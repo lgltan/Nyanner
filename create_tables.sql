@@ -1,0 +1,44 @@
+DROP TABLE moves;
+DROP TABLE games;
+DROP TABLE admin_logs;
+DROP TABLE sessions;
+DROP TABLE users;
+
+CREATE TABLE users(
+    user_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_type VARCHAR(5) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    phone_number VARCHAR(13) NOT NULL,
+    photo LONGBLOB NOT NULL,
+    pass VARBINARY(32) NOT NULL
+);
+
+CREATE TABLE sessions(
+	session_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED,
+	FOREIGN KEY (user_id) REFERENCES users(user_id),
+    ban_bool TINYINT DEFAULT 0,
+    ban_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ban_time BIGINT DEFAULT 0
+);
+
+CREATE TABLE admin_logs(
+	admin_log_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
+);
+
+CREATE TABLE games(
+	game_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user1 BIGINT UNSIGNED,
+    user2 BIGINT UNSIGNED,
+    user3 BIGINT UNSIGNED,
+    user4 BIGINT UNSIGNED
+);
+
+CREATE TABLE moves(
+	moves_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	game_id BIGINT UNSIGNED,
+    FOREIGN KEY (game_id) REFERENCES games(game_id)
+);
