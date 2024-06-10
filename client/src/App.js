@@ -1,13 +1,22 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import logo from './logo.svg';
-import './App.css';
-import LogIn from './components/LogIn.jsx'
+import './components/App.css';
 
-function App() {
+import Login from './components/Login.jsx';
+import Register from './components/Register.jsx';
+
+const App = () => {
   return (
-    <div>
-      <LogIn />
-    </div>
+    <Router>
+      <div>
+        <Routes>
+          <Route exact path="/" element={<Login/>} />
+          <Route path="/register" element={<Register/>} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;

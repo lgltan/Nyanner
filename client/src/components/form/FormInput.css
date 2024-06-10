@@ -1,0 +1,38 @@
+.form-input {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.input-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    color: #999;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.input, .input-label {
+    font-size: 16px;
+    padding: 10px 0;
+}
+
+.input:focus + .input-label {
+    color: var(--fuchsia-rose-lighter);
+    font-size: 10px;
+    top: -20px;
+}
+
+.input:focus {
+    border-bottom: 2px solid var(--fuchsia-rose-lighter);
+}

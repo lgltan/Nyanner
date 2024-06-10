@@ -1,0 +1,32 @@
+.register-container {
+    width: 50%;
+    /* max-width: 400px; */
+    background: #fffdfd;
+    padding: 50px 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.register-form {
+    width: 90%;
+    margin: auto;
+}
+
+  
+.form-flex {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.form-left, .form-right {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+}
+
+.register-btn {
+    width: 50%;
+    margin: 20px auto 0 auto;
+}
+
