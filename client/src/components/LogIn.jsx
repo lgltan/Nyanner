@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import bcrypt from 'bcrypt';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link } from 'react-router-dom';
 import FormInput from './form/FormInput';
@@ -38,7 +39,7 @@ const Login = () => {
           <p>Log in to your account to continue</p>
         </div>
         <div className="login-form">
-          <form onSubmit={handleSubmit}>
+          <form method="POST" onSubmit={handleSubmit}>
             <FormInput
               label="Username"
               type="text"

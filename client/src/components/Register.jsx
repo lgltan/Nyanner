@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import bcrypt from 'bcrypt';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
@@ -35,7 +36,17 @@ const Register = () => {
     return regex.test(phoneNumber);
   };
 
-  const handleSubmit = (e) => {
+  const hashPassword = async (password) => {
+    const saltRounds = 10;
+    try {
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      return hashedinPassword;
+    } catch (error) {
+      console.error('Error hashing password', error);
+    }
+  };
+
+  const handleSubmit = async(e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -75,8 +86,16 @@ const Register = () => {
       setErrors({});
     }
 
-    // Handle form submission
-    console.log('Form submitted', formData);
+    const hashedPassword = await hashPassword(formData.password);
+    if (hashedPassword) {
+      setFormData(prev => ({
+        ...prev,
+        password: hashedPassword
+      }));
+
+      // Handle form submission
+      console.log('Form submitted', formData);
+    }
   };
 
 
@@ -87,7 +106,7 @@ const Register = () => {
           <h1>Register</h1>
         </div>
         <div className="register-form">
-          <form onSubmit={handleSubmit}>
+          <form method="POST" onSubmit={handleSubmit}>
             <div className="form-flex">
             <div className="form-left">
             <FormInput
