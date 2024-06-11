@@ -26,13 +26,10 @@ const Login = () => {
     });
   };
 
+  // Hardcoded admin credentials for testing
   const authenticateUser = (username, password) => {
-    // Hardcoded admin credentials for demonstration
     const adminUsername = 'admin';
     const adminPassword = 'admin';
-
-    // In a real-world application, use bcrypt to hash and compare passwords
-    // For simplicity, we are using plain text comparison here
     return username === adminUsername && password === adminPassword;
   };
 
@@ -43,6 +40,7 @@ const Login = () => {
     } else {
       alert('Invalid credentials');
     }
+    console.log('Form submitted', formData);
   };
 
   return (
