@@ -3,8 +3,10 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import logo from './logo.svg';
 import './components/App.css';
 
-import Login from './components/Login.jsx';
+import Login from './components/LogIn.jsx';
 import Register from './components/Register.jsx';
+import AdminPage from './components/AdminPage.jsx';
+
 
 const App = () => {
   return (
@@ -13,6 +15,7 @@ const App = () => {
         <Routes>
           <Route exact path="/" element={<Login/>} />
           <Route path="/register" element={<Register/>} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </div>
     </Router>

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import bcrypt from "bcryptjs-react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FormInput from './form/FormInput';
 import './App.css';
-import './Login.css';
+import './LogIn.css';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +12,7 @@ const Login = () => {
     username: '',
     password: ''
   });
+  const navigate = useNavigate();
 
   const toggleShowPassword = () => {
     setShowPassword(prevState => !prevState);
@@ -25,10 +26,23 @@ const Login = () => {
     });
   };
 
+  const authenticateUser = (username, password) => {
+    // Hardcoded admin credentials for demonstration
+    const adminUsername = 'admin';
+    const adminPassword = 'admin';
+
+    // In a real-world application, use bcrypt to hash and compare passwords
+    // For simplicity, we are using plain text comparison here
+    return username === adminUsername && password === adminPassword;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted', formData);
+    if (authenticateUser(formData.username, formData.password)) {
+      navigate('/admin');
+    } else {
+      alert('Invalid credentials');
+    }
   };
 
   return (
