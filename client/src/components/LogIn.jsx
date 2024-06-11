@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import bcrypt from 'bcrypt';
+import bcrypt from "bcryptjs-react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link } from 'react-router-dom';
 import FormInput from './form/FormInput';

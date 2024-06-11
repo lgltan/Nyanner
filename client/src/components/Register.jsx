@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import bcrypt from 'bcrypt';
+import bcrypt from "bcryptjs-react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
@@ -40,7 +40,7 @@ const Register = () => {
     const saltRounds = 10;
     try {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      return hashedinPassword;
+      return hashedPassword;
     } catch (error) {
       console.error('Error hashing password', error);
     }
