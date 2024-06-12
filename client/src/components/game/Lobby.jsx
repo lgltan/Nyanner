@@ -5,20 +5,48 @@
 import React, { useState } from 'react'
 import './lobby.css'
 
-const Lobby = () => {
+const Lobby = ({
+    label,
+    type,
+    name,
+    value,
+    onChange,
+    error,
+    ...props
+  }) => {
     return (
         <div className="lobby-container">
-            <div className="button-container">
-                <button>Create Lobby</button>
-                <button>Join Lobby</button>
+            <div className="form-input">
+                <label className="input-label" htmlFor={lobbyName}>Create Lobby</label>
+                <input
+                    className="input"
+                    type={type}
+                    name={lobbyName}
+                    value={value}
+                    onChange={onChange}
+                    {...props}
+                    required
+                />
+                {error && <p className="error">{error}</p>}
             </div>
-            {/* toggle between create lobby and join lobby */}
-            <div className="create-lobby-container">
-                
-            </div>
-            <div className="join-lobby-container">
+            <button>Create Lobby</button>
 
+            <hr />
+
+            <div className="form-input">
+                <label className="input-label" htmlFor={lobbyID}>Join Lobby</label>
+                <input
+                    className="input"
+                    type={type}
+                    name={lobbyID}
+                    value={value}
+                    onChange={onChange}
+                    {...props}
+                    required
+                />
+                {error && <p className="error">{error}</p>}
             </div>
+            <button>Join Lobby</button>
         </div>
     )
 }
