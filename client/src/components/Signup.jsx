@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import bcrypt from "bcryptjs-react";
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
 
@@ -13,8 +12,7 @@ const Signup = () => {
     username: '',
     password: '',
     phoneNumber: '',
-    profilePhoto: null,
-    hashedPassword: ''
+    profilePhoto: null
   });
   const [errors, setErrors] = useState({});
 
@@ -50,26 +48,6 @@ const Signup = () => {
       newErrors.password = 'Password must contain at least one special character.';
     }
   };
-
-  const hashPassword = async (password) => {
-    const saltRounds = 10;
-    try {
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-      setFormData(prev => ({
-        ...prev,
-        hashedPassword: hashedPassword
-      }));
-      return hashedPassword;
-    } catch (error) {
-      console.error('Error hashing password', error);
-    }
-  };
-
-  useEffect(() => {
-    if (formData.hashedPassword) {
-      console.log('Form submitted', formData);
-    }
-  }, [formData]);
 
   const handleProfilePhotoChange = (file, error) => {
     if (error) {
@@ -123,16 +101,9 @@ const Signup = () => {
       setErrors({});
     }
 
-    const hashedPassword = await hashPassword(formData.password);
-    
-    if (hashedPassword) {
-      // Handle form submission
-      console.log('Form submitted', formData);
-    }
-    console.log('Form submitted', formData.hashedPassword);
+    // Handle form submission
+    console.log('Form submitted', formData);
   };
-
-
 
   return (
     <div className='container'>

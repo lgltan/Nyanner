@@ -1,8 +1,8 @@
-DROP TABLE moves;
-DROP TABLE games;
-DROP TABLE admin_logs;
-DROP TABLE sessions;
-DROP TABLE players;
+-- DROP TABLE moves;
+-- DROP TABLE games;
+-- DROP TABLE admin_logs;
+-- DROP TABLE sessions;
+-- DROP TABLE players;
 
 CREATE TABLE players(
     player_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
@@ -17,7 +17,7 @@ CREATE TABLE players(
 );
 
 CREATE TABLE sessions(
-	session_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
+    session_token VARCHAR(256) UNIQUE PRIMARY KEY,
     player_id BIGINT UNSIGNED,
 	FOREIGN KEY (player_id) REFERENCES players(player_id),
     ban_bool TINYINT DEFAULT 0,
