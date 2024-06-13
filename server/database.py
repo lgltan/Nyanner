@@ -9,7 +9,7 @@ load_dotenv()
 
 DB_URL = DB_URL = os.getenv("DB_URL")
 
-engine = create_engine(DB_URL, echo=True, connect_args={'check_same_thread': False})
+engine = create_engine(DB_URL, echo=True)
 
 SessionLocal = sessionmaker(autocommit=False,autoflush=False, bind=engine)
 
