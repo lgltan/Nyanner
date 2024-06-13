@@ -59,29 +59,26 @@ const Login = () => {
   
         // console.log('Form submitted', formData);
         console.log('Response:', response.data);
-        navigate('/home');
+        // navigate('/home');
         // const token = response.data.access_token;
 
         // //  TODO: if user_type is 0, navigate to /Home, else navigate to /admin
-        // try {
-        //   const userResponse = await axios.get('http://localhost:8000/auth/'+formData.username, {
-        //     headers: {
-        //       Authorization: `Bearer ${token}`,
-        //     },
-        //   });
+        try {
+          const userResponse = await axios.get('http://localhost:8000/'+formData.username, {
+          });
 
-        //   const userData = userResponse.data;
-        //   console.log('User Response:', userData);
+          const userData = userResponse.data;
+          console.log('User Response:', userData);
 
-        //   if (userData.user_type === 0) {
-        //     navigate('/home');
-        //   } else {
-        //     navigate('/admin');
-        //   }
-        // } catch (error) {
-        //   console.log(error)
-        //   console.log('cant get user data')
-        // }
+          if (userData.user_type === 0) {
+            navigate('/home');
+          } else {
+            navigate('/admin');
+          }
+        } catch (error) {
+          console.log(error)
+          console.log('cant get user data')
+        }
         
       } catch (error) {
         console.log(error)
