@@ -45,24 +45,15 @@ const Login = () => {
       setError('Invalid credentials');
     }
     else {
-      // if (authenticateUser(formData.username, formData.password)) {
-      //   navigate('/admin');
-      // } else {
-      //   setError('Invalid credentials');
-      // }
-      // console.log('before post', formData);
       
       try {
         const response = await axios.post('http://localhost:8000/auth/token', 
           "username=" + formData.username + "&password=" + formData.password,
         );
   
-        // console.log('Form submitted', formData);
         console.log('Response:', response.data);
-        // navigate('/home');
         // const token = response.data.access_token;
 
-        // //  TODO: if user_type is 0, navigate to /Home, else navigate to /admin
         try {
           const userResponse = await axios.get('http://localhost:8000/'+formData.username, {
           });
@@ -83,8 +74,6 @@ const Login = () => {
       } catch (error) {
         console.log(error)
         setError('Invalid credentials');
-        // console.error('Error submitting form:', error.response ? error.response.data : error.message);
-        // Handle error from the API (e.g., show error message)
       }
       
     }

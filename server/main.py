@@ -3,10 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-from server import models, schemas, auth
+from server import models, schemas, auth, crud
 from server.database import SessionLocal, engine
 from server.auth import get_current_user
-from server.models import User
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -35,9 +34,10 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
+
 @app.get("/{username}/", response_model=schemas.User)
 def get_user(username: str, db: db_dependency):
-    user = db.query(User).filter(User.username == username).first()
+    user = crud.get_user_by_username(db, username)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
