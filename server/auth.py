@@ -11,15 +11,18 @@ from server.models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 router = APIRouter(
     prefix='/auth',
     tags=['auth']
 )
 
-# PUT IN .ENV
-SECRET_KEY = "WHY_IS_IT_9AM"
-ALGORITHM = "HS256"
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
