@@ -1,5 +1,5 @@
 # Initial Installation
-```pip install fastapi python-dotenv sqlalchemy pymysql 'fastapi-users[sqlalchemy]'```
+```pip install fastapi python-dotenv sqlalchemy pymysql "python-jose[cryptography]" "passlib[bcrypt]" python-multipart```
 
 # .env
 ```DB_URL = "mysql+pymysql://{db_username}:{db_password}@localhost:3306/{db_name}"```

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
-class Player(Base):
+class User(Base):
     __tablename__ = 'players'
     player_id = Column(BigInteger, primary_key=True, autoincrement=True)
     player_type = Column(String(5), nullable=False)
@@ -46,4 +46,3 @@ class Move(Base):
     p2_board = Column(String(32))
     p3_board = Column(String(32))
     p4_board = Column(String(32))
-
