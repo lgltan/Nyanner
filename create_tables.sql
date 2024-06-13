@@ -6,7 +6,7 @@ DROP TABLE users;
 
 CREATE TABLE users(
     user_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
-    user_type TINYINT DEFAULT 0 NOT NULL,
+    user_type boolean NOT NULL DEFAULT false,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     username VARCHAR(16) UNIQUE NOT NULL,

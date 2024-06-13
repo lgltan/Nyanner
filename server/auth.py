@@ -32,6 +32,7 @@ class Photo(BaseModel):
     url: Optional[HttpUrl] = None
     filename: str = Field(...)
 class CreateUserRequest(BaseModel):
+    user_type: int
     username: str
     password: str
     first_name: str
@@ -75,6 +76,7 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     # implement regex for input validation here
     
     create_user_model = User(
+        user_type=0,
         username=create_user_request.username.encode('ascii'),
         first_name=create_user_request.first_name.encode('ascii'),
         last_name=create_user_request.last_name.encode('ascii'),
