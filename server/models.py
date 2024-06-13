@@ -20,7 +20,7 @@ class Session(Base):
     __tablename__ = 'sessions'
     session_id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey('users.user_id'))
-    user = relationship("user")
+    user = relationship("User")
     ban_bool = Column(Boolean, default=False)
     ban_timestamp = Column(TIMESTAMP, server_default='CURRENT_TIMESTAMP')
     ban_time = Column(BigInteger, default=0)

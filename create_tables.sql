@@ -13,7 +13,7 @@ CREATE TABLE users(
     email VARCHAR(50) UNIQUE NOT NULL,
     phone_number VARCHAR(13) UNIQUE NOT NULL,
     photo LONGBLOB,
-    pass VARBINARY(32) NOT NULL
+    password VARBINARY(32) NOT NULL
 );
 
 CREATE TABLE sessions(
