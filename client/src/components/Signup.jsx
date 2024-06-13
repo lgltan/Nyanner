@@ -1,27 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import bcrypt from "bcryptjs-react";
-import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
 
 import './App.css';
-import './Register.css';
+import './Signup.css';
 
-const Register = () => {
-  const [showPassword, setShowPassword] = useState(false);
+const Signup = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     username: '',
     password: '',
     phoneNumber: '',
-    profilePhoto: null
+    profilePhoto: null,
+    hashedPassword: ''
   });
   const [errors, setErrors] = useState({});
-
-  const toggleShowPassword = () => {
-    setShowPassword(prevState => !prevState);
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,13 +31,52 @@ const Register = () => {
     return regex.test(phoneNumber);
   };
 
+  const validatePassword = (password, newErrors) => {
+    const passwordLength = password.length;
+    const hasLowercase = /[a-z]/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialCharacter = /[!@#$%^&*()_,.?":{}|<>\-]/.test(password);
+
+    if (passwordLength < 12 || passwordLength > 32) {
+      newErrors.password = 'Password must be between 12 and 32 characters long.';
+    } else if (!hasLowercase) {
+      newErrors.password = 'Password must contain at least one lowercase letter.';
+    } else if (!hasUppercase) {
+      newErrors.password = 'Password must contain at least one uppercase letter.';
+    } else if (!hasNumber) {
+      newErrors.password = 'Password must contain at least one number.';
+    } else if (!hasSpecialCharacter) {
+      newErrors.password = 'Password must contain at least one special character.';
+    }
+  };
+
   const hashPassword = async (password) => {
     const saltRounds = 10;
     try {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
+      setFormData(prev => ({
+        ...prev,
+        hashedPassword: hashedPassword
+      }));
       return hashedPassword;
     } catch (error) {
       console.error('Error hashing password', error);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.hashedPassword) {
+      console.log('Form submitted', formData);
+    }
+  }, [formData]);
+
+  const handleProfilePhotoChange = (file, error) => {
+    if (error) {
+      setErrors(prevErrors => ({ ...prevErrors, profilePhoto: error }));
+    } else {
+      setErrors(prevErrors => ({ ...prevErrors, profilePhoto: '' }));
+      setFormData(prevData => ({ ...prevData, profilePhoto: file }));
     }
   };
 
@@ -74,12 +108,15 @@ const Register = () => {
       newErrors.profilePhoto = 'Please upload a profile photo.';
     }
 
+    validatePassword(formData.password, newErrors);
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match.';
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      console.log('Errors', newErrors);
       return;
     }
     else {
@@ -87,23 +124,21 @@ const Register = () => {
     }
 
     const hashedPassword = await hashPassword(formData.password);
+    
     if (hashedPassword) {
-      setFormData(prev => ({
-        ...prev,
-        password: hashedPassword
-      }));
-
       // Handle form submission
       console.log('Form submitted', formData);
     }
+    console.log('Form submitted', formData.hashedPassword);
   };
+
 
 
   return (
     <div className='container'>
       <div className='register-container'>
         <div className="header">
-          <h1>Register</h1>
+          <h1>Sign up</h1>
         </div>
         <div className="register-form">
           <form method="POST" onSubmit={handleSubmit}>
@@ -178,7 +213,7 @@ const Register = () => {
                 name="profilePhoto"
                 accept="image/*"
                 size="5"
-                onChange={handleChange}
+                onChange={handleProfilePhotoChange}
                 error={errors.profilePhoto}
               />
             </div>
@@ -191,4 +226,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Signup;

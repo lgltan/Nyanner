@@ -8,9 +8,16 @@
     border: none;
     border-bottom: 2px solid #ccc;
     outline: none;
-    transition: border-color 0.3s ease-in-out;
+    transition: border-color 0.2s ease-in-out;
+    font-size: 16px;
+    padding: 10px 0;
 }
 
+.input:focus {
+    border-bottom: 2px solid var(--fuchsia-rose-lighter);
+}
+
+/* Initial state */
 .input-label {
     position: absolute;
     top: 0;
@@ -19,20 +26,19 @@
     color: #999;
     display: flex;
     align-items: center;
-    transition: all 0.3s ease-in-out;
-}
-
-.input, .input-label {
+    transition: all 0.2s ease-in-out;
     font-size: 16px;
     padding: 10px 0;
 }
 
-.input:focus + .input-label {
+.input:focus-within + .input-label{
     color: var(--fuchsia-rose-lighter);
     font-size: 10px;
     top: -20px;
 }
 
-.input:focus {
-    border-bottom: 2px solid var(--fuchsia-rose-lighter);
+.input:not(:focus):valid + .input-label {
+    color: #999;
+    font-size: 10px;
+    top: -20px;
 }

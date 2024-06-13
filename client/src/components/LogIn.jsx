@@ -4,7 +4,8 @@ import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
 import FormInput from './form/FormInput';
 import './App.css';
-import './LogIn.css';
+import './Login.css';
+import './form/FormInput.css';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -60,7 +61,6 @@ const Login = () => {
               onChange={handleChange}
             />
             <div className="password">
-              <label className="input-label" htmlFor="password">Password</label>
               <input
                 className='input'
                 type={showPassword ? 'text' : 'password'}
@@ -68,6 +68,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
               />
+              <label className="input-label" htmlFor="password">Password</label>
               <button type="button" className="toggle-password" onClick={toggleShowPassword}>
                 {showPassword ? <IoMdEyeOff /> : <IoMdEye />}
               </button>
@@ -84,7 +85,7 @@ const Login = () => {
             <button className="primary-btn" type="submit">Log In</button>
           </form>
           <div className="signup">
-            <p>Don't have an account? <Link to="/register">Sign Up</Link></p>
+            <p>Don't have an account? <Link to="/sign-up">Sign Up</Link></p>
           </div>
         </div>
       </div>

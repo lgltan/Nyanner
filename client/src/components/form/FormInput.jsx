@@ -12,7 +12,6 @@ const FormInput = ({
 }) => {
   return (
     <div className="form-input">
-      <label className="input-label" htmlFor={name}>{label}</label>
       <input
         className="input"
         type={type}
@@ -22,6 +21,7 @@ const FormInput = ({
         {...props}
         required
       />
+      <label className="input-label" htmlFor={name}>{label}</label>
       {error && <p className="error">{error}</p>}
     </div>
   );

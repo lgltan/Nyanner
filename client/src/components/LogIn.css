@@ -19,9 +19,6 @@
     position: relative;
 }
 
-.password input {
-    flex: 1;
-}
 
 .toggle-password {
     position: absolute;
@@ -34,10 +31,6 @@
     cursor: pointer;
     padding: 0 5px;
     font-size: 18px;
-}
-
-.toggle-password:hover {
-    text-decoration: underline;
 }
 
 /* Login Options */
