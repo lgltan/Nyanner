@@ -98,6 +98,7 @@ const Signup = () => {
     // Handle form submission
     try {
       const response = await axios.post('http://localhost:8000/auth/', {
+        "user_type": 0,
         "username": formData.username,
         "password": formData.password,
         "first_name": formData.firstName,
