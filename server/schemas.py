@@ -1,16 +1,13 @@
 from pydantic import BaseModel
+from server.auth import Photo
 
-class UserBase(BaseModel):
+class User(BaseModel):
+    first_name: str
+    last_name: str
     email: str
-    name: str
-
-class UserCreate(UserBase):
-    pass 
-
-class User(UserBase):
-    id : int
-    is_active : bool
-    class Config:
-        orm_model = True
+    username: str
+    phone_number: str
+    password: str
+    # photo: Photo
 
 # NOTE: This is just like serializer.py in django

@@ -13,7 +13,7 @@ class User(Base):
     username = Column(String(16), unique=True, nullable=False)
     email = Column(String(50), unique=True, nullable=False)
     phone_number = Column(String(13), unique=True, nullable=False)
-    photo = Column(LargeBinary, nullable=False)
+    # photo = Column(LargeBinary, nullable=True)
     password = Column(LargeBinary(32), nullable=False)
 
 class Session(Base):

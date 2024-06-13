@@ -38,19 +38,19 @@ class CreateUserRequest(BaseModel):
     last_name: str
     email: str
     phone_number: str
-    photo: Photo
+    # photo: Photo
     
-    @field_validator('photo')
-    def validate_photo(cls, v):
-        if v.url:
-            return v
-        elif v.filename:
-            mime_type, _ = mimetypes.guess_type(v.filename)
-            if not mime_type or not mime_type.startswith(('image/jpeg', 'image/png')):
-                raise ValueError("Invalid photo file")
-        else:
-            raise ValueError("Photo file is missing")
-        return v
+    # @field_validator('photo')
+    # def validate_photo(cls, v):
+    #     if v.url:
+    #         return v
+    #     elif v.filename:
+    #         mime_type, _ = mimetypes.guess_type(v.filename)
+    #         if not mime_type or not mime_type.startswith(('image/jpeg', 'image/png')):
+    #             raise ValueError("Invalid photo file")
+    #     else:
+    #         raise ValueError("Photo file is missing")
+    #     return v
     
 class Token(BaseModel):
     access_token: str
@@ -68,19 +68,20 @@ db_dependency = Annotated[Session, Depends(get_db)]
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
     
-    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.photo or not create_user_request.password:
+    # or not create_user_request.photo  
+    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please fill out all fields.")
     
     # implement regex for input validation here
     
     create_user_model = User(
-        username=create_user_request.username,
-        first_name=create_user_request.first_name,
-        last_name=create_user_request.last_name,
-        email=create_user_request.email,
-        phone_number=create_user_request.phone_number,
-        photo=create_user_request.photo,
-        password=bcrypt_context.hash(create_user_request.password)
+        username=create_user_request.username.encode('ascii'),
+        first_name=create_user_request.first_name.encode('ascii'),
+        last_name=create_user_request.last_name.encode('ascii'),
+        email=create_user_request.email.encode('ascii'),
+        phone_number=create_user_request.phone_number.encode('ascii'),
+        # photo=create_user_request.photo,
+        password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
     )
     
     db.add(create_user_model)
