@@ -38,7 +38,7 @@ const GameScreen = () => {
 
       {/* Chess Board Column */}
       <div style={{ width: '60%', backgroundColor: '#e0e0e0', padding: '10px' }}>
-        <ChessBoard width="600px" height="600px" updateData={/* Pass the updated data here */} />
+        <ChessBoard width="600px" height="600px" updateData={0/* Pass the updated data here */} />
       </div>
 
       {/* Right Column */}
