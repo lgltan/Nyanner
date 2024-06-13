@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
 import FormInput from './form/FormInput';
-import './App.css';
+import { validateUsername, validatePassword } from '../validation.js';
+import '../App.css';
 import './Login.css';
 import './form/FormInput.css';
 
@@ -12,6 +13,7 @@ const Login = () => {
     username: '',
     password: ''
   });
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const toggleShowPassword = () => {
@@ -35,12 +37,18 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (authenticateUser(formData.username, formData.password)) {
-      navigate('/admin');
-    } else {
-      alert('Invalid credentials');
+
+    if (validateUsername(formData.username) === false || validatePassword(formData.password,{}) != {}) {
+      setError('Invalid credentials');
     }
-    console.log('Form submitted', formData);
+    else {
+      if (authenticateUser(formData.username, formData.password)) {
+        navigate('/admin');
+      } else {
+        setError('Invalid credentials');
+      }
+      console.log('Form submitted', formData);
+    }
   };
 
   return (
@@ -81,6 +89,7 @@ const Login = () => {
                 <a href="#">Forgot Password?</a>
               </div>
             </div>
+            {error && <p className="error-center">{error}</p>}
             <button className="primary-btn" type="submit">Log In</button>
           </form>
           <div className="signup">

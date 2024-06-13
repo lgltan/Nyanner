@@ -10,6 +10,16 @@ const FormInput = ({
   error,
   ...props
 }) => {
+ 
+  let maxLen = {}
+  
+  if (name === 'username') { 
+    maxLen = { maxLength: '16' }
+  } 
+  if (name === 'firstName' || name === 'lastName' || name === 'email') {
+    maxLen = { maxLength: '50' }
+  }
+
   return (
     <div className="form-input">
       <input
@@ -18,6 +28,7 @@ const FormInput = ({
         name={name}
         value={value}
         onChange={onChange}
+        {...maxLen}
         {...props}
         required
       />

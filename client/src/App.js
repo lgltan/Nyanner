@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import './components/App.css';
+import './App.css';
 
 import Login from './components/Login.jsx';
 import Signup from './components/Signup.jsx';
 import AdminPage from './components/AdminPage.jsx';
-
 
 const App = () => {
   return (

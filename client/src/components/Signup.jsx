@@ -2,7 +2,15 @@ import React, { useState, useEffect } from 'react';
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
 
-import './App.css';
+import { 
+  validateName,
+  validateUsername,
+  validateEmail,
+  validatePhoneNumber,
+  validatePassword
+} from '../validation.js';
+
+import '../App.css';
 import './Signup.css';
 
 const Signup = () => {
@@ -24,31 +32,6 @@ const Signup = () => {
     });
   };
 
-  const validatePhoneNumber = (phoneNumber) => {
-    const regex = /^(09|\+639)\d{9}$/;
-    return regex.test(phoneNumber);
-  };
-
-  const validatePassword = (password, newErrors) => {
-    const passwordLength = password.length;
-    const hasLowercase = /[a-z]/.test(password);
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecialCharacter = /[!@#$%^&*()_,.?":{}|<>\-]/.test(password);
-
-    if (passwordLength < 12 || passwordLength > 32) {
-      newErrors.password = 'Password must be between 12 and 32 characters long.';
-    } else if (!hasLowercase) {
-      newErrors.password = 'Password must contain at least one lowercase letter.';
-    } else if (!hasUppercase) {
-      newErrors.password = 'Password must contain at least one uppercase letter.';
-    } else if (!hasNumber) {
-      newErrors.password = 'Password must contain at least one number.';
-    } else if (!hasSpecialCharacter) {
-      newErrors.password = 'Password must contain at least one special character.';
-    }
-  };
-
   const handleProfilePhotoChange = (file, error) => {
     if (error) {
       setErrors(prevErrors => ({ ...prevErrors, profilePhoto: error }));
@@ -62,19 +45,19 @@ const Signup = () => {
     e.preventDefault();
     const newErrors = {};
 
-    if(formData.firstName.length > 50) {
-      newErrors.firstName = 'First name should not exceed 50 characters'
+    if (validateName(formData.firstName) === false) {
+      newErrors.firstName = 'First name should only contain letters and spaces.';
     }
 
-    if(formData.lastName.length > 50) {
-      newErrors.lastName = 'Last name should not exceed 50 characters'
+    if (validateName(formData.lastName) === false) {
+      newErrors.lastName = 'Last name should only contain letters and spaces.';
     }
 
-    if(formData.username.length > 50) {
-      newErrors.username = 'Username should not exceed 50 characters'
+    if(validateUsername(formData.username) === false) {
+      newErrors.username = 'Username should only contain alphanumeric or underscore characters.'
     }
 
-    if(formData.email.length > 50) {
+    if(validateEmail(formData.email) === false) {
       newErrors.email = 'E-mail should not exceed 50 characters'
     }
     
@@ -86,7 +69,8 @@ const Signup = () => {
       newErrors.profilePhoto = 'Please upload a profile photo.';
     }
 
-    validatePassword(formData.password, newErrors);
+    const passwordErrors = validatePassword(formData.password, newErrors);
+    newErrors.password = passwordErrors.password;
 
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match.';
@@ -94,7 +78,7 @@ const Signup = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      console.log('Errors', newErrors);
+      // console.log('Errors', newErrors);
       return;
     }
     else {
