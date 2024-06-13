@@ -5,22 +5,22 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 class User(Base):
-    __tablename__ = 'players'
-    player_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    player_type = Column(String(5), nullable=False)
+    __tablename__ = 'users'
+    user_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_type = Column(String(5), nullable=False)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
-    username = Column(String(50), unique=True, nullable=False)
+    username = Column(String(16), unique=True, nullable=False)
     email = Column(String(50), unique=True, nullable=False)
     phone_number = Column(String(13), unique=True, nullable=False)
     photo = Column(LargeBinary, nullable=False)
-    pass_ = Column(LargeBinary(32), nullable=False)
+    password = Column(LargeBinary(32), nullable=False)
 
 class Session(Base):
     __tablename__ = 'sessions'
     session_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    player_id = Column(BigInteger, ForeignKey('players.player_id'))
-    player = relationship("Player")
+    user_id = Column(BigInteger, ForeignKey('users.user_id'))
+    user = relationship("user")
     ban_bool = Column(Boolean, default=False)
     ban_timestamp = Column(TIMESTAMP, server_default='CURRENT_TIMESTAMP')
     ban_time = Column(BigInteger, default=0)
@@ -32,10 +32,10 @@ class AdminLog(Base):
 class Game(Base):
     __tablename__ = 'games'
     game_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    p1_id = Column(BigInteger, ForeignKey('players.player_id'))
-    p2_id = Column(BigInteger, ForeignKey('players.player_id'))
-    p3_id = Column(BigInteger, ForeignKey('players.player_id'))
-    p4_id = Column(BigInteger, ForeignKey('players.player_id'))
+    p1_id = Column(BigInteger, ForeignKey('users.user_id'))
+    p2_id = Column(BigInteger, ForeignKey('users.user_id'))
+    p3_id = Column(BigInteger, ForeignKey('users.user_id'))
+    p4_id = Column(BigInteger, ForeignKey('users.user_id'))
 
 class Move(Base):
     __tablename__ = 'moves'
@@ -46,3 +46,6 @@ class Move(Base):
     p2_board = Column(String(32))
     p3_board = Column(String(32))
     p4_board = Column(String(32))
+
+
+
