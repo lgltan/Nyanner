@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
 
@@ -15,7 +18,8 @@ import './Signup.css';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     username: '',
     password: '',
@@ -23,6 +27,8 @@ const Signup = () => {
     profilePhoto: null
   });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,7 +76,9 @@ const Signup = () => {
     }
 
     const passwordErrors = validatePassword(formData.password, newErrors);
-    newErrors.password = passwordErrors.password;
+    if (passwordErrors.password){
+      newErrors.password = passwordErrors.password;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match.';
@@ -78,15 +86,36 @@ const Signup = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      // console.log('Errors', newErrors);
+      console.log('Errors', newErrors);
       return;
     }
     else {
       setErrors({});
     }
 
+    // console.log('before post', formData)
+
     // Handle form submission
-    console.log('Form submitted', formData);
+    try {
+      const response = await axios.post('http://localhost:8000/auth/', {
+        "username": formData.username,
+        "password": formData.password,
+        "first_name": formData.firstName,
+        "last_name": formData.lastName,
+        "email": formData.email,
+        "phone_number": formData.phoneNumber,
+        "photo": formData.profilePhoto,
+      });
+
+      // console.log('Form submitted', formData);
+      // console.log('Response:', response.data);
+      // Handle successful registration (e.g., redirect to login page or show success message)
+      navigate('/')
+    } catch (error) {
+      console.log(error)
+      console.error('Error submitting form:', error.response ? error.response.data : error.message);
+      // Handle error from the API (e.g., show error message)
+    }
   };
 
   return (
