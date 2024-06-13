@@ -10,3 +10,11 @@ engine = create_engine(DB_URL,echo=True)
 SessionLocal = sessionmaker(autocommit=False,autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+# Test the connection
+try:
+    connection = engine.connect()
+    print("Connected successfully!")
+    connection.close()
+except Exception as e:
+    print("Connection failed:", e)

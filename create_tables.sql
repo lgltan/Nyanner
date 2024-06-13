@@ -1,8 +1,8 @@
-DROP TABLE moves;
-DROP TABLE games;
-DROP TABLE admin_logs;
-DROP TABLE sessions;
-DROP TABLE players;
+-- DROP TABLE moves;
+-- DROP TABLE games;
+-- DROP TABLE admin_logs;
+-- DROP TABLE sessions;
+-- DROP TABLE players;
 
 CREATE TABLE players(
     player_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
