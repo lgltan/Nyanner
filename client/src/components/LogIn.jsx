@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import bcrypt from "bcryptjs-react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
 import FormInput from './form/FormInput';
