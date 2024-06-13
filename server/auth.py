@@ -1,9 +1,9 @@
 # https://www.youtube.com/watch?v=0A_GCXBCNUQ
 
 from datetime import timedelta, datetime
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
@@ -13,6 +13,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 import os
+import mimetypes
 
 load_dotenv()
 
@@ -27,6 +28,9 @@ ALGORITHM = os.getenv("ALGORITHM")
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
+class Photo(BaseModel):
+    url: Optional[HttpUrl] = None
+    filename: str = Field(...)
 class CreateUserRequest(BaseModel):
     username: str
     password: str
@@ -34,7 +38,19 @@ class CreateUserRequest(BaseModel):
     last_name: str
     email: str
     phone_number: str
-    photo: str
+    photo: Photo
+    
+    @field_validator('photo')
+    def validate_photo(cls, v):
+        if v.url:
+            return v
+        elif v.filename:
+            mime_type, _ = mimetypes.guess_type(v.filename)
+            if not mime_type or not mime_type.startswith(('image/jpeg', 'image/png')):
+                raise ValueError("Invalid photo file")
+        else:
+            raise ValueError("Photo file is missing")
+        return v
     
 class Token(BaseModel):
     access_token: str
