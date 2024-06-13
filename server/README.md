@@ -1,3 +1,6 @@
+# Installations
+``` pip install passlib sqlmodel fastapi``` IF I MISSED ANY, INCLUDE THEM HERE
+
 Backend, JSON based web API based on OpenAPI: http://localhost/api/
 
 Adminer, database web administration: http://localhost:8080
