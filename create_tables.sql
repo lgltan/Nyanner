@@ -6,7 +6,7 @@
 
 CREATE TABLE users(
     user_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
-    user_type BOOL DEFAULT 0,
+    user_type BOOL DEFAULT 0 NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     username VARCHAR(16) UNIQUE NOT NULL,
