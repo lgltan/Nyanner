@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-from . import crud, models, schemas, auth
+from . import crud, models, schemas, auth, database
 from .database import SessionLocal, engine
 from auth import get_current_user
 
