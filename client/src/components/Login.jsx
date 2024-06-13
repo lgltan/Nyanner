@@ -36,19 +36,60 @@ const Login = () => {
     return username === adminUsername && password === adminPassword;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validateUsername(formData.username) === false || validatePassword(formData.password,{}) != {}) {
+    const passVal = validatePassword(formData.password,{})
+
+    if (validateUsername(formData.username) === false || Object.keys(passVal).length > 0) {
       setError('Invalid credentials');
     }
     else {
-      if (authenticateUser(formData.username, formData.password)) {
-        navigate('/admin');
-      } else {
+      // if (authenticateUser(formData.username, formData.password)) {
+      //   navigate('/admin');
+      // } else {
+      //   setError('Invalid credentials');
+      // }
+      // console.log('before post', formData);
+      
+      try {
+        const response = await axios.post('http://localhost:8000/auth/token', 
+          "username=" + formData.username + "&password=" + formData.password,
+        );
+  
+        // console.log('Form submitted', formData);
+        console.log('Response:', response.data);
+        navigate('/home');
+        // const token = response.data.access_token;
+
+        // //  TODO: if user_type is 0, navigate to /Home, else navigate to /admin
+        // try {
+        //   const userResponse = await axios.get('http://localhost:8000/auth/'+formData.username, {
+        //     headers: {
+        //       Authorization: `Bearer ${token}`,
+        //     },
+        //   });
+
+        //   const userData = userResponse.data;
+        //   console.log('User Response:', userData);
+
+        //   if (userData.user_type === 0) {
+        //     navigate('/home');
+        //   } else {
+        //     navigate('/admin');
+        //   }
+        // } catch (error) {
+        //   console.log(error)
+        //   console.log('cant get user data')
+        // }
+        
+      } catch (error) {
+        console.log(error)
         setError('Invalid credentials');
+        // console.error('Error submitting form:', error.response ? error.response.data : error.message);
+        // Handle error from the API (e.g., show error message)
       }
-      console.log('Form submitted', formData);
+      
     }
   };
 

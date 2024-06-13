@@ -114,7 +114,7 @@ const Signup = () => {
       navigate('/')
     } catch (error) {
       console.log(error)
-      console.error('Error submitting form:', error.response ? error.response.data : error.message);
+      // console.error('Error submitting form:', error.response ? error.response.data : error.message);
       // Handle error from the API (e.g., show error message)
     }
   };
