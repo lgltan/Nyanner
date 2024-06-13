@@ -42,7 +42,6 @@ def get_user(username: str, db: db_dependency):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-
 # @app.post("/", response_model=schemas.User)
 # def post_user(user: user_dependency, db: db_dependency):
 #     db_user = crud.get_user_by_email(db, email=user.email)

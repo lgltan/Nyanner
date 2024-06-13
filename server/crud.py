@@ -3,10 +3,14 @@ from sqlalchemy.orm import Session
 from server import models, schemas
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    del user.password
+    return user
 
 def get_user_by_username(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+    user = db.query(models.User).filter(models.User.username == username).first()
+    del user.password
+    return user
 
 # def get_user_by_email(db: Session, email: str):
 #     return db.query(models.User).filter(models.User.email == email).first()
