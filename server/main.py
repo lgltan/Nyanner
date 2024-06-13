@@ -2,9 +2,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-from . import crud, models, schemas, auth
-from database import SessionLocal, engine
-from auth import get_current_user
+from server import crud, models, schemas, auth
+from server.database import SessionLocal, engine
+from server.auth import get_current_user
 
 models.Base.metadata.create_all(bind=engine)
 
