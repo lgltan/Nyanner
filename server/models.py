@@ -14,7 +14,7 @@ class User(Base):
     username = Column(String(16), unique=True, nullable=False)
     email = Column(String(50), unique=True, nullable=False)
     phone_number = Column(String(13), unique=True, nullable=False)
-    photo = Column(String(256), nullable=True)
+    # photo = Column(String(256), nullable=True)
     password = Column(LargeBinary(256), nullable=False)
 
 class Session(Base):
@@ -48,7 +48,7 @@ class Move(Base):
     p3_board = Column(String(32))
     p4_board = Column(String(32))
 
-class Token(Base):
+class IssuedToken(Base):
     __tablename__ = "issued_tokens"
     token_id = Column(String(256), unique=True, primary_key=True)
     user_id = Column(BigInteger, ForeignKey('users.user_id'))

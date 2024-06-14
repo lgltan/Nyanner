@@ -35,12 +35,12 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-@app.get("/{username}/", response_model=schemas.User)
-def get_user(username: str, db: db_dependency):
-    user = crud.get_user_by_username(db, username)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+# @app.get("/{username}", response_model=schemas.User)
+# def get_user(username: str, db: db_dependency):
+#     user = crud.get_user_by_username(db, username)
+#     if user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return user
 
 # @app.post("/", response_model=schemas.User)
 # def post_user(user: user_dependency, db: db_dependency):

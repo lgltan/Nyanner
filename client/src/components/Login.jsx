@@ -52,11 +52,12 @@ const Login = () => {
         );
   
         console.log('Response:', response.data);
-        // const token = response.data.access_token;
+        const token = response.data.access_token;
 
         try {
-          const userResponse = await axios.get('http://localhost:8000/'+formData.username, {
-          });
+          const userResponse = await axios.post('http://localhost:8000/auth/login', 
+            "username="+ formData.username + "&password=" + formData.password + "&access_token=" + token + "&token_type=" + response.data.token_type,
+        );
 
           const userData = userResponse.data;
           console.log('User Response:', userData);
