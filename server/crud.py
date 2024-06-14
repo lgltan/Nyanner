@@ -4,12 +4,12 @@ from server import models, schemas
 
 def get_user(db: Session, user_id: int):
     user = db.query(models.User).filter(models.User.id == user_id).first()
-    del user.password
+    user.password = ''
     return user
 
 def get_user_by_username(db: Session, username: str):
     user = db.query(models.User).filter(models.User.username == username).first()
-    del user.password
+    user.password = ''
     return user
 
 # def get_user_by_email(db: Session, email: str):

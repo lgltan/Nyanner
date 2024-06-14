@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 import os
-import mimetypes
+from PIL import Image
 
 load_dotenv()
 
@@ -39,19 +39,16 @@ class CreateUserRequest(BaseModel):
     last_name: str
     email: str
     phone_number: str
-    # photo: Photo
+    photo: Photo
     
-    # @field_validator('photo')
-    # def validate_photo(cls, v):
-    #     if v.url:
-    #         return v
-    #     elif v.filename:
-    #         mime_type, _ = mimetypes.guess_type(v.filename)
-    #         if not mime_type or not mime_type.startswith(('image/jpeg', 'image/png')):
-    #             raise ValueError("Invalid photo file")
-    #     else:
-    #         raise ValueError("Photo file is missing")
-    #     return v
+    @field_validator('photo')
+    def validate_photo():
+        try:
+            with Image.open(photo) as img:
+                img.verify()
+                return True
+        except (IOError, SyntaxError):
+            return False
     
 class Token(BaseModel):
     access_token: str
@@ -116,13 +113,29 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
-        user_id: int = payload.get('id')
+        username: str = payload.get('username')
+        user_id: int = payload.get('user_id')
+        user_type: int = payload.get('user_type')
+        first_name: str = payload.get('first_name')
+        last_name: str = payload.get('last_name')
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
-        return {'username': username, 'id': user_id}
+        return {'username': username, 'id': user_id, 'user_type': user_type, 'first_name': first_name, 'last_name': last_name}
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
     
-# @router.post('/logout')
+@router.post("/logout", response_status=status.HTTP_200_OK)
+async def logout(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
+    # Verify the refresh token
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+        user_id: int = payload.get('id')
+        if username is None or user_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid')
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid')
     
+    invalidate_token(username, user_id)
+    
+    return
