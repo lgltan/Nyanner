@@ -39,16 +39,7 @@ class CreateUserRequest(BaseModel):
     last_name: str
     email: str
     phone_number: str
-    photo: Photo
-    
-    @field_validator('photo')
-    def validate_photo():
-        try:
-            with Image.open(photo) as img:
-                img.verify()
-                return True
-        except (IOError, SyntaxError):
-            return False
+    photo: str
     
 class Token(BaseModel):
     access_token: str

@@ -49,7 +49,6 @@ class Move(Base):
 
 class Token(Base):
     __tablename__ = "issued_tokens"
-
     token_id = Column(String(256), unique=True, primary_key=True)
     user_id = Column(BigInteger, ForeignKey('users.user_id'))
     user = relationship("User")
