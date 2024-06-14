@@ -46,7 +46,7 @@ const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
     return (
         <div className="lobby-container">
             {isSuccessful? (
-                <WaitingRoom /> // Render WaitingRoom component if operation was successful
+                <WaitingRoom lobbyID={lobbyID} lobbyName={lobbyName} /> // Render WaitingRoom component if operation was successful
             ) : (
                 <>
                     <div className="form-input">
