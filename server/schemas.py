@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from server.auth import Photo
 
 class User(BaseModel):
     user_type: int

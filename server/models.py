@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, LargeBinary, Boolean, DATETIME
+from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -6,7 +7,7 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
-    user_id = Column(BigInteger(unsigned=True), unique=True, autoincrement=True, primary_key=True)
+    user_id = Column(BigInteger, unique=True, autoincrement=True, primary_key=True)
     user_type = Column(Integer, nullable=False, default=False)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
@@ -22,7 +23,7 @@ class Session(Base):
     user_id = Column(BigInteger, ForeignKey('users.user_id'))
     user = relationship("User")
     ban_bool = Column(Boolean, default=False)
-    ban_timestamp = Column(TIMESTAMP, server_default='CURRENT_TIMESTAMP')
+    ban_timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
     ban_time = Column(BigInteger, default=0)
 
 class AdminLog(Base):
