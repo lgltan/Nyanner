@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 import os
-from PIL import Image
+import base64
 
 load_dotenv()
 
@@ -70,7 +70,10 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please fill out all fields.")
     
-    # implement regex for input validation here
+    # Validate photo
+    if create_user_request.photo and not is_valid_photo(create_user_request.photo):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo must be a valid image.")
+    
     
     create_user_model = User(
         user_type=0,
@@ -79,12 +82,37 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
         last_name=create_user_request.last_name.encode('ascii'),
         email=create_user_request.email.encode('ascii'),
         phone_number=create_user_request.phone_number.encode('ascii'),
-        # photo=create_user_request.photo,
+        photo=create_user_request.photo,
         password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
     )
     
     db.add(create_user_model)
     db.commit()
+
+# Function to verify if the photo is a valid image
+def is_valid_photo(photo: str) -> bool:
+    try:
+        _, ext = os.path.splitext(photo)
+        if ext.lower() not in ['.jpg', '.jpeg', '.png']:
+            return False
+        # Decode the Base64 string to get the raw bytes
+        decoded_data = base64.b64decode(photo)
+        
+        # Check the first few bytes to see if they match known image file signatures
+        jpeg_signature = b'\xFF\xD8\xff'
+        png_signature = b'\x89PNG\r\n\x1a\n'
+        
+        # Check for JPEG signature
+        if decoded_data[:3] == jpeg_signature:
+            return True
+        # Check for PNG signature
+        elif decoded_data[:8] == png_signature:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return False
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
