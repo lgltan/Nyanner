@@ -16,7 +16,7 @@ const AdminPage = () => {
             <img src="profile-pic-url" alt="Profile" />
             <p>Username: admin</p>
             <p>Email: admin@example.com</p>
-            <p>Web URLs: <a href="https://example.com">https://example.com</a></p>
+            <p>Web URLs: </p>
             <p>Bio: This is the admin bio.</p>
           </div>
         );

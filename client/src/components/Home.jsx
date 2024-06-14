@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaUser } from 'react-icons/fa';
-import Lobby from 'game/Lobby.jsx';
+import Lobby from './game/Lobby.jsx';
 
 const Home = () => {
     const [activeTab, setActiveTab] = useState('profile');
@@ -14,10 +14,10 @@ const Home = () => {
                     <div>
                         <h2>User Profile</h2>
                         <img src="profile-pic-url" alt="Profile" />
-                        <p>Username: admin</p>
-                        <p>Email: admin@example.com</p>
-                        <p>Web URLs: <a href="https://example.com">https://example.com</a></p>
-                        <p>Bio: This is the admin bio.</p>
+                        <p>Username: username</p>
+                        <p>Email: user@example.com</p>
+                        <p>Web URLs: </p>
+                        <p>Bio: This is the user's bio.</p>
                     </div>
                 );
             case 'lobby':
