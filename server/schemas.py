@@ -9,6 +9,6 @@ class User(BaseModel):
     username: str
     phone_number: str
     password: str
-    # photo: Photo
+    photo: str
 
 # NOTE: This is just like serializer.py in django
