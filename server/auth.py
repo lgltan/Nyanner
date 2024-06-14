@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, HttpUrl, field_validator
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
-from server.models import User
+from server.models import User, IssuedToken
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -129,13 +129,15 @@ async def logout(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependenc
     # Verify the refresh token
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
-        user_id: int = payload.get('id')
-        if username is None or user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid')
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid')
-    
-    invalidate_token(username, user_id)
-    
-    return
+
+    invalidate_token(token, db)
+    return {"detail": "Logged out successfully"}
+
+
+def invalidate_token(token: str, db: Session):
+    issued_token = db.query(IssuedToken).filter(IssuedToken.id == token).first()
+    if issued_token:
+        issued_token.invalidated = True
+        db.commit()

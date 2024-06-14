@@ -47,5 +47,10 @@ class Move(Base):
     p3_board = Column(String(32))
     p4_board = Column(String(32))
 
+class Token(Base):
+    __tablename__ = "issued_tokens"
 
-
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    issued_at = Column(DateTime, nullable=False)
+    invalidated = Column(Boolean, default=False)
