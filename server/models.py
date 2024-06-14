@@ -27,7 +27,7 @@ class Session(Base):
 
 class AdminLog(Base):
     __tablename__ = 'admin_logs'
-    admin_log_id = Column(BigInteger, unique=True primary_key=True, autoincrement=True)
+    admin_log_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
 
 class Game(Base):
     __tablename__ = 'games'
