@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaUser } from 'react-icons/fa';
-import Lobby from 'game/Lobby.jsx';
+import Lobby from './game/Lobby.jsx';
 
 const Home = () => {
     const [activeTab, setActiveTab] = useState('profile');
