@@ -6,14 +6,14 @@ DROP TABLE users;
 
 CREATE TABLE users(
     user_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
-    user_type boolean NOT NULL DEFAULT false,
+	user_type boolean NOT NULL DEFAULT false,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     username VARCHAR(16) UNIQUE NOT NULL,
     email VARCHAR(50) UNIQUE NOT NULL,
     phone_number VARCHAR(13) UNIQUE NOT NULL,
     photo LONGBLOB,
-    password VARCHAR(256) NOT NULL
+    password VARBINARY(256) NOT NULL
 );
 
 CREATE TABLE sessions(

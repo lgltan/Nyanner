@@ -6,7 +6,7 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
-    user_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger(unsigned=True), unique=True, autoincrement=True, primary_key=True)
     user_type = Column(Integer, nullable=False)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
@@ -14,7 +14,7 @@ class User(Base):
     email = Column(String(50), unique=True, nullable=False)
     phone_number = Column(String(13), unique=True, nullable=False)
     # photo = Column(LargeBinary, nullable=True)
-    password = Column(LargeBinary(32), nullable=False)
+    password = Column(LargeBinary(256), nullable=False)
 
 class Session(Base):
     __tablename__ = 'sessions'
