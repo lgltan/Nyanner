@@ -1,52 +1,89 @@
-// create lobby or join lobby
+import React, { useState } from 'react';
+import './lobby.css';
+import WaitingRoom from './WaitingRoom'; // Ensure WaitingRoom is imported
 
-// initialize game state in DB
+const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
+    const [isSuccessful, setIsSuccessful] = useState(false);
+    const [lobbyName, setLobbyName] = useState('');
+    const [lobbyID, setLobbyID] = useState('');
 
-import React, { useState } from 'react'
-import './lobby.css'
+    const createLobby = async () => {
+        try {
+            const response = await fetch('YOUR_API_ENDPOINT_FOR_CREATE_LOBBY', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: lobbyName }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to create lobby');
+            }
+            setIsSuccessful(true); // Set successful state after successful API call
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-const Lobby = ({
-    label,
-    type,
-    name,
-    value,
-    onChange,
-    error,
-    ...props
-  }) => {
+    const joinLobby = async () => {
+        try {
+            const response = await fetch('YOUR_API_ENDPOINT_FOR_JOIN_LOBBY', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: lobbyID }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to join lobby');
+            }
+            setIsSuccessful(true); // Set successful state after successful API call
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div className="lobby-container">
-            <div className="form-input">
-                <label className="input-label" htmlFor={lobbyName}>Create Lobby</label>
-                <input
-                    className="input"
-                    type={type}
-                    name={lobbyName}
-                    value={value}
-                    onChange={onChange}
-                    {...props}
-                    required
-                />
-                {error && <p className="error">{error}</p>}
-            </div>
-            <button>Create Lobby</button>
+            {isSuccessful? (
+                <WaitingRoom /> // Render WaitingRoom component if operation was successful
+            ) : (
+                <>
+                    <div className="form-input">
+                        <label className="input-label" htmlFor={name}>Create Lobby</label>
+                        <input
+                            className="input"
+                            type={type}
+                            name={name}
+                            value={lobbyName}
+                            onChange={(e) => setLobbyName(e.target.value)}
+                            {...props}
+                            required
+                        />
+                        {error && <p className="error">{error}</p>}
+                    </div>
+                    <button onClick={createLobby}>Create Lobby</button>
 
-            <hr />
+                    <hr />
 
-            <div className="form-input">
-                <label className="input-label" htmlFor={lobbyID}>Join Lobby</label>
-                <input
-                    className="input"
-                    type={type}
-                    name={lobbyID}
-                    value={value}
-                    onChange={onChange}
-                    {...props}
-                    required
-                />
-                {error && <p className="error">{error}</p>}
-            </div>
-            <button>Join Lobby</button>
+                    <div className="form-input">
+                        <label className="input-label" htmlFor={name}>Join Lobby</label>
+                        <input
+                            className="input"
+                            type={type}
+                            name={name}
+                            value={lobbyID}
+                            onChange={(e) => setLobbyID(e.target.value)}
+                            {...props}
+                            required
+                        />
+                        {error && <p className="error">{error}</p>}
+                    </div>
+                    <button onClick={joinLobby}>Join Lobby</button>
+                </>
+            )}
         </div>
-    )
-}
+    );
+};
+
+export default Lobby;
