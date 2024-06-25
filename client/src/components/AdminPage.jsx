@@ -115,6 +115,8 @@ const AdminPage = () => {
         <div className={`sidebar-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>
           <FaClipboardList /> Logs
         </div>
+        <button className="primary-btn logout">Logout</button>
+
       </div>
       <div className="content">
         {renderContent()}
