@@ -2,7 +2,7 @@ main loop
 - preparation round
 - - buy units
 - - move units
-- - buy XP
+- - buy XP - defines max number of units
 - battle round
 - - auto battler
 
@@ -32,28 +32,12 @@ orange - red border
 light blue - light blue border
 dark blue - yellow border
 
-Upgrading mechanic
-pawn
-- 1* - 1 step forward, eat diagonally
-- 2* - randomly become another piece once you reach the end
-- 3* - randomly become another piece - happens after round starts, not during prep phase
-
-bishop
-- 1* - move diagonally 1 step in all 4 directions
-- 2* - move diagonally 3 steps in all 4 directions
-- 3* - normal bishop
-knight
-- 1* - move L to the right only (cannot jump over pieces)
-- 2* - move L to both left and right (cannot jump over pieces)
-- 3* - normal knight
-rook
-- 1* - move ordinally 4 steps
-- 2* - move ordinally 8 steps
-- 3* - normal rook
-queen
-- 1* - move in all 8 directions 2 steps
-- 2* - move in all 8 directions 4 steps
-- 3* - normal queen
-
 auto battler
 - train via reinforcement learning, or do minimax
+
+number of pieces at a given point
+2 * player level
+
+MONEY & HP MECHANICS
+- on win, earn money equivalent to number of pieces left on the board
+- on loss, lose hp and earn money equivalent to number of pieces left on the board

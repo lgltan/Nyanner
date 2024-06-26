@@ -1,3 +1,7 @@
-# run the game here
+from Player import Player
+from game import battle
 
-# treat this as the database
+p1 = Player()
+p2 = Player()
+
+battle(p1.board, p2.board)

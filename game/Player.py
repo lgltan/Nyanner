@@ -1,5 +1,8 @@
 import math
 
+BOARD_COLS = 8
+BOARD_ROWS = 8
+
 LVL_1 = 2 # only 1 unit (king)
 LVL_2 = LVL_1 + 2 # 2 units (including king)
 LVL_3 = LVL_2 + 6
@@ -17,16 +20,13 @@ KNIGHT_ID = 3
 ROOK_ID = 4
 QUEEN_ID = 5
 
-BOARD_COLS = 5
-BOARD_ROWS = 8
-
 class Player:
     def __init__(self):
         self.money = 0
         self.xp = 0
-        self.board = ("_," * (math.floor(BOARD_COLS * BOARD_ROWS / 2) - 1)) + "K"
+        self.board = ("." * (math.floor(BOARD_COLS * BOARD_ROWS / 2) - 1)) + "K"
         self.hp = 42 # answer to life, the universe, everything
-        
+    
     # returns LEVEL, CURRENT XP        
     def get_level(self):
         if self.xp < LVL_1:
@@ -46,6 +46,10 @@ class Player:
         else:
             print("ERR: XP INVALID")
             return -1, -1
+        
+    def get_piece_cap(self):
+        piece_cap, _ = self.get_level()
+        return piece_cap * 2
         
     def buy_xp(self):
         self.xp += 4
@@ -76,27 +80,3 @@ class Player:
 
     def update_board(self, new_board):
         self.board = new_board
-
-    def print_board(self):
-        col = 0
-        row = 0
-        i = 0
-        print("Board State:")
-        while i < len(self.board):
-            if self.board[i] == "*":
-                print(self.board[i], end="")
-            elif self.board[i] == ",":
-                pass
-            elif col + 1 == BOARD_COLS:
-                col = 0
-                print(self.board[i], end="\n")
-                row += 1
-            else:
-                    print(self.board[i], end=" | ")
-                    col += 1
-
-            # update counter
-            i += 1
-
-# player = Player()
-# player.print_board()
