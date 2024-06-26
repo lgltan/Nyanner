@@ -40,6 +40,7 @@ const Home = () => {
                 <div className={`sidebar-item ${activeTab === 'lobby' ? 'active' : ''}`} onClick={() => setActiveTab('lobby')}>
                     <FaUser /> Lobby
                 </div>
+                <button className="primary-btn logout">Logout</button>
             </div>
             <div className="content">
                 {renderContent()}

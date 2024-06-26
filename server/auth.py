@@ -1,7 +1,7 @@
 # https://www.youtube.com/watch?v=0A_GCXBCNUQ
 
 from datetime import timedelta, datetime
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Union
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 from sqlalchemy.orm import Session
@@ -24,6 +24,7 @@ router = APIRouter(
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
+TOKEN_EXPIRATION = os.getenv("REMEMBER_ME_EXPIRATION_DAYS")
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
@@ -41,15 +42,29 @@ class CreateUserRequest(BaseModel):
     phone_number: str
     # photo: str
 
-class LoginUser(BaseModel):
+class LoginRequest(BaseModel):
     username: str
     password: str
-    access_token: str
-    token_type: str
+    rememberMe: bool
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+    
+class TokenData(BaseModel):
+    username: str = None
+    user_id: int = None
+    user_type: int = None
+
+class UserData(BaseModel):
+    user_id: int
+    user_type: int
+    username: str
+    first_name: str
+    last_name: str
+    email: str
+    phone_number: str
+    # photo: str
     
 def get_db():
     db = SessionLocal()
@@ -60,31 +75,9 @@ def get_db():
         
 db_dependency = Annotated[Session, Depends(get_db)]
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
-    
-    # or not create_user_request.photo  
-    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please fill out all fields.")
-    
-    # # Validate photo
-    # if create_user_request.photo and not is_valid_photo(create_user_request.photo):
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo must be a valid image.")
-    
-    
-    create_user_model = User(
-        user_type=0,
-        username=create_user_request.username.encode('ascii'),
-        first_name=create_user_request.first_name.encode('ascii'),
-        last_name=create_user_request.last_name.encode('ascii'),
-        email=create_user_request.email.encode('ascii'),
-        phone_number=create_user_request.phone_number.encode('ascii'),
-        # photo=create_user_request.photo,
-        password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
-    )
-    
-    db.add(create_user_model)
-    db.commit()
+###############
+## FUNCTIONS ##
+###############
 
 # Function to verify if the photo is a valid image
 def is_valid_photo(photo: str) -> bool:
@@ -111,24 +104,6 @@ def is_valid_photo(photo: str) -> bool:
         print(e)
         return False
 
-@router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
-    user = authenticate_user(form_data.username, form_data.password, db)
-    
-    if not user: 
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
-    token = create_access_token(user.username, user.user_id, timedelta(minutes=5))
-    
-    return {'access_token': token, 'token_type': 'bearer'}
-    
-@router.post("/login", response_model=LoginUser)
-async def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
-    user = authenticate_user(form_data.username, form_data.password, db)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
-    
-    return get_current_user(form_data.access_token, form_data.username)
-
 def authenticate_user(username: str, password: str, db):
     user = db.query(User).filter(User.username == username).first()
     if not user: 
@@ -137,42 +112,94 @@ def authenticate_user(username: str, password: str, db):
         return False
     return user
 
-def create_access_token(username: str, user_id: int, expires_delta: timedelta):
-    encode = {'sub': username, 'id': user_id}
-    expires = datetime.utcnow() + expires_delta
+def create_access_token(username: str, user_id: int, user_type: int, expires_delta: Union[timedelta, None]):
+    encode = {'username': username, 'id': user_id, 'user_type': user_type}
+    expires = datetime.utcnow() + timedelta(minutes=30)
+    if expires_delta:
+        expires = datetime.utcnow() + expires_delta
     encode.update({'exp': expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], username):
-    print("running get current")
+async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Could not validate credentials',
+        headers={'WWW-Authenticate': 'Bearer'}
+    )
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('username')
-        user_id: int = payload.get('user_id')
+        user_id: int = payload.get('id')
         user_type: int = payload.get('user_type')
-        first_name: str = payload.get('first_name')
-        last_name: str = payload.get('last_name')
         if username is None or user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
-        return {'username': username, 'id': user_id, 'user_type': user_type, 'first_name': first_name, 'last_name': last_name}
+            raise credentials_exception
+        token_data = TokenData(username=username, user_id=user_id, user_type=user_type)
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
+        raise credentials_exception
     
-# @router.post("/logout", response_status=status.HTTP_200_OK)
-# async def logout(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
-#     # Verify the refresh token
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#     except JWTError:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid')
+    user = db.query(User).filter(User.username == token_data.username).first()
+    if user is None:
+        raise credentials_exception
+    return user
 
-#     invalidate_token(token, db)
-#     return {"detail": "Logged out successfully"}
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    # if current_user.disabled:
+    #     raise HTTPException(status_code=400, detail='Inactive user')
+    return current_user
+
+###############
+##  ROUTES   ##
+###############
+@router.post('/', status_code=status.HTTP_201_CREATED)
+async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
+    
+    # or not create_user_request.photo  
+    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please fill out all fields.")
+    
+    # # Validate photo
+    # if create_user_request.photo and not is_valid_photo(create_user_request.photo):
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo must be a valid image.")
+    
+    
+    create_user_model = User(
+        user_type=0,
+        username=create_user_request.username.encode('ascii'),
+        first_name=create_user_request.first_name.encode('ascii'),
+        last_name=create_user_request.last_name.encode('ascii'),
+        email=create_user_request.email.encode('ascii'),
+        phone_number=create_user_request.phone_number.encode('ascii'),
+        # photo=create_user_request.photo,
+        password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
+    )
+    
+    db.add(create_user_model)
+    db.commit()
 
 
-def invalidate_token(token: str, db: Session):
-    issued_token = db.query(IssuedToken).filter(IssuedToken.id == token).first()
-    if issued_token:
-        issued_token.invalidated = True
-        db.commit()
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+    request: LoginRequest,
+    db: db_dependency
+) -> Token:
+    
+    user = authenticate_user(request.username, request.password, db)
+    
+    if not user: 
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
+    
+    access_token_expires = None
+    if request.rememberMe:
+        access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
+    access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
+
+    return Token(access_token=access_token, token_type='bearer')
+    
+@router.get('/users/me', response_model=UserData)
+async def read_users_me(current_user: dict = Depends(get_current_active_user)):
+    return current_user
+
+# @router.get('/users/me/items')
+# async def read_own_items(current_user: dict = Depends(get_current_user)):
+#     return [{'item_id': 'Foo', 'owner': current_user.username}]

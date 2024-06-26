@@ -12,7 +12,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -22,18 +23,11 @@ const Login = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value,
     });
-  };
-
-  // Hardcoded admin credentials for testing
-  const authenticateUser = (username, password) => {
-    const adminUsername = 'admin';
-    const adminPassword = 'admin';
-    return username === adminUsername && password === adminPassword;
   };
 
   const handleSubmit = async (e) => {
@@ -47,29 +41,39 @@ const Login = () => {
     else {
       
       try {
-        const response = await axios.post('http://localhost:8000/auth/token', 
-          "username=" + formData.username + "&password=" + formData.password,
-        );
+        const response = await axios.post('http://localhost:8000/auth/token', {
+            "username": formData.username,
+            "password": formData.password,
+            "rememberMe": formData.rememberMe
+        });
   
         console.log('Response:', response.data);
         const token = response.data.access_token;
 
         try {
-          const userResponse = await axios.post('http://localhost:8000/auth/login', 
-            "username="+ formData.username + "&password=" + formData.password + "&access_token=" + token + "&token_type=" + response.data.token_type,
-        );
+          const userResponse = await axios.get('http://localhost:8000/auth/users/me', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
 
           const userData = userResponse.data;
           console.log('User Response:', userData);
 
-          if (userData.user_type === 0) {
+
+          localStorage.setItem('token', token);
+
+          if (userData.user_type == 0) {
+            console.log('Going to Home')
             navigate('/home');
           } else {
+            console.log('Going to Admin')
             navigate('/admin');
           }
-        } catch (error) {
+        }
+        catch (error) { 
           console.log(error)
-          console.log('cant get user data')
+          setError('Invalid credentials');
         }
         
       } catch (error) {
@@ -111,8 +115,13 @@ const Login = () => {
             </div>
             <div className="login-options">
               <div className="remember-me">
-                <input type="checkbox" name="remember-me" />
-                <label htmlFor="remember-me"> Remember Me </label>
+                <input 
+                  type="checkbox" 
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleChange} 
+                />
+                <label htmlFor="rememberMe"> Remember Me </label>
               </div>
               <div className="forgot-password">
                 <a href="#">Forgot Password?</a>
