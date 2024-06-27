@@ -1,5 +1,3 @@
-# https://www.youtube.com/watch?v=0A_GCXBCNUQ
-
 from datetime import timedelta, datetime
 from typing import Annotated, Optional, Union
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,6 +10,7 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from dotenv import load_dotenv
+from server.schemas import User, Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
 import os
 import base64
 
@@ -28,43 +27,6 @@ TOKEN_EXPIRATION = os.getenv("REMEMBER_ME_EXPIRATION_DAYS")
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
-
-class Photo(BaseModel):
-    url: Optional[HttpUrl] = None
-    filename: str = Field(...)
-class CreateUserRequest(BaseModel):
-    user_type: int
-    username: str
-    password: str
-    first_name: str
-    last_name: str
-    email: str
-    phone_number: str
-    # photo: str
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-    rememberMe: bool
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    
-class TokenData(BaseModel):
-    username: str = None
-    user_id: int = None
-    user_type: int = None
-
-class UserData(BaseModel):
-    user_id: int
-    user_type: int
-    username: str
-    first_name: str
-    last_name: str
-    email: str
-    phone_number: str
-    # photo: str
     
 def get_db():
     db = SessionLocal()
@@ -74,10 +36,6 @@ def get_db():
         db.close()
         
 db_dependency = Annotated[Session, Depends(get_db)]
-
-###############
-## FUNCTIONS ##
-###############
 
 # Function to verify if the photo is a valid image
 def is_valid_photo(photo: str) -> bool:
@@ -147,59 +105,3 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     # if current_user.disabled:
     #     raise HTTPException(status_code=400, detail='Inactive user')
     return current_user
-
-###############
-##  ROUTES   ##
-###############
-@router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
-    
-    # or not create_user_request.photo  
-    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please fill out all fields.")
-    
-    # # Validate photo
-    # if create_user_request.photo and not is_valid_photo(create_user_request.photo):
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo must be a valid image.")
-    
-    
-    create_user_model = User(
-        user_type=0,
-        username=create_user_request.username.encode('ascii'),
-        first_name=create_user_request.first_name.encode('ascii'),
-        last_name=create_user_request.last_name.encode('ascii'),
-        email=create_user_request.email.encode('ascii'),
-        phone_number=create_user_request.phone_number.encode('ascii'),
-        # photo=create_user_request.photo,
-        password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
-    )
-    
-    db.add(create_user_model)
-    db.commit()
-
-
-@router.post("/token", response_model=Token)
-async def login_for_access_token(
-    request: LoginRequest,
-    db: db_dependency
-) -> Token:
-    
-    user = authenticate_user(request.username, request.password, db)
-    
-    if not user: 
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
-    
-    access_token_expires = None
-    if request.rememberMe:
-        access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
-    access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
-
-    return Token(access_token=access_token, token_type='bearer')
-    
-@router.get('/users/me', response_model=UserData)
-async def read_users_me(current_user: dict = Depends(get_current_active_user)):
-    return current_user
-
-# @router.get('/users/me/items')
-# async def read_own_items(current_user: dict = Depends(get_current_user)):
-#     return [{'item_id': 'Foo', 'owner': current_user.username}]

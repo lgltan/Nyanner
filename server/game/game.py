@@ -1,7 +1,6 @@
 # game functions
 import numpy as np
 from sunfish import initial, Searcher, Position, MATE_LOWER, MATE_UPPER
-
 from Player import Player
 
 BOARD_COLS = 8
@@ -31,15 +30,15 @@ def battle(p1_board, p2_board):
     if winner == "K":
         print("P1 won")
         print(move_count)
-        print(board_list[-1])
+        print(board_list)
     elif winner == "k":
         print("P2 won")
         print(move_count)
-        print(board_list[-1])
+        print(board_list)
     else:
         print("Evaluate board")
         print(move_count)
-        print(board_list[-1])
+        print(board_list)
 
 def play_self_game(initial_positions=None, max_moves=50, search_depth=3):
     if initial_positions is None:
@@ -56,7 +55,7 @@ def play_self_game(initial_positions=None, max_moves=50, search_depth=3):
         move_count += 1
 
         # Break the loop if the maximum number of moves is reached
-        if move_count > max_moves:
+        if move_count >= max_moves:
             print("Game ended after reaching the maximum number of moves.")
             return 0, move_count, hist
 
@@ -75,3 +74,8 @@ def play_self_game(initial_positions=None, max_moves=50, search_depth=3):
             return "k", move_count, hist
         elif score == MATE_LOWER:
             return "K", move_count, hist
+        
+p1 = Player()
+p2 = Player()
+
+battle(p1.board, p2.board)

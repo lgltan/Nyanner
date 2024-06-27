@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './lobby.css';
 import WaitingRoom from './WaitingRoom'; // Ensure WaitingRoom is imported
+import axios from 'axios';
 
 const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
     const [isSuccessful, setIsSuccessful] = useState(false);

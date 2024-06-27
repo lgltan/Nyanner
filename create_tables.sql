@@ -1,8 +1,10 @@
-DROP TABLE moves;
-DROP TABLE games;
-DROP TABLE admin_logs;
-DROP TABLE sessions;
-DROP TABLE users;
+-- CREATE SCHEMA nyanner_db
+
+-- DROP TABLE moves;
+-- DROP TABLE games;
+-- DROP TABLE admin_logs;
+-- DROP TABLE sessions;
+-- DROP TABLE users;
 
 CREATE TABLE users(
     user_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,

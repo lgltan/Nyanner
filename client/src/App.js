@@ -6,6 +6,7 @@ import Login from './components/Login.jsx';
 import Signup from './components/Signup.jsx';
 import Home from './components/Home.jsx';
 import AdminPage from './components/AdminPage.jsx';
+import Lobby from './components/game/Lobby.jsx';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/signup" element={<Signup/>} />
           <Route path="/home" element={<Home />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/lobby" element={<Lobby />} />
         </Routes>
       </div>
     </Router>
