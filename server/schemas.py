@@ -3,13 +3,13 @@ from pydantic import BaseModel, Field, HttpUrl
 
 class User(BaseModel):
     user_type: int
+    username: str
     first_name: str
     last_name: str
     email: str
-    username: str
     phone_number: str
+    # photo: str
     password: str
-    photo: str
 
 class Photo(BaseModel):
     url: Optional[HttpUrl] = None

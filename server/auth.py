@@ -10,16 +10,16 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from dotenv import load_dotenv
-from server.schemas import User, Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
+from server.schemas import Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
 import os
 import base64
 
 load_dotenv()
 
-router = APIRouter(
-    prefix='/auth',
-    tags=['auth']
-)
+# router = APIRouter(
+#     prefix='/auth',
+#     tags=['auth']
+# )
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")

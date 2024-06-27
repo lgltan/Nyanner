@@ -9,8 +9,8 @@ from server.database import SessionLocal
 from server.models import User
 from passlib.context import CryptContext
 from dotenv import load_dotenv
-from server.schemas import User, Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
-from server.auth import authenticate_user, create_access_token, get_current_active_user
+from server.schemas import Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
+from server.auth import authenticate_user, create_access_token, get_current_active_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import os
 
 load_dotenv()
@@ -19,18 +19,6 @@ router = APIRouter(
     prefix='/auth',
     tags=['auth']
 )
-
-TOKEN_EXPIRATION = os.getenv("REMEMBER_ME_EXPIRATION_DAYS")
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-    
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        
-db_dependency = Annotated[Session, Depends(get_db)]
 
 ###############
 ##  ROUTES   ##
