@@ -18,6 +18,7 @@ class CreateUserRequest(BaseModel):
     user_type: int
     username: str
     password: str
+    confirm_password: str
     first_name: str
     last_name: str
     email: str

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
 import FormInput from './form/FormInput';
-import { validateUsername, validatePassword } from '../validation.js';
 import '../App.css';
 import './Login.css';
 import './form/FormInput.css';
@@ -33,55 +32,45 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const passVal = validatePassword(formData.password,{})
-
-    if (validateUsername(formData.username) === false || Object.keys(passVal).length > 0) {
-      setError('Invalid credentials');
-    }
-    else {
       
+    try {
+      const response = await api.post('/auth/token', {
+          "username": formData.username,
+          "password": formData.password,
+          "rememberMe": formData.rememberMe
+      });
+
+      // console.log('Response:', response.data);
+      const token = response.data.access_token;
+
       try {
-        const response = await api.post('/auth/token', {
-            "username": formData.username,
-            "password": formData.password,
-            "rememberMe": formData.rememberMe
-        });
-  
-        console.log('Response:', response.data);
-        const token = response.data.access_token;
-
-        try {
-          const userResponse = await api.get('/auth/users/me', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-
-          const userData = userResponse.data;
-          console.log('User Response:', userData);
-
-          setToken(token);
-          
-          if (userData.user_type === 0) {
-            console.log('Going to Home')
-            navigate('/home');
-          } else {
-            console.log('Going to Admin')
-            navigate('/admin');
+        const userResponse = await api.get('/auth/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-        }
-        catch (error) { 
-          console.log(error)
-          setError('Invalid credentials');
-        }
+        });
+
+        const userData = userResponse.data;
+        // console.log('User Response:', userData);
+        setToken(token);
         
-      } catch (error) {
-        console.log(error)
+        if (userData.user_type === 0) {
+          // console.log('Going to Home')
+          navigate('/home');
+        } else {
+          // console.log('Going to Admin')
+          navigate('/admin');
+        }
+      }
+      catch (error) { 
+        // console.log(error)
         setError('Invalid credentials');
       }
-      
+    } catch (error) {
+      console.log(error)
+      setError('Invalid credentials');
     }
+      
   };
 
   return (
@@ -131,7 +120,7 @@ const Login = () => {
             <button className="primary-btn" type="submit">Log In</button>
           </form>
           <div className="signup">
-            <p>Don't have an account? <Link to="/sign-up">Sign Up</Link></p>
+            <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
           </div>
         </div>
       </div>

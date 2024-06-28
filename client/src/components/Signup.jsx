@@ -1,17 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
-
-import { 
-  validateName,
-  validateUsername,
-  validateEmail,
-  validatePhoneNumber,
-  validatePassword
-} from '../validation.js';
 
 import '../App.css';
 import './Signup.css';
@@ -28,7 +20,6 @@ const Signup = () => {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,50 +40,10 @@ const Signup = () => {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    const newErrors = {};
 
-    if (validateName(formData.firstName) === false) {
-      newErrors.firstName = 'First name should only contain letters and spaces.';
-    }
-
-    if (validateName(formData.lastName) === false) {
-      newErrors.lastName = 'Last name should only contain letters and spaces.';
-    }
-
-    if(validateUsername(formData.username) === false) {
-      newErrors.username = 'Username should only contain alphanumeric or underscore characters.'
-    }
-
-    if(validateEmail(formData.email) === false) {
-      newErrors.email = 'E-mail should not exceed 50 characters'
-    }
-    
-    if (!validatePhoneNumber(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'Please enter a valid Philippine phone number.';
-    }
-    
-    if (!formData.profilePhoto) {
-      newErrors.profilePhoto = 'Please upload a profile photo.';
-    }
-
-    const passwordErrors = validatePassword(formData.password, newErrors);
-    if (passwordErrors.password){
-      newErrors.password = passwordErrors.password;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match.';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      console.log('Errors', newErrors);
-      return;
-    }
-    else {
-      setErrors({});
-    }
-
+    // if (!formData.profilePhoto) {
+    //   newErrors.profilePhoto = 'Please upload a profile photo.';
+    // }
     // console.log('before post', formData)
 
     // Handle form submission
@@ -101,21 +52,23 @@ const Signup = () => {
         "user_type": 0,
         "username": formData.username,
         "password": formData.password,
+        "confirm_password": formData.confirmPassword,
         "first_name": formData.firstName,
         "last_name": formData.lastName,
         "email": formData.email,
         "phone_number": formData.phoneNumber,
-        "photo": formData.profilePhoto,
+        // "photo": formData.profilePhoto,
       });
 
       // console.log('Form submitted', formData);
       // console.log('Response:', response.data);
+
       // Handle successful registration (e.g., redirect to login page or show success message)
-      navigate('/')
+      navigate('/login')
     } catch (error) {
-      console.log(error)
-      // console.error('Error submitting form:', error.response ? error.response.data : error.message);
-      // Handle error from the API (e.g., show error message)
+      // console.log(error)
+      const newErrors = error.response.data.detail
+      setErrors(newErrors)
     }
   };
 

@@ -10,7 +10,7 @@ from server.models import User
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 from server.schemas import Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
-from server.auth import authenticate_user, create_access_token, get_current_active_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
+from server.auth import validate_user_data, authenticate_user, create_access_token, get_current_active_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import os
 
 load_dotenv()
@@ -30,10 +30,11 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please fill out all fields.")
     
-    # # Validate photo
-    # if create_user_request.photo and not is_valid_photo(create_user_request.photo):
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo must be a valid image.")
+    # Validate information
+    errors = validate_user_data(create_user_request, db)
     
+    if len(errors) > 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=errors)
     
     create_user_model = User(
         user_type=0,

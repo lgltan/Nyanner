@@ -1,11 +1,10 @@
 from datetime import timedelta, datetime
-from typing import Annotated, Optional, Union
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from typing import Annotated, Union
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
-from server.models import User, IssuedToken
+from server.models import User
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -13,6 +12,7 @@ from dotenv import load_dotenv
 from server.schemas import Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
 import os
 import base64
+import re
 
 load_dotenv()
 
@@ -36,6 +36,71 @@ def get_db():
         db.close()
         
 db_dependency = Annotated[Session, Depends(get_db)]
+
+def validate_password(password: str):
+    password_length = len(password)
+    has_lowercase = re.search(r'[a-z]', password) is not None
+    has_uppercase = re.search(r'[A-Z]', password) is not None
+    has_number = re.search(r'[0-9]', password) is not None
+    has_special_character = re.search(r'[!@#$%^&*()_,.?":{}|<>\\-]', password) is not None
+
+    if password_length < 12 or password_length > 32:
+        return 'Password must be between 12 and 32 characters long.'
+    elif not has_lowercase:
+        return 'Password must contain at least one lowercase letter.'
+    elif not has_uppercase:
+        return 'Password must contain at least one uppercase letter.'
+    elif not has_number:
+        return 'Password must contain at least one number.'
+    elif not has_special_character:
+        return 'Password must contain at least one special character.'
+
+    return None
+
+def validate_user_data(user_data: CreateUserRequest, db: db_dependency):
+    errors = {}
+    # Validate first name
+    NAME_REGEX = r'^[a-zA-Z ]{1,50}$'
+    if not re.match(NAME_REGEX, user_data.first_name):
+        errors['firstName'] = 'First name should only contain letters and spaces.'
+
+    # Validate last name
+    if not re.match(NAME_REGEX, user_data.last_name):
+        errors['lastName'] = 'Last name should only contain letters and spaces.'
+
+    # Validate username
+    USERNAME_REGEX = r'^[a-zA-Z0-9](\w|_){3,15}$'
+    if not re.match(USERNAME_REGEX, user_data.username):
+        errors['username'] = 'Username should only contain alphanumeric or underscore characters and must be 4-16 characters long.'
+    # Check if username already exists
+    user = db.query(User).filter(User.username == user_data.username).first()
+    if user:
+        errors['username'] = 'Username already exists.'
+    
+    # Validate email
+    EMAIL_REGEX = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(EMAIL_REGEX, user_data.email):
+        errors['email'] = 'E-mail should not exceed 50 characters'
+
+    # Validate phone number
+    PHONE_REGEX = r'^(09|\+639)\d{9}$'
+    if not re.match(PHONE_REGEX, user_data.phone_number):
+        errors['phoneNumber'] = 'Please enter a valid Philippine phone number'
+
+    # Validate password
+    password_error = validate_password(user_data.password)
+    if password_error:
+        errors['password'] = password_error
+
+    # Validate confirm password
+    if user_data.password != user_data.confirm_password:
+        errors['confirmPassword'] = 'Passwords do not match.'
+
+    # # Validate photo
+    # if create_user_request.photo and not is_valid_photo(create_user_request.photo):
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo must be a valid image.")
+    
+    return errors
 
 # Function to verify if the photo is a valid image
 def is_valid_photo(photo: str) -> bool:
@@ -63,6 +128,12 @@ def is_valid_photo(photo: str) -> bool:
         return False
 
 def authenticate_user(username: str, password: str, db):
+    ALPHANUM_UNDERSCORE_REGEX = r'^[a-zA-Z0-9](\w|_)*$'
+    if not re.match(ALPHANUM_UNDERSCORE_REGEX, username):
+        return False
+    # if len(validate_password(password)) > 0:
+    #     return False
+
     user = db.query(User).filter(User.username == username).first()
     if not user: 
         return False
