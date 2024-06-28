@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
 import { FaUser, FaUsers, FaClipboardList } from 'react-icons/fa';
 import './AdminPage.css';
+import { useNavigate } from 'react-router-dom';
+import { removeToken } from '../provider/authProvider.js';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [searchUser, setSearchUser] = useState('');
   const [searchLog, setSearchLog] = useState('');
+  const navigate = useNavigate();
+    
+  const logout = () => {
+      if(removeToken()){
+          navigate('/login');
+      }
+      else{
+          alert('Error logging out');
+          console.log('Error logging out');
+      }
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -115,7 +128,7 @@ const AdminPage = () => {
         <div className={`sidebar-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>
           <FaClipboardList /> Logs
         </div>
-        <button className="primary-btn logout">Logout</button>
+        <button className="primary-btn logout" onClick={logout}>Logout</button>
 
       </div>
       <div className="content">

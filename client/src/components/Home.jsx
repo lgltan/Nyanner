@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
 import { FaUser } from 'react-icons/fa';
 import Lobby from './game/Lobby.jsx';
+import { removeToken } from '../provider/authProvider.js';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
     const [activeTab, setActiveTab] = useState('profile');
     const [searchUser, setSearchUser] = useState('');
     const [searchLog, setSearchLog] = useState('');
+    const navigate = useNavigate();
+    
+    const logout = () => {
+        if(removeToken()){
+            navigate('/login');
+        }
+        else{
+            alert('Error logging out');
+            console.log('Error logging out');
+        }
+    }
 
     const renderContent = () => {
         switch (activeTab) {
@@ -40,7 +53,7 @@ const Home = () => {
                 <div className={`sidebar-item ${activeTab === 'lobby' ? 'active' : ''}`} onClick={() => setActiveTab('lobby')}>
                     <FaUser /> Lobby
                 </div>
-                <button className="primary-btn logout">Logout</button>
+                <button className="primary-btn logout" onClick={logout}>Logout</button>
             </div>
             <div className="content">
                 {renderContent()}

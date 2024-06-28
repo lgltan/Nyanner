@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import FormInput from './form/FormInput';
 import { validateUsername, validatePassword } from '../validation.js';
 import '../App.css';
 import './Login.css';
 import './form/FormInput.css';
+import api from '../services/api.js'
+import {setToken} from '../provider/authProvider.js'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +42,7 @@ const Login = () => {
     else {
       
       try {
-        const response = await axios.post('http://localhost:8000/auth/token', {
+        const response = await api.post('/auth/token', {
             "username": formData.username,
             "password": formData.password,
             "rememberMe": formData.rememberMe
@@ -51,7 +52,7 @@ const Login = () => {
         const token = response.data.access_token;
 
         try {
-          const userResponse = await axios.get('http://localhost:8000/auth/users/me', {
+          const userResponse = await api.get('/auth/users/me', {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -60,10 +61,9 @@ const Login = () => {
           const userData = userResponse.data;
           console.log('User Response:', userData);
 
-
-          localStorage.setItem('token', token);
-
-          if (userData.user_type == 0) {
+          setToken(token);
+          
+          if (userData.user_type === 0) {
             console.log('Going to Home')
             navigate('/home');
           } else {

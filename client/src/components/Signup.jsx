@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 import FormInput from './form/FormInput';
 import ProfilePictureUpload from './form/ProfilePictureUpload';
@@ -97,7 +97,7 @@ const Signup = () => {
 
     // Handle form submission
     try {
-      const response = await axios.post('http://localhost:8000/auth/', {
+      const response = await api.post('/auth/', {
         "user_type": 0,
         "username": formData.username,
         "password": formData.password,
