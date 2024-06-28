@@ -4,7 +4,16 @@
 -- DROP TABLE games;
 -- DROP TABLE admin_logs;
 -- DROP TABLE sessions;
+-- DROP TABLE issued_tokens;
 -- DROP TABLE users;
+-- DROP TABLE photos;
+
+CREATE TABLE photos (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    filename VARCHAR(100) NOT NULL,
+    content LONGBLOB NOT NULL,
+    PRIMARY KEY (id)
+);
 
 CREATE TABLE users(
     user_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
@@ -14,8 +23,9 @@ CREATE TABLE users(
     username VARCHAR(16) UNIQUE NOT NULL,
     email VARCHAR(50) UNIQUE NOT NULL,
     phone_number VARCHAR(13) UNIQUE NOT NULL,
-    photo VARCHAR(256) NOT NULL,
-    password VARBINARY(256) NOT NULL
+    photo_id INT(11),
+    password VARBINARY(256) NOT NULL,
+    FOREIGN KEY (photo_id) REFERENCES photos(id)
 );
 
 CREATE TABLE sessions(

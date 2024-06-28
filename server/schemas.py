@@ -11,9 +11,6 @@ class User(BaseModel):
     # photo: str
     password: str
 
-class Photo(BaseModel):
-    url: Optional[HttpUrl] = None
-    filename: str = Field(...)
 class CreateUserRequest(BaseModel):
     user_type: int
     username: str
@@ -23,7 +20,6 @@ class CreateUserRequest(BaseModel):
     last_name: str
     email: str
     phone_number: str
-    # photo: str
 
 class LoginRequest(BaseModel):
     username: str

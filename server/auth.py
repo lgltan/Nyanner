@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 from typing import Annotated, Union
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from dotenv import load_dotenv
-from server.schemas import Photo, CreateUserRequest, LoginRequest, Token, TokenData, UserData
+from server.schemas import CreateUserRequest, LoginRequest, Token, TokenData, UserData
 import os
 import base64
 import re
@@ -57,7 +57,26 @@ def validate_password(password: str):
 
     return None
 
-def validate_user_data(user_data: CreateUserRequest, db: db_dependency):
+# Function to verify if the photo is a valid image
+def validate_image(file: UploadFile) -> bool:
+    magic_numbers = {
+        b'\xff\xd8\xff': 'jpeg',
+        b'\x89PNG\r\n\x1a\n': 'png',
+        b'GIF87a': 'gif',
+        b'GIF89a': 'gif',
+    }
+    
+    try:
+        content = file.file.read(10)
+        file.file.seek(0)
+        for magic, filetype in magic_numbers.items():
+            if content.startswith(magic):
+                return True
+    except Exception as e:
+        return False
+    return False
+
+def validate_user_data(db: db_dependency, user_data: CreateUserRequest, file: UploadFile = None):
     errors = {}
     # Validate first name
     NAME_REGEX = r'^[a-zA-Z ]{1,50}$'
@@ -97,35 +116,11 @@ def validate_user_data(user_data: CreateUserRequest, db: db_dependency):
         errors['confirmPassword'] = 'Passwords do not match.'
 
     # # Validate photo
-    # if create_user_request.photo and not is_valid_photo(create_user_request.photo):
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo must be a valid image.")
+    if file:
+        if not validate_image(file):
+            errors['profilePhoto'] = 'Invalid photo file.'
     
     return errors
-
-# Function to verify if the photo is a valid image
-def is_valid_photo(photo: str) -> bool:
-    try:
-        _, ext = os.path.splitext(photo)
-        if ext.lower() not in ['.jpg', '.jpeg', '.png']:
-            return False
-        # Decode the Base64 string to get the raw bytes
-        decoded_data = base64.b64decode(photo)
-        
-        # Check the first few bytes to see if they match known image file signatures
-        jpeg_signature = b'\xFF\xD8\xff'
-        png_signature = b'\x89PNG\r\n\x1a\n'
-        
-        # Check for JPEG signature
-        if decoded_data[:3] == jpeg_signature:
-            return True
-        # Check for PNG signature
-        elif decoded_data[:8] == png_signature:
-            return True
-        else:
-            return False
-    except Exception as e:
-        print(e)
-        return False
 
 def authenticate_user(username: str, password: str, db):
     ALPHANUM_UNDERSCORE_REGEX = r'^[a-zA-Z0-9](\w|_)*$'

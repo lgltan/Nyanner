@@ -30,12 +30,10 @@ const Signup = () => {
   };
 
   const handleProfilePhotoChange = (file, error) => {
-    if (error) {
-      setErrors(prevErrors => ({ ...prevErrors, profilePhoto: error }));
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, profilePhoto: '' }));
-      setFormData(prevData => ({ ...prevData, profilePhoto: file }));
-    }
+    setFormData(prevData => ({ 
+      ...prevData, 
+      profilePhoto: file 
+    }));
   };
 
   const handleSubmit = async(e) => {
@@ -47,27 +45,39 @@ const Signup = () => {
     // console.log('before post', formData)
 
     // Handle form submission
+    console.log(formData)
+    console.log(formData.profilePhoto)
+
+    const data = new FormData();
+    data.append('username', formData.username);
+    data.append('password', formData.password);
+    data.append('confirm_password', formData.confirmPassword);
+    data.append('first_name', formData.firstName);
+    data.append('last_name', formData.lastName);
+    data.append('email', formData.email);
+    data.append('phone_number', formData.phoneNumber);
+    if (formData.profilePhoto) {
+      data.append('file', formData.profilePhoto);
+    }
+
     try {
-      const response = await api.post('/auth/', {
-        "user_type": 0,
-        "username": formData.username,
-        "password": formData.password,
-        "confirm_password": formData.confirmPassword,
-        "first_name": formData.firstName,
-        "last_name": formData.lastName,
-        "email": formData.email,
-        "phone_number": formData.phoneNumber,
-        // "photo": formData.profilePhoto,
+      // console
+      const response = await api.post('/auth/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       // console.log('Form submitted', formData);
-      // console.log('Response:', response.data);
+      setErrors({});
+      console.log('Response:', response.data);
 
       // Handle successful registration (e.g., redirect to login page or show success message)
       navigate('/login')
     } catch (error) {
-      // console.log(error)
+      console.log(error)
       const newErrors = error.response.data.detail
+      console.log("error: ", newErrors)
       setErrors(newErrors)
     }
   };
@@ -156,6 +166,7 @@ const Signup = () => {
               />
             </div>
             </div>
+            {errors.general && <p className="error">{errors.general}</p>}
             <button className="primary-btn register-btn" type="submit">Register</button>
           </form>
         </div>

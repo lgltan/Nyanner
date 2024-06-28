@@ -1,9 +1,15 @@
-from sqlalchemy import create_engine, Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, LargeBinary, Boolean, DATETIME
+from sqlalchemy import create_engine, Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, LargeBinary, Boolean, DATETIME, BLOB
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
+
+class Photo(Base):
+    __tablename__ = 'photos'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    filename = Column(String(100), nullable=False)
+    content = Column(BLOB, nullable=False)
 
 class User(Base):
     __tablename__ = 'users'
@@ -14,8 +20,10 @@ class User(Base):
     username = Column(String(16), unique=True, nullable=False)
     email = Column(String(50), unique=True, nullable=False)
     phone_number = Column(String(13), unique=True, nullable=False)
-    # photo = Column(String(256), nullable=True)
+    photo_id = Column(Integer, ForeignKey('photos.id'))
     password = Column(LargeBinary(256), nullable=False)
+    
+    photo = relationship("Photo")
 
 class Session(Base):
     __tablename__ = 'sessions'
