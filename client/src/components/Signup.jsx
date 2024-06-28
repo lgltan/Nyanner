@@ -39,15 +39,9 @@ const Signup = () => {
   const handleSubmit = async(e) => {
     e.preventDefault();
 
-    // if (!formData.profilePhoto) {
-    //   newErrors.profilePhoto = 'Please upload a profile photo.';
-    // }
     // console.log('before post', formData)
 
     // Handle form submission
-    console.log(formData)
-    console.log(formData.profilePhoto)
-
     const data = new FormData();
     data.append('username', formData.username);
     data.append('password', formData.password);
@@ -61,23 +55,19 @@ const Signup = () => {
     }
 
     try {
-      // console
       const response = await api.post('/auth/', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-
-      // console.log('Form submitted', formData);
       setErrors({});
-      console.log('Response:', response.data);
+      // console.log('Response:', response.data);
 
       // Handle successful registration (e.g., redirect to login page or show success message)
       navigate('/login')
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       const newErrors = error.response.data.detail
-      console.log("error: ", newErrors)
       setErrors(newErrors)
     }
   };

@@ -67,7 +67,7 @@ const Login = () => {
         setError('Invalid credentials');
       }
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       setError('Invalid credentials');
     }
       
