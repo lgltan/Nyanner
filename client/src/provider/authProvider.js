@@ -1,3 +1,5 @@
+// Roughly based on https://dev.to/oyedeletemitope/login-authentication-with-react-and-fastapi-397b
+
 import { useState, useEffect } from "react";
 import { useLocation, Navigate } from "react-router-dom"
 import api from "../services/api"
