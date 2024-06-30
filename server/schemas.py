@@ -44,3 +44,7 @@ class UserData(BaseModel):
     email: str
     phone_number: str
     # photo: str
+    
+class CreateLobbyRequest(BaseModel):
+    lobby_name: str
+    p1_id: str

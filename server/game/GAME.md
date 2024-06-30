@@ -7,17 +7,15 @@ main loop
 - - auto battler
 
 game state storage
-- 1 line FEN
-- - FEN string should indicate 5|5|5|5|5|5|5|5
-- - upper case for white, lower case for black
-- - \* represents star value of the unit
-- - same system will be used for units on a player's bench
+- 1 line string
 
 state table
-- gameID | round_num(int) | b1_fen | b2_fen
+- stateID | gameID | round_num(int) | p1_xp | p1_money | p2_xp | p2_money | p3_xp | p3_money | p4_xp | p4_money | p1_board | p2_board | p3_board | p4_board
 
-game table - used in preparation stage - updates each time an action is made in the prep round
-- gameID | p1_xp | p1_money | p2_xp | p2_money | p3_xp | p3_money | p4_xp | p4_money | p1_board | p2_board | p3_board | p4_board | unit(int) | unit(int) | unit(int) | unit(int) | unit(int)
+game table - for each lobby created, initialize with gameID and p1_id. 4 board column and 4 pos column data are to record the end of the game (updated whenever a player loses) - player id is added each time a player joins the lobby, and is the account id
+- gameID | p1_id | p2_id | p3_id | p4_id | p1_board | p2_board | p3_board | p4_board | p1_pos | p2_pos | p3_pos | p4_pos
+
+*ADDITIONAL FEATURE: PREFERRED COLOR - player gets to list their top 4 preference on color, and they get the color they want depending on player # priority per game - works like amongus but automated
 
 pawn - smol cat
 bishop - reading cat
@@ -26,14 +24,14 @@ rook - le choncc
 queen - hoodie cat
 king - eepy cat
 
-team colors:
+player colors:
 beige - pink border
 orange - red border
 light blue - light blue border
 dark blue - yellow border
 
 auto battler
-- train via reinforcement learning, or do minimax
+- sunfish
 
 number of pieces at a given point
 2 * player level

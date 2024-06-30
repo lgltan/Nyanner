@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
-from server.models import User, Photo
+from server.models import User, Photo, Lobby
 from passlib.context import CryptContext
 from dotenv import load_dotenv
-from server.schemas import CreateUserRequest, LoginRequest, Token, TokenData, UserData
+from server.schemas import CreateUserRequest, LoginRequest, Token, TokenData, UserData, CreateLobbyRequest
 from server.auth import validate_image, validate_user_data, authenticate_user, create_access_token, get_current_active_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import os
 
@@ -120,3 +120,26 @@ async def read_users_me(current_user: dict = Depends(get_current_active_user)):
 # @router.get('/users/me/items')
 # async def read_own_items(current_user: dict = Depends(get_current_user)):
 #     return [{'item_id': 'Foo', 'owner': current_user.username}]
+
+@router.post('/', status_code=status.HTTP_201_CREATED)
+async def create_lobby(db: db_dependency, 
+                        lobby_name: str = Form(...),
+                        p1_id: str = Form(...),
+    ):
+
+    create_lobby_request = CreateLobbyRequest(
+        lobby_name="",
+        p1_id="",
+        
+    )
+    
+    if not create_lobby_request.lobby_name or not create_lobby_request.p1_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
+
+    new_lobby = Lobby(
+        lobby_name=create_lobby_request.lobby_name.encode('ascii'),
+        p1_id=create_lobby_request.p1_id.encode('ascii'),
+    )
+    
+    db.add(new_lobby)
+    db.commit()
