@@ -121,7 +121,7 @@ async def read_users_me(current_user: dict = Depends(get_current_active_user)):
 # async def read_own_items(current_user: dict = Depends(get_current_user)):
 #     return [{'item_id': 'Foo', 'owner': current_user.username}]
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
+@router.post('/lobby', status_code=status.HTTP_201_CREATED)
 async def create_lobby(db: db_dependency, 
                         lobby_name: str = Form(...),
                         p1_id: str = Form(...),
