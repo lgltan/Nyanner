@@ -14,7 +14,6 @@ const WaitingRoom = ({ lobbyID, lobbyName }) => {
                 setPlayers(data.players); // Assuming the API returns an object with a players array
             } catch (error) {
                 console.error(error);
-                // Handle error appropriately, e.g., show an error message
             }
         };
 
