@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Square from './Square';
 
 const Chessboard = () => {
   const [pieces, setPieces] = useState(Array(64).fill(null)); // Initialize with nulls

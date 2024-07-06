@@ -27,9 +27,9 @@ const App = () => {
               </ProtectedRoute>
                   } />
           <Route path="/lobby" element={
-              <ProtectedRoute isAdminRoute={false}>
+              // <ProtectedRoute isAdminRoute={false}>
                 <Lobby />
-              </ProtectedRoute>
+              // </ProtectedRoute>
                   } />
           <Route path="/unauthorized" element={<h1>Unauthorized</h1>} />
         </Routes>
