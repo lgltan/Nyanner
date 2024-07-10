@@ -9,7 +9,7 @@ from server.database import SessionLocal
 from server.models import User, Photo, Lobby
 from passlib.context import CryptContext
 from dotenv import load_dotenv
-from server.schemas import CreateUserRequest, LoginRequest, Token, TokenData, UserData, CreateLobbyRequest
+from server.schemas import CreateUserRequest, LoginRequest, Token, TokenData, UserData, CreateLobbyRequest, JoinLobbyRequest
 from server.auth import validate_image, validate_user_data, authenticate_user, create_access_token, get_current_active_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import os
 
@@ -121,7 +121,7 @@ async def read_users_me(current_user: dict = Depends(get_current_active_user)):
 # async def read_own_items(current_user: dict = Depends(get_current_user)):
 #     return [{'item_id': 'Foo', 'owner': current_user.username}]
 
-@router.post('/lobby', status_code=status.HTTP_201_CREATED)
+@router.post('/lobby/create', status_code=status.HTTP_201_CREATED)
 async def create_lobby(db: db_dependency, 
                         lobby_name: str = Form(...),
                         p1_id: str = Form(...),
@@ -142,4 +142,26 @@ async def create_lobby(db: db_dependency,
     )
     
     db.add(new_lobby)
+    db.commit()
+    
+@router.put('/lobby/join', status_code=status.HTTP_201_CREATED)
+async def join_lobby(db: db_dependency, 
+                        lobby_id: str = Form(...),
+                        player_id: str = Form(...),
+    ):
+
+    join_lobby_request = JoinLobbyRequest(
+        lobby_id="",
+        player_id="",
+    )
+    
+    if not join_lobby_request.lobby_id or not join_lobby_request.player_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
+
+    join_lobby = Lobby(
+        lobby_id=join_lobby_request.lobby_id.encode('ascii'),
+        player_id=join_lobby_request.player_id.encode('ascii'),
+    )
+    
+    db.add(join_lobby)
     db.commit()

@@ -48,3 +48,7 @@ class UserData(BaseModel):
 class CreateLobbyRequest(BaseModel):
     lobby_name: str
     p1_id: str
+    
+class JoinLobbyRequest(BaseModel):
+    lobby_id: str
+    player_id: str
