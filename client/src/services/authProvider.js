@@ -1,8 +1,8 @@
 // Roughly based on https://dev.to/oyedeletemitope/login-authentication-with-react-and-fastapi-397b
 
 import { useState, useEffect } from "react";
-import { useLocation, Navigate } from "react-router-dom"
-import api from "../services/api"
+import { useLocation, useNavigate, Navigate } from "react-router-dom"
+import api from "./api"
 
 export const USER_TYPES = {
     REGULAR: 0,
@@ -13,16 +13,31 @@ export const setToken = (token)=>{
     localStorage.setItem('token', token)
 }
 
-export const fetchToken = (token)=>{
+export const fetchToken = ()=>{
     return localStorage.getItem('token')
 }
 
-export const removeToken = (token)=>{
+export const removeToken = ()=>{
     if (localStorage.getItem('token') === null)
         return false;
     localStorage.removeItem('token');
     return true;
 }
+
+export const useLogout = () => {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    if (removeToken()) {
+      navigate('/login');
+    } else {
+      alert('Error logging out');
+      console.log('Error logging out');
+    }
+  };
+
+  return logout;
+};
 
 export function ProtectedRoute({ isAdminRoute = false, children }) {
     const [loading, setLoading] = useState(true);

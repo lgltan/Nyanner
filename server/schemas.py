@@ -35,6 +35,11 @@ class TokenData(BaseModel):
     user_id: int = None
     user_type: int = None
 
+class PhotoData(BaseModel):
+    id: int
+    filename: str
+    content: str
+
 class UserData(BaseModel):
     user_id: int
     user_type: int
@@ -43,8 +48,19 @@ class UserData(BaseModel):
     last_name: str
     email: str
     phone_number: str
-    # photo: str
-    
+    photo_id: int
+    photo_content: str
+
+class FullUserData(BaseModel):
+    user_id: int
+    user_type: int
+    username: str
+    first_name: str
+    last_name: str
+    email: str
+    phone_number: str
+    photo: Optional[PhotoData]
+        
 class CreateLobbyRequest(BaseModel):
     lobby_name: str
     p1_id: str

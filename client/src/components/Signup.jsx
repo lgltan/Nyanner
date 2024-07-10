@@ -30,6 +30,7 @@ const Signup = () => {
   };
 
   const handleProfilePhotoChange = (file, error) => {
+    // console.log('File:', file);
     setFormData(prevData => ({ 
       ...prevData, 
       profilePhoto: file 
@@ -53,6 +54,8 @@ const Signup = () => {
     if (formData.profilePhoto) {
       data.append('file', formData.profilePhoto);
     }
+
+    // console.log('Data:', data);
 
     try {
       const response = await api.post('/auth/', data, {
@@ -81,83 +84,83 @@ const Signup = () => {
         <div className="register-form">
           <form method="POST" onSubmit={handleSubmit}>
             <div className="form-flex">
-            <div className="form-left">
-            <FormInput
-              label="First Name"
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              error={errors.firstName}
-            />
-
-            <FormInput
-              label="Last Name"
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              error={errors.lastName}
-            />
-
-            <FormInput
-              label="E-mail"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
-            />
-            
-            <FormInput
-              label="Phone Number"
-              type="text"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              error={errors.phoneNumber}
-            />
-
-            <FormInput
-              label="Username"
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              error={errors.username}
-            />
-
-            <FormInput
-              label="Password"
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              error={errors.password}
-            />
-
-            <FormInput
-              label="Confirm Password"
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={errors.confirmPassword}
-            />
-            </div>
-            <div className="form-right">
-              <ProfilePictureUpload
-                label="Profile Photo"
-                name="profilePhoto"
-                accept="image/*"
-                size="5"
-                onChange={handleProfilePhotoChange}
-                error={errors.profilePhoto}
+              <div className="form-left">
+              <FormInput
+                label="First Name"
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                error={errors.firstName}
               />
-            </div>
+
+              <FormInput
+                label="Last Name"
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                error={errors.lastName}
+              />
+
+              <FormInput
+                label="E-mail"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                error={errors.email}
+              />
+              
+              <FormInput
+                label="Phone Number"
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                error={errors.phoneNumber}
+              />
+
+              <FormInput
+                label="Username"
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                error={errors.username}
+              />
+
+              <FormInput
+                label="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                error={errors.password}
+              />
+
+              <FormInput
+                label="Confirm Password"
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                error={errors.confirmPassword}
+              />
+              </div>
+              <div className="form-right">
+                <ProfilePictureUpload
+                  label="Profile Photo"
+                  name="profilePhoto"
+                  accept="image/*"
+                  size="5"
+                  onChange={handleProfilePhotoChange}
+                  error={errors.profilePhoto}
+                />
+              </div>
             </div>
             {errors.general && <p className="error">{errors.general}</p>}
-            <button className="primary-btn register-btn" type="submit">Register</button>
+            <button className="primary-btn register-btn mt-20" type="submit">Register</button>
           </form>
         </div>
       </div>

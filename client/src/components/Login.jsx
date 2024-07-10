@@ -6,7 +6,7 @@ import '../App.css';
 import './Login.css';
 import './form/FormInput.css';
 import api from '../services/api.js'
-import {setToken} from '../provider/authProvider.js'
+import {setToken} from '../services/authProvider.js'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +51,7 @@ const Login = () => {
         });
 
         const userData = userResponse.data;
-        // console.log('User Response:', userData);
+        console.log('User Response:', userData);
         setToken(token);
         
         if (userData.user_type === 0) {
@@ -63,7 +63,7 @@ const Login = () => {
         }
       }
       catch (error) { 
-        // console.log(error)
+        console.log(error)
         setError('Invalid credentials');
       }
     } catch (error) {
@@ -117,7 +117,7 @@ const Login = () => {
               </div>
             </div>
             {error && <p className="error-center">{error}</p>}
-            <button className="primary-btn" type="submit">Log In</button>
+            <button className="primary-btn mt-20" type="submit">Log In</button>
           </form>
           <div className="signup">
             <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>

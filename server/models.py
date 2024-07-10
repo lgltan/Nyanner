@@ -9,7 +9,7 @@ class Photo(Base):
     __tablename__ = 'photos'
     id = Column(Integer, primary_key=True, autoincrement=True)
     filename = Column(String(100), nullable=False)
-    content = Column(BLOB, nullable=False)
+    content = Column(LargeBinary(), nullable=False)
 
 class User(Base):
     __tablename__ = 'users'
@@ -64,18 +64,18 @@ class IssuedToken(Base):
     issued_at = Column(DATETIME, nullable=False)
     invalidated = Column(Boolean, default=False)
     
-class Lobby(Base):
-    __tablename__ = "game"
-    lobby_name = Column(String(24))
-    p1_id = Column(String(24), nullable=False)
-    p2_id = Column(String(24))
-    p3_id = Column(String(24))
-    p4_id = Column(String(24))
-    p1_pos = Column(SmallInteger(4))
-    p2_pos = Column(SmallInteger(4))
-    p3_pos = Column(SmallInteger(4))
-    p4_pos = Column(SmallInteger(4))
-    p1_board = Column(Integer(120))
-    p2_board = Column(Integer(120))
-    p3_board = Column(Integer(120))
-    p4_board = Column(Integer(120))
+# class Lobby(Base):
+#     __tablename__ = "game"
+#     lobby_name = Column(String(24))
+#     p1_id = Column(String(24), nullable=False)
+#     p2_id = Column(String(24))
+#     p3_id = Column(String(24))
+#     p4_id = Column(String(24))
+#     p1_pos = Column(SmallInteger(4))
+#     p2_pos = Column(SmallInteger(4))
+#     p3_pos = Column(SmallInteger(4))
+#     p4_pos = Column(SmallInteger(4))
+#     p1_board = Column(Integer(120))
+#     p2_board = Column(Integer(120))
+#     p3_board = Column(Integer(120))
+#     p4_board = Column(Integer(120))

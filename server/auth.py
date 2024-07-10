@@ -1,173 +1,213 @@
-from datetime import timedelta, datetime
-from typing import Annotated, Union
-from fastapi import Depends, HTTPException, UploadFile
+# https://www.youtube.com/watch?v=0A_GCXBCNUQ
+
+from datetime import timedelta
+from typing import Annotated, Optional
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
-from server.models import User
+from server.models import User, Photo
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from jose import jwt, JWTError
 from dotenv import load_dotenv
-from server.schemas import CreateUserRequest, LoginRequest, Token, TokenData, UserData
-import os
+from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, FullUserData, PhotoData
+from server.utils import validate_image, validate_phone_number, validate_name, validate_user_data, authenticate_user, create_access_token, get_current_active_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import base64
-import re
 
 load_dotenv()
 
-# router = APIRouter(
-#     prefix='/auth',
-#     tags=['auth']
-# )
+router = APIRouter(
+    prefix='/auth',
+    tags=['auth']
+)
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-TOKEN_EXPIRATION = os.getenv("REMEMBER_ME_EXPIRATION_DAYS")
+###############
+##  ROUTES   ##
+###############
+@router.post('/', status_code=status.HTTP_201_CREATED)
+async def create_user(db: db_dependency, 
+                        username: str = Form(...),
+                        first_name: str = Form(...),
+                        last_name: str = Form(...),
+                        email: str = Form(...),
+                        phone_number: str = Form(...),
+                        password: str = Form(...),
+                        confirm_password: str = Form(...),
+                        file: Optional[UploadFile] = File(None)
+    ):
 
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
+    create_user_request = CreateUserRequest(
+        user_type=0,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        phone_number=phone_number,
+        password=password,
+        confirm_password=confirm_password
+    )
     
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        
-db_dependency = Annotated[Session, Depends(get_db)]
-
-def validate_password(password: str):
-    password_length = len(password)
-    has_lowercase = re.search(r'[a-z]', password) is not None
-    has_uppercase = re.search(r'[A-Z]', password) is not None
-    has_number = re.search(r'[0-9]', password) is not None
-    has_special_character = re.search(r'[!@#$%^&*()_,.?":{}|<>\\-]', password) is not None
-
-    if password_length < 12 or password_length > 32:
-        return 'Password must be between 12 and 32 characters long.'
-    elif not has_lowercase:
-        return 'Password must contain at least one lowercase letter.'
-    elif not has_uppercase:
-        return 'Password must contain at least one uppercase letter.'
-    elif not has_number:
-        return 'Password must contain at least one number.'
-    elif not has_special_character:
-        return 'Password must contain at least one special character.'
-
-    return None
-
-# Function to verify if the photo is a valid image
-def validate_image(file: UploadFile) -> bool:
-    magic_numbers = {
-        b'\xff\xd8\xff': 'jpeg',
-        b'\x89PNG\r\n\x1a\n': 'png',
-        b'GIF87a': 'gif',
-        b'GIF89a': 'gif',
-    }
+    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password or not create_user_request.confirm_password or not file:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
     
-    try:
-        content = file.file.read(10)
-        file.file.seek(0)
-        for magic, filetype in magic_numbers.items():
-            if content.startswith(magic):
-                return True
-    except Exception as e:
-        return False
-    return False
-
-def validate_user_data(db: db_dependency, user_data: CreateUserRequest, file: UploadFile = None):
-    errors = {}
-    # Validate first name
-    NAME_REGEX = r'^[a-zA-Z ]{1,50}$'
-    if not re.match(NAME_REGEX, user_data.first_name):
-        errors['firstName'] = 'First name should only contain letters and spaces.'
-
-    # Validate last name
-    if not re.match(NAME_REGEX, user_data.last_name):
-        errors['lastName'] = 'Last name should only contain letters and spaces.'
-
-    # Validate username
-    USERNAME_REGEX = r'^[a-zA-Z0-9](\w|_){3,15}$'
-    if not re.match(USERNAME_REGEX, user_data.username):
-        errors['username'] = 'Username should only contain alphanumeric or underscore characters and must be 4-16 characters long.'
-    # Check if username already exists
-    user = db.query(User).filter(User.username == user_data.username).first()
-    if user:
-        errors['username'] = 'Username already exists.'
+    # Validate information
+    errors = validate_user_data(db, create_user_request, file)
     
-    # Validate email
-    EMAIL_REGEX = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if not re.match(EMAIL_REGEX, user_data.email):
-        errors['email'] = 'E-mail should not exceed 50 characters'
-
-    # Validate phone number
-    PHONE_REGEX = r'^(09|\+639)\d{9}$'
-    if not re.match(PHONE_REGEX, user_data.phone_number):
-        errors['phoneNumber'] = 'Please enter a valid Philippine phone number'
-
-    # Validate password
-    password_error = validate_password(user_data.password)
-    if password_error:
-        errors['password'] = password_error
-
-    # Validate confirm password
-    if user_data.password != user_data.confirm_password:
-        errors['confirmPassword'] = 'Passwords do not match.'
-
-    # # Validate photo
+    if len(errors) > 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=errors)
+    
+    # Handle photo upload
+    photo_id = None
     if file:
-        if not validate_image(file):
-            errors['profilePhoto'] = 'Invalid photo file.'
+        photo_content = file.file.read()
+        photo = Photo(filename=file.filename, content=photo_content)
+        db.add(photo)
+        db.commit()
+        db.refresh(photo)
+        photo_id = photo.id
     
-    return errors
+    new_user = User(
+        user_type=0,
+        username=create_user_request.username.encode('ascii'),
+        first_name=create_user_request.first_name.encode('ascii'),
+        last_name=create_user_request.last_name.encode('ascii'),
+        email=create_user_request.email.encode('ascii'),
+        phone_number=create_user_request.phone_number.encode('ascii'),
+        photo_id=photo_id,
+        password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
+    )
+    
+    db.add(new_user)
+    db.commit()
 
-def authenticate_user(username: str, password: str, db):
-    ALPHANUM_UNDERSCORE_REGEX = r'^[a-zA-Z0-9](\w|_)*$'
-    if not re.match(ALPHANUM_UNDERSCORE_REGEX, username):
-        return False
-    # if len(validate_password(password)) > 0:
-    #     return False
+@router.post('/uploadfile', status_code=status.HTTP_202_ACCEPTED)
+async def upload_file(file: UploadFile = File(...)):
+    if not file:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='No file uploaded.')
+    
+    FILE_SIZE_LIMIT = 5 * 1024 * 1024   # 5MB
+    if file.size > FILE_SIZE_LIMIT:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File size too large.')
+    
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid file type.')
+    
+    if not validate_image(file):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid image file.')
+    
+
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+    request: LoginRequest,
+    db: db_dependency
+) -> Token:
+    
+    user = authenticate_user(request.username, request.password, db)
+    
+    if not user: 
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
+    
+    access_token_expires = None
+    if request.rememberMe:
+        access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
+    access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
+
+    return Token(access_token=access_token, token_type='bearer')
+    
+@router.get('/users/me', response_model=UserData)
+async def read_users_me(current_user: dict = Depends(get_current_active_user)):
+    return { 
+        'user_id': current_user['user'].user_id,
+        'user_type': current_user['user'].user_type,
+        'username': current_user['user'].username,
+        'first_name': current_user['user'].first_name,
+        'last_name': current_user['user'].last_name,
+        'email': current_user['user'].email,
+        'phone_number': current_user['user'].phone_number,
+        'photo_id': current_user['user'].photo_id,
+        'photo_content': current_user['photo_content']
+    }
+
+@router.get("/photos/{photo_id}", response_model=PhotoData)
+async def get_photo(db: db_dependency, photo_id: int):
+    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    if not photo:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Photo not found.')
+    photo.content = base64.b64encode(photo.content).decode('ascii')
+    return {'id': photo.id, 'filename': photo.filename, 'content': photo.content}
+
+@router.put('/edit/me', status_code=status.HTTP_200_OK)
+async def edit_user(
+    db: db_dependency,
+    username: str,
+    first_name: Optional[str] = Form(None),
+    last_name: Optional[str] = Form(None),
+    phone_number: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+    current_user: User = Depends(get_current_active_user),
+):
+    # Ensure the user can only edit their own profile
+    if current_user['user'].username != username:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to edit this user")
 
     user = db.query(User).filter(User.username == username).first()
-    if not user: 
-        return False
-    if not bcrypt_context.verify(password, user.password):
-        return False
-    return user
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-def create_access_token(username: str, user_id: int, user_type: int, expires_delta: Union[timedelta, None]):
-    encode = {'username': username, 'id': user_id, 'user_type': user_type}
-    expires = datetime.utcnow() + timedelta(minutes=30)
-    if expires_delta:
-        expires = datetime.utcnow() + expires_delta
-    encode.update({'exp': expires})
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+    if first_name:
+        if not validate_name(first_name):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid first name')
+        user.first_name = first_name.encode('ascii')
+    if last_name:
+        if not validate_name(last_name):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid last name')
+        user.last_name = last_name.encode('ascii')
+    if phone_number:
+        if not validate_phone_number(phone_number):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid phone number')
+        user.phone_number = phone_number.encode('ascii')
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Could not validate credentials',
-        headers={'WWW-Authenticate': 'Bearer'}
-    )
+    # Handle photo upload
+    if file:
+        FILE_SIZE_LIMIT = 5 * 1024 * 1024  # 5MB
+        if file.size > FILE_SIZE_LIMIT:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File size too large')
+        if not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid file type')
+        if not validate_image(file):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid image file')
 
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('username')
-        user_id: int = payload.get('id')
-        user_type: int = payload.get('user_type')
-        if username is None or user_id is None:
-            raise credentials_exception
-        token_data = TokenData(username=username, user_id=user_id, user_type=user_type)
-    except JWTError:
-        raise credentials_exception
+        photo_content = file.file.read()
+        photo = Photo(filename=file.filename, content=photo_content)
+        db.add(photo)
+        db.commit()
+        db.refresh(photo)
+        user.photo_id = photo.id
+
+    db.commit()
+    db.refresh(user)
     
-    user = db.query(User).filter(User.username == token_data.username).first()
-    if user is None:
-        raise credentials_exception
-    return user
+    return {"message": "User details updated successfully"}
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    # if current_user.disabled:
-    #     raise HTTPException(status_code=400, detail='Inactive user')
-    return current_user
+
+# @router.post('/lobby', status_code=status.HTTP_201_CREATED)
+# async def create_lobby(db: db_dependency, 
+#                         lobby_name: str = Form(...),
+#                         p1_id: str = Form(...),
+#     ):
+
+#     create_lobby_request = CreateLobbyRequest(
+#         lobby_name="",
+#         p1_id="",
+        
+#     )
+    
+#     if not create_lobby_request.lobby_name or not create_lobby_request.p1_id:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
+
+#     new_lobby = Lobby(
+#         lobby_name=create_lobby_request.lobby_name.encode('ascii'),
+#         p1_id=create_lobby_request.p1_id.encode('ascii'),
+#     )
+    
+#     db.add(new_lobby)
+#     db.commit()
