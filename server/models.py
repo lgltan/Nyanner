@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, LargeBinary, Boolean, DATETIME, BLOB, SmallInteger
+from sqlalchemy import create_engine, Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, LargeBinary, Boolean, DATE, DATETIME, BLOB, SmallInteger
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -22,6 +22,7 @@ class User(Base):
     phone_number = Column(String(13), unique=True, nullable=False)
     photo_id = Column(Integer, ForeignKey('photos.id'))
     password = Column(LargeBinary(256), nullable=False)
+    birthday = Column(DATE)
     
     photo = relationship("Photo")
 
