@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import FormInput from './form/FormInput';
-import { validateUsername, validatePassword } from '../validation.js';
 import '../App.css';
 import './Login.css';
 import './form/FormInput.css';
+import api from '../services/api.js'
+import {setToken} from '../services/authProvider.js'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -22,61 +23,54 @@ const Login = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value,
     });
-  };
-
-  // Hardcoded admin credentials for testing
-  const authenticateUser = (username, password) => {
-    const adminUsername = 'admin';
-    const adminPassword = 'admin';
-    return username === adminUsername && password === adminPassword;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const passVal = validatePassword(formData.password,{})
-
-    if (validateUsername(formData.username) === false || Object.keys(passVal).length > 0) {
-      setError('Invalid credentials');
-    }
-    else {
       
+    try {
+      const response = await api.post('/auth/token', {
+          "username": formData.username,
+          "password": formData.password,
+          "rememberMe": formData.rememberMe
+      });
+
+      // console.log('Response:', response.data);
+      const token = response.data.access_token;
+
       try {
-        const response = await axios.post('http://localhost:8000/auth/token', 
-          "username=" + formData.username + "&password=" + formData.password,
-        );
-  
-        console.log('Response:', response.data);
-        // const token = response.data.access_token;
-
-        try {
-          const userResponse = await axios.get('http://localhost:8000/'+formData.username, {
-          });
-
-          const userData = userResponse.data;
-          console.log('User Response:', userData);
-
-          if (userData.user_type === 0) {
-            navigate('/home');
-          } else {
-            navigate('/admin');
+        const userResponse = await api.get('/auth/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-        } catch (error) {
-          console.log(error)
-          console.log('cant get user data')
-        }
+        });
+
+        const userData = userResponse.data;
+        console.log('User Response:', userData);
+        setToken(token);
         
-      } catch (error) {
+        if (userData.user_type === 0) {
+          // console.log('Going to Home')
+          navigate('/home');
+        } else {
+          // console.log('Going to Admin')
+          navigate('/admin');
+        }
+      }
+      catch (error) { 
         console.log(error)
         setError('Invalid credentials');
       }
-      
+    } catch (error) {
+      // console.log(error)
+      setError('Invalid credentials');
     }
+      
   };
 
   return (
@@ -110,18 +104,23 @@ const Login = () => {
             </div>
             <div className="login-options">
               <div className="remember-me">
-                <input type="checkbox" name="remember-me" />
-                <label htmlFor="remember-me"> Remember Me </label>
+                <input 
+                  type="checkbox" 
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleChange} 
+                />
+                <label htmlFor="rememberMe"> Remember Me </label>
               </div>
               <div className="forgot-password">
                 <a href="#">Forgot Password?</a>
               </div>
             </div>
             {error && <p className="error-center">{error}</p>}
-            <button className="primary-btn" type="submit">Log In</button>
+            <button className="primary-btn mt-20" type="submit">Log In</button>
           </form>
           <div className="signup">
-            <p>Don't have an account? <Link to="/sign-up">Sign Up</Link></p>
+            <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
           </div>
         </div>
       </div>

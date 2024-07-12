@@ -132,3 +132,7 @@ dist
 
 # server cache
 server/__pycache__
+
+game/__pycache__
+
+.vscode

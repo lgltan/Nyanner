@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { FaUser, FaUsers, FaClipboardList } from 'react-icons/fa';
 import './AdminPage.css';
+import { useLogout } from '../services/authProvider.js';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [searchUser, setSearchUser] = useState('');
   const [searchLog, setSearchLog] = useState('');
+  const logout = useLogout();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -115,6 +117,8 @@ const AdminPage = () => {
         <div className={`sidebar-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>
           <FaClipboardList /> Logs
         </div>
+        <button className="primary-btn logout" onClick={logout}>Logout</button>
+
       </div>
       <div className="content">
         {renderContent()}

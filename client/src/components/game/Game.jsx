@@ -9,19 +9,40 @@
 // - figure out a way to sync actual chessboard and timings
 
 import React, { useEffect, useRef } from 'react';
-import ChessBoard from './ChessBoard';
+import Chessboard from './Chessboard';
+import { io } from "socket.io-client"; // Import Socket.IO client
 
-const GameScreen = () => {
+const Game = () => {
   const intervalRef = useRef(null);
+  const socket = useRef(null); // Reference to the Socket.IO socket
 
   useEffect(() => {
+    // Initialize Socket.IO connection
+    socket.current = io("http://localhost:3001"); // Replace with your Socket.IO server URL
+
+    // Listen for messages from the server
+    socket.current.on("update", (data) => {
+      console.log("Received update:", data);
+      // Here you would update your component's state based on the received data
+    });
+
+    // Emit an event to the server whenever a button is clicked
+    socket.current.on("buttonClick", (id) => {
+      console.log(`Button ${id} was pressed`);
+      // Send the button click event to the server
+      socket.current.emit("buttonClick", id);
+    });
+
+    // Fetch updates from the server here
     intervalRef.current = setInterval(() => {
-      // Fetch updates from the server here
       console.log('Fetching updates...');
-      // Example: fetchDataFromServer().then(data => setBoardData(data));
+      // Example: socket.current.emit("requestUpdate");
     }, 5000); // Call every 5 seconds
 
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      clearInterval(intervalRef.current);
+      socket.current.disconnect(); // Clean up on unmount
+    };
   }, []);
 
   const handleButtonClick = (id) => {
@@ -38,7 +59,7 @@ const GameScreen = () => {
 
       {/* Chess Board Column */}
       <div style={{ width: '60%', backgroundColor: '#e0e0e0', padding: '10px' }}>
-        <ChessBoard width="600px" height="600px" updateData={0/* Pass the updated data here */} />
+        <Chessboard width="600px" height="600px" updateData={0/* Pass the updated data here */} />
       </div>
 
       {/* Right Column */}
@@ -53,4 +74,4 @@ const GameScreen = () => {
   );
 };
 
-export default GameScreen;
+export default Game;

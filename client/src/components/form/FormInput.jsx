@@ -8,6 +8,7 @@ const FormInput = ({
   value,
   onChange,
   error,
+  disabled=false,
   ...props
 }) => {
  
@@ -30,6 +31,7 @@ const FormInput = ({
         onChange={onChange}
         {...maxLen}
         {...props}
+        disabled={disabled}
         required
       />
       <label className="input-label" htmlFor={name}>{label}</label>

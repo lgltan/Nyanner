@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './lobby.css';
 import WaitingRoom from './WaitingRoom'; // Ensure WaitingRoom is imported
+import axios from 'axios';
+import Game from './Game';
 
 const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
     const [isSuccessful, setIsSuccessful] = useState(false);
@@ -45,9 +47,7 @@ const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
 
     return (
         <div className="lobby-container">
-            {isSuccessful? (
-                <WaitingRoom lobbyID={lobbyID} lobbyName={lobbyName} /> // Render WaitingRoom component if operation was successful
-            ) : (
+            {!isSuccessful ? (
                 <>
                     <div className="form-input">
                         <label className="input-label" htmlFor={name}>Create Lobby</label>
@@ -81,6 +81,8 @@ const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
                     </div>
                     <button onClick={joinLobby}>Join Lobby</button>
                 </>
+            ) : (
+                <WaitingRoom lobbyID={lobbyID} lobbyName={lobbyName} /> // Render WaitingRoom component if operation was successful
             )}
         </div>
     );
