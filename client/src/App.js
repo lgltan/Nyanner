@@ -9,6 +9,7 @@ import Home from './components/Home.jsx';
 import AdminPage from './components/AdminPage.jsx';
 import EditProfile from './components/EditProfile.jsx';
 import Lobby from './components/game/Lobby.jsx';
+import Game from './components/game/Game.jsx';
 
 import { fetchToken } from './services/authProvider.js';
 
@@ -42,6 +43,11 @@ const App = () => {
           <Route path="/lobby" element={
               // <ProtectedRoute isAdminRoute={false}>
                 <Lobby />
+              // </ProtectedRoute>
+                  } />
+          <Route path="/game" element={
+              // <ProtectedRoute isAdminRoute={false}>
+                <Game />
               // </ProtectedRoute>
                   } />
           <Route path="/unauthorized" element={<h1>Unauthorized</h1>} />

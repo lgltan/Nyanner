@@ -1,77 +1,95 @@
-// page for the game proper
+// p1 always == createLobby host or playBots
+// p2 is either the player or the bot
+// receive player color - compare player id with currently logged in to player 1 or player 2 in game state
+// insert game logic which sends the board state representation as a string as soon as the piece is dropped, wait for response from server to see if it is a valid move
+import React, { useState } from 'react';
+import axios from 'axios';
 
-// main loop
-// - check db for game state - current board, current phase
-// - - possible actions: [move unit, purchase unit, roll for new units, purchase xp]
-// - submit action log to backend
+const Game = ({ props }) => {
+    const { lobbyId } = props.lobbyId || 0; // Extract the lobby ID from the URL
 
-// backend
-// - figure out a way to sync actual chessboard and timings
+    const squaresArray = Array(64).fill().map((_, index) => ({
+        id: index.toString(),
+        color: (index & 7) === 0 || (index & 7) === 7 || (index & 56) === 0 || (index & 56) === 63 ? 'white' : 'black',
+    }));
 
-import React, { useEffect, useRef } from 'react';
-import Chessboard from './Chessboard';
-import { io } from "socket.io-client"; // Import Socket.IO client
+    const [draggedPiece, setDraggedPiece] = useState(null);
+    const [targetSquare, setTargetSquare] = useState(null);
+    const [squares, setSquares] = useState(squaresArray);
+    const [pieces, setPieces] = useState({});
 
-const Game = () => {
-  const intervalRef = useRef(null);
-  const socket = useRef(null); // Reference to the Socket.IO socket
-
-  useEffect(() => {
-    // Initialize Socket.IO connection
-    socket.current = io("http://localhost:3001"); // Replace with your Socket.IO server URL
-
-    // Listen for messages from the server
-    socket.current.on("update", (data) => {
-      console.log("Received update:", data);
-      // Here you would update your component's state based on the received data
-    });
-
-    // Emit an event to the server whenever a button is clicked
-    socket.current.on("buttonClick", (id) => {
-      console.log(`Button ${id} was pressed`);
-      // Send the button click event to the server
-      socket.current.emit("buttonClick", id);
-    });
-
-    // Fetch updates from the server here
-    intervalRef.current = setInterval(() => {
-      console.log('Fetching updates...');
-      // Example: socket.current.emit("requestUpdate");
-    }, 5000); // Call every 5 seconds
-
-    return () => {
-      clearInterval(intervalRef.current);
-      socket.current.disconnect(); // Clean up on unmount
+    const updateBoardState = (newBoardState) => {
+        setSquares(newBoardState);
     };
-  }, []);
 
-  const handleButtonClick = (id) => {
-    console.log(`Button ${id} was pressed`);
-    // Handle button press logic here
-  };
+    const handleDragStart = (piece) => {
+        setDraggedPiece(piece);
+    };
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'row' }}>
-      {/* Logo Column */}
-      <div style={{ width: '20%', backgroundColor: '#f0f0f0', padding: '10px' }}>
-        <img src="https://via.placeholder.com/150" alt="Logo" />
-      </div>
+    const handleDragOver = (square) => {
+        setTargetSquare(square);
+    };
 
-      {/* Chess Board Column */}
-      <div style={{ width: '60%', backgroundColor: '#e0e0e0', padding: '10px' }}>
-        <Chessboard width="600px" height="600px" updateData={0/* Pass the updated data here */} />
-      </div>
+    const handleDrop = async (square) => {
+        if (!draggedPiece) return;
 
-      {/* Right Column */}
-      <div style={{ width: '20%', backgroundColor: '#d0d0d0', padding: '10px' }}>
-        <button onClick={() => handleButtonClick(1)}>Button 1</button>
-        <button onClick={() => handleButtonClick(2)}>Button 2</button>
-        <button onClick={() => handleButtonClick(3)}>Button 3</button>
-        <button onClick={() => handleButtonClick(4)}>Button 4</button>
-        <button onClick={() => handleButtonClick(5)}>Button 5</button>
-      </div>
-    </div>
-  );
+        // Perform the move logic here
+        // For simplicity, this example doesn't include move validation
+        const newBoardState = [...squares]; // Copy the board state
+        const pieceIndex = newBoardState.findIndex(p => p.id === draggedPiece.position);
+        newBoardState[pieceIndex].id = square.id;
+        newBoardState[square.id].id = draggedPiece.position;
+
+        // Update the board state
+        setSquares(newBoardState);
+
+        // Reset dragged piece and target square
+        setDraggedPiece(null);
+        setTargetSquare(null);
+
+        // Call the API to validate the move
+        try {
+            const response = await axios.post(`YOUR_API_ENDPOINT_TO_VALIDATE_MOVE`, {
+                sourceSquare: draggedPiece.position,
+                targetSquare,
+            });
+
+            // Handle the API response here
+            // For example, revert the move if it's invalid
+            if (!response.data.isValidMove) {
+                const revertBoardState = [...squares]; // Revert the board state
+                const pieceIndex = revertBoardState.findIndex(p => p.id === square.id);
+                revertBoardState[pieceIndex].id = draggedPiece.position;
+                revertBoardState[draggedPiece.position].id = square.id;
+                setSquares(revertBoardState);
+            }
+        } catch (error) {
+            console.error("Failed to validate move", error);
+        }
+    };
+
+
+    return (
+        <div>
+            <h1>Game Page</h1>
+            <p>Lobby ID: {lobbyId}</p>
+
+            <div className="chessboard">
+                {squares.map((square) => (
+                    <div
+                        key={square.id}
+                        className={`square ${square.color}`}
+                        draggable
+                        onDragStart={() => handleDragStart(square.id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(e, square.id)}
+                    >
+                        {pieces[square.color].find((piece) => piece.position === square.id)?.type}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 };
 
 export default Game;
