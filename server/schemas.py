@@ -1,15 +1,11 @@
 from typing import Optional
 from pydantic import BaseModel, Field, HttpUrl
+from datetime import date
 
-class User(BaseModel):
-    user_type: int
-    username: str
-    first_name: str
-    last_name: str
-    email: str
-    phone_number: str
-    # photo: str
-    password: str
+class PhotoData(BaseModel):
+    id: int
+    filename: str
+    content: str
 
 class CreateUserRequest(BaseModel):
     user_type: int
@@ -35,32 +31,18 @@ class TokenData(BaseModel):
     user_id: int = None
     user_type: int = None
 
-class PhotoData(BaseModel):
-    id: int
-    filename: str
-    content: str
-
 class UserData(BaseModel):
     user_id: int
-    user_type: int
-    username: str
+    user_type: bool = False
     first_name: str
     last_name: str
+    username: str
     email: str
+    birthday: date
     phone_number: str
-    photo_id: int
-    photo_content: str
+    photo: PhotoData
+    password: bytes
 
-class FullUserData(BaseModel):
-    user_id: int
-    user_type: int
-    username: str
-    first_name: str
-    last_name: str
-    email: str
-    phone_number: str
-    photo: Optional[PhotoData]
-        
 class CreateLobbyRequest(BaseModel):
     lobby_name: str
     p1_id: str
