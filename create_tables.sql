@@ -22,6 +22,7 @@ CREATE TABLE users(
     last_name VARCHAR(50) NOT NULL,
     username VARCHAR(16) UNIQUE NOT NULL,
     email VARCHAR(50) UNIQUE NOT NULL,
+    birthday DATE,
     phone_number VARCHAR(13) UNIQUE NOT NULL,
     photo_id INT,
     password VARBINARY(256) NOT NULL,
