@@ -38,6 +38,9 @@ class Session(Base):
 class AdminLog(Base):
     __tablename__ = 'admin_logs'
     admin_log_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
+    description = Column(String(256), nullable=False)
+    timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
+
 
 class Game(Base):
     __tablename__ = 'games'

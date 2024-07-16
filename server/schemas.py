@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, HttpUrl
 from datetime import date
@@ -50,3 +51,8 @@ class CreateLobbyRequest(BaseModel):
 class JoinLobbyRequest(BaseModel):
     lobby_id: str
     player_id: str
+
+class AdminLogSchema(BaseModel):
+    admin_log_id: int
+    description: str
+    timestamp: datetime
