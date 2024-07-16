@@ -201,6 +201,14 @@ async def edit_user(
 
     admin_log = AdminLog(admin_description=f"Successfully edited profile for username: {user.username}")
     db.add(admin_log)
+    db.commit()
     
     return {"message": "User details updated successfully"}
 
+@router.get('/logout', status_code=status.HTTP_200_OK)
+async def logout(db: db_dependency, current_user: dict = Depends(get_current_active_user)):
+    admin_log = AdminLog(admin_description=f"Successfully logged out for username: {current_user.username}")
+    db.add(admin_log)
+    db.commit()
+    
+    return {"message": "User logged out successfully"}

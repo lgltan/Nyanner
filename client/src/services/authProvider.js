@@ -29,11 +29,17 @@ export const useLogout = () => {
   const navigate = useNavigate();
 
   const logout = () => {
-    if (removeToken()) {
+    try {
+      api.post('/auth/logout', {
+        headers: {
+          Authorization: `Bearer ${fetchToken()}`,
+        },
+      });
+      removeToken();
       navigate('/login');
-    } else {
+    } catch (error) {
       alert('Error logging out');
-      console.log('Error logging out');
+      console.error('Error logging out:', error);
     }
   };
 
