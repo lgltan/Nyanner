@@ -1,17 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { useLogout } from "../../services/authProvider";
+import { fetchToken } from '../../services/authProvider.js';
+import { getUserData } from '../../services/api.js';
 import "../../App.css";
 import "./NavBar.css";
 
-const NavBar = ( {profile_photo} ) => {
+const NavBar = () => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const logout = useLogout();
   const navigate = useNavigate();
+  const auth = fetchToken();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userData = await getUserData(auth);
+        setProfilePhoto(userData.photo.content);
+      } catch (error) {
+        console.error("Error fetching user data or photo:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [auth]);
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <nav className="navbar">
@@ -26,7 +50,7 @@ const NavBar = ( {profile_photo} ) => {
         </button>
         <div className="profile-container">
           <img
-            src={`data:image/jpeg;base64,${profile_photo}`}
+            src={`data:image/jpeg;base64,${profilePhoto}`}
             alt="Profile"
             className="profile-image"
             onClick={toggleDropdown}

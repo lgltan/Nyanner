@@ -129,12 +129,12 @@ def validate_user_data(db: db_dependency, user_data: CreateUserRequest, file: Up
         errors['birthday'] = 'Please enter a valid birthday.'
         
     # Validate password
-    password_error = validate_password(user_data.password)
+    password_error = validate_password(user_data.user_password)
     if password_error:
         errors['password'] = password_error
 
     # Validate confirm password
-    if user_data.password != user_data.confirm_password:
+    if user_data.user_password != user_data.confirm_password:
         errors['confirmPassword'] = 'Passwords do not match.'
 
     # # Validate photo
@@ -154,7 +154,7 @@ def authenticate_user(username: str, password: str, db):
     user = db.query(User).filter(User.username == username).first()
     if not user: 
         return False
-    if not bcrypt_context.verify(password, user.password):
+    if not bcrypt_context.verify(password, user.user_password):
         return False
     return user
 

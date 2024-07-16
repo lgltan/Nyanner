@@ -26,17 +26,17 @@ router = APIRouter(
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_lobby(db: db_dependency, 
-                        lobby_name: str = Form(...),
+                        lobby_id: str = Form(...),
                         p1_id: str = Form(...),
     ):
 
     create_lobby_request = CreateLobbyRequest(
-        lobby_name="",
-        p1_id="",
+        lobby_id="",
+        p1_id=""
         
     )
     
-    if not create_lobby_request.lobby_name or not create_lobby_request.p1_id:
+    if not create_lobby_request.lobby_id or not create_lobby_request.p1_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
 
 #     new_lobby = Lobby(

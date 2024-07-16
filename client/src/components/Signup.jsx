@@ -46,7 +46,7 @@ const Signup = () => {
     // Handle form submission
     const data = new FormData();
     data.append('username', formData.username);
-    data.append('password', formData.password);
+    data.append('user_password', formData.password);
     data.append('confirm_password', formData.confirmPassword);
     data.append('first_name', formData.firstName);
     data.append('last_name', formData.lastName);
