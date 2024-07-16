@@ -5,8 +5,8 @@ import { useLocation, useNavigate, Navigate } from "react-router-dom"
 import api from "./api"
 
 export const USER_TYPES = {
-    REGULAR: 0,
-    ADMIN: 1,
+    REGULAR: false,
+    ADMIN: true,
   };
 
 export const setToken = (token)=>{
@@ -61,6 +61,7 @@ export function ProtectedRoute({ isAdminRoute = false, children }) {
   
           const userData = userResponse.data;
           const user_type = userData.user_type;
+          console.log('User Response:', userData);
   
           if ((isAdminRoute && user_type === USER_TYPES.ADMIN) || 
               (!isAdminRoute && user_type === USER_TYPES.REGULAR)) {

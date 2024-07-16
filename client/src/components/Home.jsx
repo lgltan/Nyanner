@@ -13,8 +13,9 @@ const Home = () => {
         const fetchData = async () => {
             try {
                 const userData = await getUserData(auth);
+                // console.log("User data:", userData);
                 // const userPhoto = await getUserPhoto(auth);
-                setProfilePhoto(userData.photo_content);
+                setProfilePhoto(userData.photo.content);
             } catch (error) {
                 console.error("Error fetching user data or photo:", error);
             } finally {

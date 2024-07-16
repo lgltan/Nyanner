@@ -1,7 +1,7 @@
 -- CREATE SCHEMA nyanner_db
 
 DROP TABLE moves;
-DROP TABLE game;
+DROP TABLE games;
 DROP TABLE admin_logs;
 DROP TABLE sessions;
 DROP TABLE issued_tokens;
@@ -44,7 +44,7 @@ CREATE TABLE admin_logs(
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE game(
+CREATE TABLE games(
 	lobby_name VARCHAR(32) UNIQUE PRIMARY KEY,
     p1_id BIGINT UNSIGNED NOT NULL,
     FOREIGN KEY (p1_id) REFERENCES users(user_id),
@@ -55,7 +55,7 @@ CREATE TABLE game(
 CREATE TABLE moves(
 	moves_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
 	lobby_name VARCHAR(32) UNIQUE,
-    FOREIGN KEY (lobby_name) REFERENCES game(lobby_name),
+    FOREIGN KEY (lobby_name) REFERENCES games(lobby_name),
     board VARCHAR(256)
 );
 

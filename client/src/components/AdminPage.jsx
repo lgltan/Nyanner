@@ -14,7 +14,6 @@ const AdminPage = () => {
   const [searchLog, setSearchLog] = useState('');
   const navigate = useNavigate();
 
-
   const fetchUserData = useCallback(async () => {
     try {
       const token = fetchToken();

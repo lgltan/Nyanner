@@ -16,6 +16,7 @@ const Signup = () => {
     username: '',
     password: '',
     phoneNumber: '',
+    birthday: '',
     profilePhoto: null
   });
   const [errors, setErrors] = useState({});
@@ -51,6 +52,7 @@ const Signup = () => {
     data.append('last_name', formData.lastName);
     data.append('email', formData.email);
     data.append('phone_number', formData.phoneNumber);
+    data.append('birthday', formData.birthday);
     if (formData.profilePhoto) {
       data.append('file', formData.profilePhoto);
     }
@@ -128,6 +130,16 @@ const Signup = () => {
                 value={formData.username}
                 onChange={handleChange}
                 error={errors.username}
+              />
+
+              <FormInput
+                label="Birthday"
+                type="text"
+                name="birthday"
+                value={formData.birthday}
+                onChange={handleChange}
+                error={errors.birthday}
+                
               />
 
               <FormInput

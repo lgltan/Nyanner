@@ -13,8 +13,6 @@ from server.schemas import CreateUserRequest, TokenData
 import os
 import re
 import base64
-from io import BytesIO
-from starlette.responses import StreamingResponse
 
 load_dotenv()
 
@@ -86,6 +84,18 @@ def validate_phone_number(phone_number: str) -> bool:
     PHONE_REGEX = r'^(09|\+639)\d{9}$'
     return re.match(PHONE_REGEX, phone_number)
 
+def validate_birthday(birthday):    
+    today = datetime.now()
+    max_age = 150
+    min_age = 1
+    earliest_valid_date = today - timedelta(days=max_age * 365)
+    latest_valid_date = today - timedelta(days=min_age * 365)
+
+    if birthday >= today or birthday < earliest_valid_date or birthday > latest_valid_date:
+        return False
+    else:
+        return True
+
 def validate_user_data(db: db_dependency, user_data: CreateUserRequest, file: UploadFile = None):
     errors = {}
     # Validate first name
@@ -114,6 +124,10 @@ def validate_user_data(db: db_dependency, user_data: CreateUserRequest, file: Up
     if not validate_phone_number(user_data.phone_number):
         errors['phoneNumber'] = 'Please enter a valid Philippine phone number'
 
+    # Validate birthday
+    if not validate_birthday(user_data.birthday):
+        errors['birthday'] = 'Please enter a valid birthday.'
+        
     # Validate password
     password_error = validate_password(user_data.password)
     if password_error:
@@ -146,7 +160,7 @@ def authenticate_user(username: str, password: str, db):
 
 def create_access_token(username: str, user_id: int, user_type: int, expires_delta: Union[timedelta, None]):
     encode = {'username': username, 'id': user_id, 'user_type': user_type}
-    expires = datetime.utcnow() + timedelta(minutes=180)
+    expires = datetime.utcnow() + timedelta(minutes=180)    # Default expiration time is 3 hours
     if expires_delta:
         expires = datetime.utcnow() + expires_delta
     encode.update({'exp': expires})
@@ -183,8 +197,9 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
 async def get_current_active_user(current_user: dict = Depends(get_current_user)):
     # if current_user['user'].disabled:
     #     raise HTTPException(status_code=400, detail='Inactive user')
-    
-    current_user['photo_content'] = base64.b64encode(current_user['photo'].content).decode('ascii')
+    current_user['photo'].id = current_user['photo'].id
+    current_user['photo'].filename = current_user['photo'].filename
+    current_user['photo'].content = base64.b64encode(current_user['photo'].content).decode('ascii')
     return current_user
 
 async def get_photo_from_db(image_id: int, db: db_dependency):

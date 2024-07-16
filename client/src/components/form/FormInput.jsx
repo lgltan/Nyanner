@@ -13,12 +13,30 @@ const FormInput = ({
 }) => {
  
   let maxLen = {}
+  let onFocus = {}
+  let onBlur = {}
   
   if (name === 'username') { 
     maxLen = { maxLength: '16' }
   } 
   if (name === 'firstName' || name === 'lastName' || name === 'email') {
     maxLen = { maxLength: '50' }
+  }
+  if (name === 'birthday') {
+    onFocus = {
+      onFocus: (e) => {
+        if (!e.target.value) {
+          e.target.type = 'date';
+        }
+      },
+    };
+    onBlur = {
+      onBlur: (e) => {
+        if (!e.target.value) {
+          e.target.type = 'text';
+        }
+      },
+    };
   }
 
   return (
@@ -30,6 +48,8 @@ const FormInput = ({
         value={value}
         onChange={onChange}
         {...maxLen}
+        {...onFocus}
+        {...onBlur}
         {...props}
         disabled={disabled}
         required

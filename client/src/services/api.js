@@ -7,13 +7,13 @@ const api = axios.create({
 // Function to get user data from token
 export const getUserData = async (token) => {
   try {
-    console.log("Token:", token);
+    // console.log("Token:", token);
     const response = await api.get("/auth/users/me", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log("User data:", response.data);
+    // console.log("User data:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -23,10 +23,10 @@ export const getUserData = async (token) => {
 
 export const getUserPhoto = async (token) => {
   try {
-    console.log("in getUserPhoto");
+    // console.log("in getUserPhoto");
     const userData = await getUserData(token); // Await the result here
     const response = await api.get("/auth/photos/"+userData.photo_id);
-    console.log("Photo:", response.data);
+    // console.log("Photo:", response.data);
     return { user: userData, photo: response.data };
   } catch (error) {
     console.error("Error fetching user photo:", error);

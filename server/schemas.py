@@ -17,6 +17,7 @@ class CreateUserRequest(BaseModel):
     last_name: str
     email: str
     phone_number: str
+    birthday: datetime
 
 class LoginRequest(BaseModel):
     username: str
@@ -41,8 +42,9 @@ class UserData(BaseModel):
     email: str
     birthday: date
     phone_number: str
+    photo_id: int
     photo: PhotoData
-    password: bytes
+    # password: bytes
 
 class CreateLobbyRequest(BaseModel):
     lobby_name: str

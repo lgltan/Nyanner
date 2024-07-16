@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, BigInteger, Forei
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.mysql import BIGINT
 
 Base = declarative_base()
 
@@ -13,7 +14,7 @@ class Photo(Base):
 
 class User(Base):
     __tablename__ = 'users'
-    user_id = Column(BigInteger, unique=True, autoincrement=True, primary_key=True)
+    user_id = Column(BIGINT(unsigned=True), unique=True, autoincrement=True, primary_key=True)
     user_type = Column(Integer, nullable=False, default=False)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
@@ -29,7 +30,7 @@ class User(Base):
 class Session(Base):
     __tablename__ = 'sessions'
     session_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
-    user_id = Column(BigInteger, ForeignKey('users.user_id'))
+    user_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
     user = relationship("User")
     ban_bool = Column(Boolean, default=False)
     ban_timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
@@ -63,7 +64,7 @@ class Move(Base):
 class IssuedToken(Base):
     __tablename__ = "issued_tokens"
     token_id = Column(String(256), unique=True, primary_key=True)
-    user_id = Column(BigInteger, ForeignKey('users.user_id'))
+    user_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
     user = relationship("User")
     issued_at = Column(DATETIME, nullable=False)
     invalidated = Column(Boolean, default=False)

@@ -9,7 +9,7 @@ from server.database import SessionLocal
 from server.models import User, Photo
 from passlib.context import CryptContext
 from dotenv import load_dotenv
-from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, FullUserData, PhotoData
+from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
 from server.utils import validate_image, validate_phone_number, validate_name, validate_user_data, authenticate_user, create_access_token, get_current_active_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import base64
 
@@ -30,6 +30,7 @@ async def create_user(db: db_dependency,
                         last_name: str = Form(...),
                         email: str = Form(...),
                         phone_number: str = Form(...),
+                        birthday: str = Form(...),
                         password: str = Form(...),
                         confirm_password: str = Form(...),
                         file: Optional[UploadFile] = File(None)
@@ -42,6 +43,7 @@ async def create_user(db: db_dependency,
         last_name=last_name,
         email=email,
         phone_number=phone_number,
+        birthday=birthday,
         password=password,
         confirm_password=confirm_password
     )
@@ -72,6 +74,7 @@ async def create_user(db: db_dependency,
         last_name=create_user_request.last_name.encode('ascii'),
         email=create_user_request.email.encode('ascii'),
         phone_number=create_user_request.phone_number.encode('ascii'),
+        birthday=create_user_request.birthday,
         photo_id=photo_id,
         password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
     )
@@ -123,8 +126,9 @@ async def read_users_me(current_user: dict = Depends(get_current_active_user)):
         'last_name': current_user['user'].last_name,
         'email': current_user['user'].email,
         'phone_number': current_user['user'].phone_number,
+        'birthday': current_user['user'].birthday,
         'photo_id': current_user['user'].photo_id,
-        'photo_content': current_user['photo_content']
+        'photo': current_user['photo']
     }
 
 @router.get("/photos/{photo_id}", response_model=PhotoData)
