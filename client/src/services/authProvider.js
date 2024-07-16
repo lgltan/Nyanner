@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom"
 import api from "./api"
+import Loading from "../components/misc/Loading"
 
 export const USER_TYPES = {
     REGULAR: false,
@@ -78,7 +79,7 @@ export function ProtectedRoute({ isAdminRoute = false, children }) {
     }, [auth, isAdminRoute]);
   
     if (loading) {
-      return <div>Loading...</div>; // or a spinner component
+      return <Loading />;
     }
   
     if (!auth) {

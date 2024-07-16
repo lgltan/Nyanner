@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
+import ReCAPTCHA from "react-google-recaptcha";
 import FormInput from './form/FormInput';
 import '../App.css';
 import './Login.css';
@@ -22,6 +23,8 @@ const Login = () => {
     setShowPassword(prevState => !prevState);
   };
 
+  // const recaptcha = useRef(null);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -32,11 +35,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      
     try {
       const response = await api.post('/auth/token', {
           "username": formData.username,
-          "password": formData.password,
+          "user_password": formData.password,
           "rememberMe": formData.rememberMe
       });
 
@@ -70,8 +72,55 @@ const Login = () => {
       // console.log(error)
       setError('Invalid credentials');
     }
-      
   };
+
+  // with recaptcha
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if(!recaptcha.current.getValue()){
+  //     setError('Please Submit Captcha')
+  //   }
+  //   else {
+  //     try {
+  //       const response = await api.post('/auth/token', {
+  //           "username": formData.username,
+  //           "password": formData.password,
+  //           "rememberMe": formData.rememberMe
+  //       });
+  
+  //       // console.log('Response:', response.data);
+  //       const token = response.data.access_token;
+  
+  //       try {
+  //         const userResponse = await api.get('/auth/users/me', {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`
+  //           }
+  //         });
+  
+  //         const userData = userResponse.data;
+  //         console.log('User Response:', userData);
+  //         setToken(token);
+          
+  //         if (userData.user_type === 0) {
+  //           // console.log('Going to Home')
+  //           navigate('/home');
+  //         } else {
+  //           // console.log('Going to Admin')
+  //           navigate('/admin');
+  //         }
+  //       }
+  //       catch (error) { 
+  //         console.log(error)
+  //         setError('Invalid credentials');
+  //       }
+  //     } catch (error) {
+  //       // console.log(error)
+  //       setError('Invalid credentials');
+  //     }
+  //   }
+      
+  // };
 
   return (
     <div className="container">
@@ -118,6 +167,7 @@ const Login = () => {
             </div>
             {error && <p className="error-center">{error}</p>}
             <button className="primary-btn mt-20" type="submit">Log In</button>
+            {/* <ReCAPTCHA sitekey={process.env.CAPTCHA_SITE_KEY} ref={recaptcha}/> */}
           </form>
           <div className="signup">
             <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>

@@ -46,8 +46,8 @@ class AdminLog(Base):
 class Lobby(Base):
     __tablename__ = 'lobby'
     lobby_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
-    p1_id = Column(BigInteger, ForeignKey('users.user_id'))
-    p2_id = Column(BigInteger, ForeignKey('users.user_id'))
+    p1_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
+    p2_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
 
 class Move(Base):
     __tablename__ = 'moves'

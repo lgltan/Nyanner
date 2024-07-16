@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import FormInput from "./form/FormInput.jsx";
 import ProfilePictureUpload from "./form/ProfilePictureUpload.jsx";
 import api from "../services/api.js";
+import Modal from "./misc/Modal.jsx";
+import Loading from "./misc/Loading.jsx";
 
 const Home = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -24,6 +26,13 @@ const Home = () => {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleConfirm = (password) => {
+    console.log('Password entered:', password);
+    // Perform your confirmation logic here
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,7 +59,7 @@ const Home = () => {
   }, [auth]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   const handleChange = (e) => {
@@ -71,37 +80,38 @@ const Home = () => {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
+    setIsModalOpen(true);
 
     // console.log('before post', formData)
 
     // Handle form submission
-    const data = new FormData();
-    data.append('first_name', formData.firstName);
-    data.append('last_name', formData.lastName);
-    data.append('phone_number', formData.phoneNumber);
-    if (formData.profilePhoto) {
-      data.append('file', formData.profilePhoto);
-    }
+    // const data = new FormData();
+    // data.append('first_name', formData.firstName);
+    // data.append('last_name', formData.lastName);
+    // data.append('phone_number', formData.phoneNumber);
+    // if (formData.profilePhoto) {
+    //   data.append('file', formData.profilePhoto);
+    // }
 
-    console.log('Data:', data);
+    // console.log('Data:', data);
 
-    try {
-      const response = await api.put('/auth/edit/me?username='+formData.username, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${auth}`,
-        },
-      });
-      setErrors({});
-      // console.log('Response:', response.data);
-      window.location.reload();
+    // try {
+    //   const response = await api.put('/auth/edit/me?username='+formData.username, data, {
+    //     headers: {
+    //       'Content-Type': 'multipart/form-data',
+    //       'Authorization': `Bearer ${auth}`,
+    //     },
+    //   });
+    //   setErrors({});
+    //   // console.log('Response:', response.data);
+    //   window.location.reload();
 
-    } catch (error) {
-      console.log(error)
-      const newErrors = error.response.data.detail
-      console.log('Errors:', newErrors)
-      setErrors(newErrors)
-    }
+    // } catch (error) {
+    //   console.log(error)
+    //   const newErrors = error.response.data.detail
+    //   console.log('Errors:', newErrors)
+    //   setErrors(newErrors)
+    // }
   };
 
   return (
@@ -178,6 +188,11 @@ const Home = () => {
               Save
             </button>
           </form>
+          <Modal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={handleConfirm}
+          />
         </div>
       </div>
     </div>

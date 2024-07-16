@@ -31,7 +31,7 @@ async def create_user(db: db_dependency,
                         email: str = Form(...),
                         phone_number: str = Form(...),
                         birthday: str = Form(...),
-                        password: str = Form(...),
+                        user_password: str = Form(...),
                         confirm_password: str = Form(...),
                         file: Optional[UploadFile] = File(None)
     ):
@@ -44,11 +44,11 @@ async def create_user(db: db_dependency,
         email=email,
         phone_number=phone_number,
         birthday=birthday,
-        password=password,
+        user_password=user_password,
         confirm_password=confirm_password
     )
     
-    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.password or not create_user_request.confirm_password or not file:
+    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.user_password or not create_user_request.confirm_password or not file:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
     
     # Validate information
@@ -76,7 +76,7 @@ async def create_user(db: db_dependency,
         phone_number=create_user_request.phone_number.encode('ascii'),
         birthday=create_user_request.birthday,
         photo_id=photo_id,
-        password=bcrypt_context.hash(create_user_request.password).encode('ascii'),
+        user_password=bcrypt_context.hash(create_user_request.user_password).encode('ascii'),
     )
     
     db.add(new_user)
@@ -103,18 +103,18 @@ async def login_for_access_token(
     request: LoginRequest,
     db: db_dependency
 ) -> Token:
-    user = authenticate_user(request.username, request.password, db)
+    user = authenticate_user(request.username, request.user_password, db)
     
     if not user:
         # Log the failed login attempt
-        admin_log = AdminLog(description=f"Failed login attempt for username: {request.username}")
+        admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}")
         db.add(admin_log)
         db.commit()
 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
     
     # Log the successful login attempt
-    admin_log = AdminLog(description=f"Successful login for username: {request.username}")
+    admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")
     db.add(admin_log)
     db.commit()
 
@@ -198,29 +198,9 @@ async def edit_user(
 
     db.commit()
     db.refresh(user)
+
+    admin_log = AdminLog(admin_description=f"Successfully edited profile for username: {user.username}")
+    db.add(admin_log)
     
     return {"message": "User details updated successfully"}
 
-
-# @router.post('/lobby', status_code=status.HTTP_201_CREATED)
-# async def create_lobby(db: db_dependency, 
-#                         lobby_name: str = Form(...),
-#                         p1_id: str = Form(...),
-#     ):
-
-#     create_lobby_request = CreateLobbyRequest(
-#         lobby_name="",
-#         p1_id="",
-        
-#     )
-    
-#     if not create_lobby_request.lobby_name or not create_lobby_request.p1_id:
-#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
-
-#     new_lobby = Lobby(
-#         lobby_name=create_lobby_request.lobby_name.encode('ascii'),
-#         p1_id=create_lobby_request.p1_id.encode('ascii'),
-#     )
-    
-#     db.add(new_lobby)
-#     db.commit()
