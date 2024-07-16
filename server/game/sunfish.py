@@ -302,15 +302,6 @@ class Searcher:
         # Generator of moves to search in order.
         # This allows us to define the moves, but only calculate them if needed.
         def moves():
-            # First try not moving at all. We only do this if there is at least one major
-            # piece left on the board, since otherwise zugzwangs are too dangerous.
-            # FIXME: We also can't null move if we can capture the opponent king.
-            # Since if we do, we won't spot illegal moves that could lead to stalemate.
-            # For now we just solve this by not using null-move in very unbalanced positions.
-            # TODO: We could actually use null-move in QS as well. Not sure it would be very useful.
-            # But still.... We just have to move stand-pat to be before null-move.
-            #if depth > 2 and can_null and any(c in pos.board for c in "RBNQ"):
-            #if depth > 2 and can_null and any(c in pos.board for c in "RBNQ") and abs(pos.score) < 500:
             if depth > 2 and can_null and abs(pos.score) < 500:
                 yield None, -self.bound(pos.rotate(nullmove=True), 1 - gamma, depth - 3)
 
