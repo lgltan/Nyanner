@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, } from 'react';
 import { FaUser, FaUsers, FaClipboardList } from 'react-icons/fa';
 import './AdminPage.css';
+import { useNavigate } from 'react-router-dom';
 import { useLogout, fetchToken } from '../services/authProvider.js';
 import api from '../services/api.js'; // Assuming you have a service for API calls
 
@@ -13,14 +14,14 @@ const AdminPage = () => {
   const [searchLog, setSearchLog] = useState('');
   const navigate = useNavigate();
 
-  const logout = () => {
-    if (removeToken()) {
-      navigate('/login');
-    } else {
-      alert('Error logging out');
-      console.log('Error logging out');
-    }
-  }
+  // const logout = () => {
+  //   if (removeToken()) {
+  //     navigate('/login');
+  //   } else {
+  //     alert('Error logging out');
+  //     console.log('Error logging out');
+  //   }
+  // }
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -78,6 +79,7 @@ const AdminPage = () => {
       fetchLogs();
     }
   }, [activeTab, fetchUserData, fetchAllUsers, fetchLogs]);
+  
   const logout = useLogout();
 
   const renderContent = () => {
