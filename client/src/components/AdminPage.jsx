@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, } from 'react';
 import { FaUser, FaUsers, FaClipboardList } from 'react-icons/fa';
+import {useNavigate } from 'react-router-dom';
 import './AdminPage.css';
-import { useNavigate } from 'react-router-dom';
 import { useLogout, fetchToken } from '../services/authProvider.js';
 import api from '../services/api.js'; // Assuming you have a service for API calls
 
@@ -14,14 +14,6 @@ const AdminPage = () => {
   const [searchLog, setSearchLog] = useState('');
   const navigate = useNavigate();
 
-  // const logout = () => {
-  //   if (removeToken()) {
-  //     navigate('/login');
-  //   } else {
-  //     alert('Error logging out');
-  //     console.log('Error logging out');
-  //   }
-  // }
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -44,7 +36,7 @@ const AdminPage = () => {
     try {
       const token = fetchToken();
       console.log("Fetching all users...");
-      const response = await api.get('/auth/users', {
+      const response = await api.get('/admin/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -59,7 +51,7 @@ const AdminPage = () => {
   const fetchLogs = useCallback(async () => {
     try {
       const token = fetchToken();
-      const response = await api.get('/auth/logs', {
+      const response = await api.get('/admin/logs', {
         headers: {
           Authorization: `Bearer ${token}`
         }
