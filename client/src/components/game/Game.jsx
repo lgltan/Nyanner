@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // page for the game proper
 
 // main loop
@@ -73,5 +74,18 @@ const Game = () => {
     </div>
   );
 };
+=======
+import React from 'react';
+import ChessGame from './ChessGame';
+import './game.css'
+
+function Game() {
+    return (
+        <div className="game">
+            <ChessGame />
+        </div>
+    );
+}
+>>>>>>> Stashed changes
 
 export default Game;

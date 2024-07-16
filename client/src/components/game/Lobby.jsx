@@ -9,6 +9,7 @@ const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
     const [lobbyName, setLobbyName] = useState('');
     const [lobbyID, setLobbyID] = useState('');
 
+<<<<<<< Updated upstream
     const createLobby = async () => {
         try {
             const response = await fetch('YOUR_API_ENDPOINT_FOR_CREATE_LOBBY', {
@@ -63,6 +64,35 @@ const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
                         {error && <p className="error">{error}</p>}
                     </div>
                     <button onClick={createLobby}>Create Lobby</button>
+=======
+  const createLobby = async () => {
+    try {
+      const response = await axios.post('YOUR_API_ENDPOINT_FOR_CREATE_LOBBY', { name: lobbyName });
+      setLobbyID(response.data.lobbyId); // Adjust based on your API response
+      navigate(`/game`); // Navigate to the game page with the lobby ID
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const joinLobby = async () => {
+    try {
+      const response = await axios.post('YOUR_API_ENDPOINT_FOR_JOIN_LOBBY', { id: joinLobbyID });
+      navigate(`/game`); // Navigate to the game page with the lobby ID
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const playBots = async () => {
+    try {
+      const response = await axios.post('API_CALL_FOR_PLAYING_AGAINST_SUNFISH', { id: lobbyID });
+      navigate(`/game`); // Navigate to the game page with the lobby ID
+    } catch (error) {
+      console.error(error);
+    }
+  };
+>>>>>>> Stashed changes
 
                     <hr />
 
