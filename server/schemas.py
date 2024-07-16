@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field, HttpUrl
 from datetime import date
+
 
 class PhotoData(BaseModel):
     id: int
@@ -9,9 +10,9 @@ class PhotoData(BaseModel):
     content: str
 
 class CreateUserRequest(BaseModel):
-    user_type: int
+    user_type: bool
     username: str
-    password: str
+    user_password: str
     confirm_password: str
     first_name: str
     last_name: str
@@ -21,7 +22,7 @@ class CreateUserRequest(BaseModel):
 
 class LoginRequest(BaseModel):
     username: str
-    password: str
+    user_password: str
     rememberMe: bool
 
 class Token(BaseModel):
@@ -32,6 +33,11 @@ class TokenData(BaseModel):
     username: str = None
     user_id: int = None
     user_type: int = None
+
+
+class UserlistAdmin(BaseModel):
+    username: str
+    email: str
 
 class UserData(BaseModel):
     user_id: int
@@ -48,13 +54,13 @@ class UserData(BaseModel):
 
 class CreateLobbyRequest(BaseModel):
     lobby_name: str
-    p1_id: str
+    p1_id: int
     
 class JoinLobbyRequest(BaseModel):
-    lobby_id: str
-    player_id: str
+    lobby_id: int
+    player_id: int
 
 class AdminLogSchema(BaseModel):
     admin_log_id: int
-    description: str
-    timestamp: datetime
+    admin_description: str
+    admin_timestamp: datetime

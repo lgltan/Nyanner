@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaUser, FaUsers, FaClipboardList } from 'react-icons/fa';
-import {useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './AdminPage.css';
 import { useLogout, fetchToken } from '../services/authProvider.js';
-import api from '../services/api.js'; // Assuming you have a service for API calls
+import api from '../services/api.js';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -70,7 +70,7 @@ const AdminPage = () => {
       fetchLogs();
     }
   }, [activeTab, fetchUserData, fetchAllUsers, fetchLogs]);
-  
+
   const logout = useLogout();
 
   const renderContent = () => {
@@ -79,7 +79,6 @@ const AdminPage = () => {
         return (
           <div>
             <h2>User Profile</h2>
-            {/* <img src="profile-pic-url" alt="Profile" /> STILL NEEDS TO BE FIXED */}
             <p>Username: {userData.username}</p>
             <p>Email: {userData.email}</p>
             <p>First Name: {userData.first_name}</p>
@@ -116,7 +115,6 @@ const AdminPage = () => {
                       <td>{user.email}</td>
                       <td>{user.status}</td>
                       <td>
-                        {/* Add Ban/Unban functionality here */}
                         <button>Ban</button>
                       </td>
                     </tr>
