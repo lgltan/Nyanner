@@ -5,8 +5,9 @@ import { fetchToken } from '../../services/authProvider.js';
 import { getUserData } from '../../services/api.js';
 import "../../App.css";
 import "./NavBar.css";
+import Loading from "./Loading.jsx";
 
-const NavBar = () => {
+const NavBar = ({ signup }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +35,7 @@ const NavBar = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (
@@ -44,6 +45,7 @@ const NavBar = () => {
           Nyanner
         </Link>
       </div>
+      
       <div className="navbar-right">
         <button className="primary-btn mr-10" onClick={() => navigate("/game")}>
           Play Game

@@ -62,7 +62,7 @@ export function ProtectedRoute({ isAdminRoute = false, children }) {
   
           const userData = userResponse.data;
           const user_type = userData.user_type;
-          console.log('User Response:', userData);
+          // console.log('User Response:', userData);
   
           if ((isAdminRoute && user_type === USER_TYPES.ADMIN) || 
               (!isAdminRoute && user_type === USER_TYPES.REGULAR)) {

@@ -9,6 +9,8 @@ import ProfilePictureUpload from "./form/ProfilePictureUpload.jsx";
 import api from "../services/api.js";
 import Modal from "./misc/Modal.jsx";
 import Loading from "./misc/Loading.jsx";
+import "../App.css";
+import "./EditProfile.css";
 
 const Home = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);

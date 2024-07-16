@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import "../form/FormInput.css";
 import "./Modal.css";
+import "../../App.css";
 
 const Modal = ({ isOpen, onClose, onConfirm }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,8 +28,8 @@ const Modal = ({ isOpen, onClose, onConfirm }) => {
           &times;
         </button>
         <h2>Confirm Changes</h2>
-        <p>Please enter your password to confirm changes to your profile.</p>
-        <div className="password">
+        <p className="mt-20">Please enter your password to confirm changes to your profile.</p>
+        <div className="modal_password">
           <input
             className="input"
             type={showPassword ? "text" : "password"}

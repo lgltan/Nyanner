@@ -14,9 +14,9 @@
   .modal-content {
     position: relative;
     background: white;
-    padding: 20px;
+    padding: 35px 45px;
     border-radius: 8px;
-    width: 300px;
+    width: 35%;
     text-align: center;
   }
   
@@ -28,29 +28,18 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: #333;
+    color: var(--night);
+  }
+
+  p {
+    color: var(--night);
+    font-size: 14px;
+    font-style: italic;
   }
   
-  .password {
+  .modal_password {
     position: relative;
-    margin-bottom: 20px;
-  }
-  
-  .input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .input-label {
-    position: absolute;
-    top: -10px;
-    left: 10px;
-    background: white;
-    padding: 0 5px;
-    font-size: 12px;
-    color: #666;
+    margin: 50px 0;
   }
   
   .toggle-password {

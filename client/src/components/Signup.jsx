@@ -7,6 +7,7 @@ import ProfilePictureUpload from './form/ProfilePictureUpload';
 
 import '../App.css';
 import './Signup.css';
+import NavBar from './misc/NavBar';
 
 const Signup = () => {
   const [formData, setFormData] = useState({

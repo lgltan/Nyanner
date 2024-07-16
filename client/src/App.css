@@ -88,7 +88,7 @@ form {
   text-align: center;
 }
 
-/* Button styles */
+/* Margins */
 .mt-20 {
   margin-top: 20px;
 }
@@ -97,6 +97,7 @@ form {
   margin-right: 10px;
 }
 
+/* Button styles */
 .primary-btn {
   background-color: var(--porcelain-blue);
   color: var(--off-white);
