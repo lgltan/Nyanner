@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
-from server.models import User, Photo
+from server.models import AdminLog, User, Photo
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
@@ -103,12 +103,21 @@ async def login_for_access_token(
     request: LoginRequest,
     db: db_dependency
 ) -> Token:
-    
     user = authenticate_user(request.username, request.password, db)
     
-    if not user: 
+    if not user:
+        # Log the failed login attempt
+        admin_log = AdminLog(description=f"Failed login attempt for username: {request.username}")
+        db.add(admin_log)
+        db.commit()
+
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
     
+    # Log the successful login attempt
+    admin_log = AdminLog(description=f"Successful login for username: {request.username}")
+    db.add(admin_log)
+    db.commit()
+
     access_token_expires = None
     if request.rememberMe:
         access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))

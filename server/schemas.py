@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field, HttpUrl
 from datetime import date
+
 
 class PhotoData(BaseModel):
     id: int
@@ -32,6 +33,11 @@ class TokenData(BaseModel):
     username: str = None
     user_id: int = None
     user_type: int = None
+
+
+class UserlistAdmin(BaseModel):
+    username: str
+    email: str
 
 class UserData(BaseModel):
     user_id: int
