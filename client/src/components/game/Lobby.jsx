@@ -1,60 +1,91 @@
-// Lobby.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import './lobby.css';
+import WaitingRoom from './WaitingRoom'; // Ensure WaitingRoom is imported
 import axios from 'axios';
+import Game from './Game';
 
-const Lobby = () => {
-  const [lobbyName, setLobbyName] = useState('');
-  const [lobbyID, setLobbyID] = useState('');
-  const [joinLobbyID, setJoinLobbyID] = useState(''); // State for storing the lobby ID to join
-  const navigate = useNavigate();
+const Lobby = ({ label, type, name, value, onChange, error,...props }) => {
+    const [isSuccessful, setIsSuccessful] = useState(false);
+    const [lobbyName, setLobbyName] = useState('');
+    const [lobbyID, setLobbyID] = useState('');
 
-  const createLobby = async () => {
-    try {
-      const response = await axios.post('YOUR_API_ENDPOINT_FOR_CREATE_LOBBY', { name: lobbyName });
-      setLobbyID(response.data.lobbyId); // Adjust based on your API response
-      navigate(`/game/${lobbyID}`); // Navigate to the game page with the lobby ID
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    const createLobby = async () => {
+        try {
+            const response = await fetch('YOUR_API_ENDPOINT_FOR_CREATE_LOBBY', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: lobbyName }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to create lobby');
+            }
+            setIsSuccessful(true); // Set successful state after successful API call
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-  const joinLobby = async () => {
-    try {
-      const response = await axios.post('YOUR_API_ENDPOINT_FOR_JOIN_LOBBY', { id: joinLobbyID });
-      navigate(`/game/${joinLobbyID}`); // Navigate to the game page with the lobby ID
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    const joinLobby = async () => {
+        try {
+            const response = await fetch('YOUR_API_ENDPOINT_FOR_JOIN_LOBBY', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: lobbyID }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to join lobby');
+            }
+            setIsSuccessful(true); // Set successful state after successful API call
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-  const playBots = async () => {
-    try {
-      const response = await axios.post('API_CALL_FOR_PLAYING_AGAINST_SUNFISH', { id: lobbyID });
-      navigate(`/game/${lobbyID}`); // Navigate to the game page with the lobby ID
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    return (
+        <div className="lobby-container">
+            {!isSuccessful ? (
+                <>
+                    <div className="form-input">
+                        <label className="input-label" htmlFor={name}>Create Lobby</label>
+                        <input
+                            className="input"
+                            type={type}
+                            name={name}
+                            value={lobbyName}
+                            onChange={(e) => setLobbyName(e.target.value)}
+                            {...props}
+                            required
+                        />
+                        {error && <p className="error">{error}</p>}
+                    </div>
+                    <button onClick={createLobby}>Create Lobby</button>
 
-  return (
-    <div>
-      {/* Input for creating a lobby */}
-      <button onClick={createLobby}>Create Lobby</button>
+                    <hr />
 
-      {/* Input for joining a lobby */}
-      <input
-        type="text"
-        placeholder="Enter lobby ID to join"
-        value={joinLobbyID}
-        onChange={(e) => setJoinLobbyID(e.target.value)}
-      />
-      <button onClick={joinLobby}>Join Lobby</button>
-
-      {/* Button for playing against a bot */}
-      <button onClick={playBots}>Play Against Bot</button>
-    </div>
-  );
+                    <div className="form-input">
+                        <label className="input-label" htmlFor={name}>Join Lobby</label>
+                        <input
+                            className="input"
+                            type={type}
+                            name={name}
+                            value={lobbyID}
+                            onChange={(e) => setLobbyID(e.target.value)}
+                            {...props}
+                            required
+                        />
+                        {error && <p className="error">{error}</p>}
+                    </div>
+                    <button onClick={joinLobby}>Join Lobby</button>
+                </>
+            ) : (
+                <WaitingRoom lobbyID={lobbyID} lobbyName={lobbyName} /> // Render WaitingRoom component if operation was successful
+            )}
+        </div>
+    );
 };
 
 export default Lobby;
