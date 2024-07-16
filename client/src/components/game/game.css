@@ -1,4 +1,12 @@
 .game {
-    height: 80vh;
-    width: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    overflow: hidden;
+    height: 100vh;
+    width: 100%;
+}
+
+.chessboard-container {
+    width: 80vh;
 }
