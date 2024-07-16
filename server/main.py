@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-from server import auth, lobby, models
+from server import auth, lobby, models, admin
 from server.database import SessionLocal, engine
 from server.utils import get_current_user
 
@@ -23,6 +23,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(lobby.router)
+app.include_router(admin.router)
 
 # Dependency
 def get_db():
