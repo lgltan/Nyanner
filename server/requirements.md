@@ -11,3 +11,8 @@ ALGORITHM = "HS256"
 # Running the server
 In ```./server``` run the following command in the terminal:
 ```fastapi dev main.py```
+
+# Running the server
+In ```./client``` run the following command in the terminal:
+```npm install```
+```npm start```

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -44,3 +45,8 @@ class UserData(BaseModel):
     email: str
     phone_number: str
     # photo: str
+
+class AdminLogSchema(BaseModel):
+    admin_log_id: int
+    description: str
+    timestamp: datetime

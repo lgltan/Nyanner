@@ -1,24 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaUser, FaUsers, FaClipboardList } from 'react-icons/fa';
 import './AdminPage.css';
 import { useNavigate } from 'react-router-dom';
-import { removeToken } from '../provider/authProvider.js';
+import { removeToken, fetchToken } from '../provider/authProvider.js';
+import api from '../services/api.js'; // Assuming you have a service for API calls
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const [userData, setUserData] = useState({});
+  const [users, setUsers] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [searchUser, setSearchUser] = useState('');
   const [searchLog, setSearchLog] = useState('');
   const navigate = useNavigate();
-    
+
   const logout = () => {
-      if(removeToken()){
-          navigate('/login');
-      }
-      else{
-          alert('Error logging out');
-          console.log('Error logging out');
-      }
+    if (removeToken()) {
+      navigate('/login');
+    } else {
+      alert('Error logging out');
+      console.log('Error logging out');
+    }
   }
+
+  const fetchUserData = useCallback(async () => {
+    try {
+      const token = fetchToken();
+      console.log("Fetching user data...");
+      const response = await api.get('/auth/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log("User data fetched:", response.data);
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const fetchAllUsers = useCallback(async () => {
+    try {
+      const token = fetchToken();
+      console.log("Fetching all users...");
+      const response = await api.get('/auth/users', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log("All users fetched:", response.data);
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching all users:', error);
+    }
+  }, []);
+
+  const fetchLogs = useCallback(async () => {
+    try {
+      const token = fetchToken();
+      const response = await api.get('/auth/logs', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setLogs(response.data);
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'profile') {
+      fetchUserData();
+    } else if (activeTab === 'userlist') {
+      fetchAllUsers();
+    } else if (activeTab === 'logs') {
+      fetchLogs();
+    }
+  }, [activeTab, fetchUserData, fetchAllUsers, fetchLogs]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -26,10 +86,12 @@ const AdminPage = () => {
         return (
           <div>
             <h2>User Profile</h2>
-            <img src="profile-pic-url" alt="Profile" />
-            <p>Username: admin</p>
-            <p>Email: admin@example.com</p>
-            <p>Web URLs: </p>
+            {/* <img src="profile-pic-url" alt="Profile" /> STILL NEEDS TO BE FIXED */}
+            <p>Username: {userData.username}</p>
+            <p>Email: {userData.email}</p>
+            <p>First Name: {userData.first_name}</p>
+            <p>Last Name: {userData.last_name}</p>
+            <p>Phone Number: {userData.phone_number}</p>
             <p>Bio: This is the admin bio.</p>
           </div>
         );
@@ -55,20 +117,17 @@ const AdminPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>user1</td>
-                    <td>user1@example.com</td>
-                    <td>Active</td>
-                    <td><button>Ban</button></td>
-                    
-                  </tr>
-                  <tr>
-                    <td>user2</td>
-                    <td>user2@example.com</td>
-                    <td>Offline</td>
-                    <td><button>Ban</button></td>
-                    
-                  </tr>
+                  {users.map((user) => (
+                    <tr key={user.user_id}>
+                      <td>{user.username}</td>
+                      <td>{user.email}</td>
+                      <td>{user.status}</td>
+                      <td>
+                        {/* Add Ban/Unban functionality here */}
+                        <button>Ban</button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -94,16 +153,13 @@ const AdminPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>User logged in</td>
-                    <td>2024-06-11 12:34:56</td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td>User logged out</td>
-                    <td>2024-06-11 13:45:67</td>
-                  </tr>
+                  {logs.map((log) => (
+                    <tr key={log.log_id}>
+                      <td>{log.log_id}</td>
+                      <td>{log.description}</td>
+                      <td>{log.timestamp}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -128,8 +184,9 @@ const AdminPage = () => {
         <div className={`sidebar-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>
           <FaClipboardList /> Logs
         </div>
-        <button className="primary-btn logout" onClick={logout}>Logout</button>
-
+        <div className="sidebar-item" onClick={logout}>
+          Logout
+        </div>
       </div>
       <div className="content">
         {renderContent()}

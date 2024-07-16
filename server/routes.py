@@ -1,12 +1,12 @@
 # https://www.youtube.com/watch?v=0A_GCXBCNUQ
 
 from datetime import timedelta
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
-from server.models import User, Photo
+from server.models import AdminLog, User, Photo
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, TokenData, UserData
@@ -100,22 +100,42 @@ async def login_for_access_token(
     request: LoginRequest,
     db: db_dependency
 ) -> Token:
-    
     user = authenticate_user(request.username, request.password, db)
     
-    if not user: 
+    if not user:
+        # Log the failed login attempt
+        admin_log = AdminLog(description=f"Failed login attempt for username: {request.username}")
+        db.add(admin_log)
+        db.commit()
+
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
     
+    # Log the successful login attempt
+    admin_log = AdminLog(description=f"Successful log in for username: {request.username}")
+    db.add(admin_log)
+    db.commit()
+
     access_token_expires = None
     if request.rememberMe:
         access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
     access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
 
     return Token(access_token=access_token, token_type='bearer')
+
     
 @router.get('/users/me', response_model=UserData)
 async def read_users_me(current_user: dict = Depends(get_current_active_user)):
     return current_user
+
+@router.get('/users', response_model=List[UserData])
+async def get_all_users(db: db_dependency):
+    users = db.query(User).all()
+    return users
+
+@router.get('/logs', response_model=List[dict])
+async def get_all_logs(db: db_dependency):
+    logs = db.query(AdminLog).all()
+    return [{"log_id": log.admin_log_id, "description": log.description, "timestamp": log.timestamp} for log in logs]
 
 # @router.get('/users/me/items')
 # async def read_own_items(current_user: dict = Depends(get_current_user)):
