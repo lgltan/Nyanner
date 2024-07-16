@@ -15,7 +15,7 @@
 }
 
 .input:focus {
-    border-bottom: 2px solid var(--fuchsia-rose-lighter);
+    border-bottom: 2px solid var(--porcelain-blue);
 }
 
 /* Initial state */
@@ -33,7 +33,7 @@
 }
 
 .input:focus-within + .input-label{
-    color: var(--fuchsia-rose-lighter);
+    color: var(--porcelain-blue);
     font-size: 10px;
     top: -20px;
 }
@@ -59,6 +59,6 @@
 input::-webkit-datetime-edit-day-field:focus,
 input::-webkit-datetime-edit-month-field:focus,
 input::-webkit-datetime-edit-year-field:focus {
-    color: var(--fuchsia-rose-lighter);
+    color: var(--porcelain-blue);
     outline: none;
 }

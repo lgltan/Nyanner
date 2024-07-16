@@ -78,8 +78,8 @@ const ChessGame = () => {
     onDrop={onDrop} 
     boardOrientation={"black"} 
     customPieces={customPieces}
-    customDarkSquareStyle={{backgroundColor: '#405A86'}} 
-    customLightSquareStyle={{backgroundColor: '#F7F7F7'}} 
+    customDarkSquareStyle={{backgroundColor: '--porcelain-blue'}} 
+    customLightSquareStyle={{backgroundColor: '--off-white'}} 
     customBoardStyle={{border: '16px solid rgb(200, 200, 200)', margin: '20px'}}
     />;
 };

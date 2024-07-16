@@ -1,13 +1,9 @@
 :root {
   --indigo-dye: #244166ff;
   --indigo-dye-darker: rgb(31, 56, 88);
-  --non-photo-blue: #a7dfe6ff;
-  --old-lace: #fff6e8ff;
-  --pink: #f8bec8ff;
-  --fuchsia-rose-lighter: rgb(215, 82, 135);
-  --fuchsia-rose: #c94277ff;
+  --porcelain-blue: #405A86;
   --night: #0a0a0aff;
-  --off-white: #f5f5f5;
+  --off-white: #F7F7F7;
 }
 
 body {
