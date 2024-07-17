@@ -25,7 +25,13 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const joinLobby = async () => {
         try {
-            const response = await api.put('/lobby/join', { access_code: lobbyCode });
+            const token = fetchToken();
+            const response = await api.put('/lobby/join', { access_code: lobbyCode }, {
+                headers: {
+                    Content_Type: 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
@@ -67,7 +73,6 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
                     <button onClick={joinLobby}>Join Lobby</button>
                     <hr />
                     <button onClick={playBots}>Play Bots</button>
-                    
         </div >
     );
 };

@@ -33,18 +33,13 @@ async def create_lobby(
 
     user_id = current_user.user_id
     access_code = generate_unique_id()
-
-    create_lobby_request = CreateLobbyRequest(
-        lobby_code=access_code,
-        p1_id=user_id
-    )
     
-    if not create_lobby_request.lobby_code or not create_lobby_request.p1_id:
+    if not access_code or not user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to create lobby."})
 
     new_lobby = Lobby(
-        lobby_code=create_lobby_request.lobby_code.encode('ascii'),
-        p1_id=create_lobby_request.p1_id,
+        lobby_code=access_code.encode('ascii'),
+        p1_id=user_id,
         lobby_status=EnumStatus['waiting']
     )
     
@@ -82,19 +77,13 @@ async def create_bots(
 
     user_id = current_user.user_id
     access_code = generate_unique_id()
-
-    create_lobby_request = CreateLobbyRequest(
-        lobby_code=access_code,
-        p1_id=user_id,
-        p2_id=0
-    )
     
-    if not create_lobby_request.lobby_code or not create_lobby_request.p1_id:
+    if not access_code or not user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to create lobby."})
 
     new_lobby = Lobby(
-        lobby_code=create_lobby_request.lobby_code.encode('ascii'),
-        p1_id=create_lobby_request.p1_id,
+        lobby_code=access_code.encode('ascii'),
+        p1_id=user_id,
         p2_id=0,
         lobby_status=EnumStatus['ongoing']
     )
@@ -109,7 +98,9 @@ async def get_lobby(
     ):
 
     user_id = current_user.user_id
-    lobby = db.query(Lobby).filter(Lobby.lobby_status == "Ongoing" or Lobby.lobby_status == "Waiting").filter(Lobby.p1_id == user_id or Lobby.p2_id == user_id).first()
+    lobby = db.query(Lobby).filter(Lobby.lobby_status == EnumStatus['ongoing'] or Lobby.lobby_status == EnumStatus['waiting']).filter(Lobby.p1_id == user_id or Lobby.p2_id == user_id).first()
+    
+    print(lobby)
     
     if not lobby:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})

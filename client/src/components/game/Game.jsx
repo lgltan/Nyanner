@@ -5,10 +5,8 @@ import api from '../../services/api';
 import { fetchToken } from '../../services/authProvider';
 
 function Game() {
-  // TODO: get user id, find ongoing lobby with user id
-  // TODO: on init, create move to generate default board
-
   const [lobbyInfo, setLobbyInfo] = useState(null);
+  const [isWaiting, setIsWaiting] = useState(true); // State to control fetching
 
   const getLobby = async () => {
     try {
@@ -18,28 +16,36 @@ function Game() {
           Authorization: `Bearer ${token}`
         }
       });
-      return response.data
+      setLobbyInfo(response.data);
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
-    setLobbyInfo(getLobby)
-  }, []);
+    const intervalId = setInterval(getLobby, 5000); // Fetch every 5 seconds
+    if (lobbyInfo?.p2_id != null) {
+      setIsWaiting(false);
+      console.log("P2 Found.");
+    }
+
+    return () => {
+      clearInterval(intervalId); // Clear interval on cleanup
+    };
+  }, [isWaiting]); // Depend on isWaiting state
 
   return (
     <div className="game">
       <div className="game-left-col">
         Nyanner
-        P1: {lobbyInfo.p1_id}
-        P2: {lobbyInfo.p2_id}
+        P1: {lobbyInfo?.p1_id}
+        P2: {lobbyInfo?.p2_id}
         {/* insert player usernames */}
       </div>
       <div className="chessboard-container">
         <ChessGame />
       </div>
-    </div>
+  </div>
   );
 }
 

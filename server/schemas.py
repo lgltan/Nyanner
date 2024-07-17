@@ -56,11 +56,6 @@ class UserData(BaseModel):
     photo: PhotoData
     # password: bytes
 
-class CreateLobbyRequest(BaseModel):
-    p1_id: int
-    lobby_code: str
-    lobby_status: EnumStatus = 'Waiting'
-
 class AdminLogSchema(BaseModel):
     admin_log_id: int
     admin_description: str
