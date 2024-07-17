@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql import BIGINT
+from server.schemas import EnumStatus
 
 Base = declarative_base()
 
@@ -47,6 +48,7 @@ class Lobby(Base):
     __tablename__ = 'lobby'
     lobby_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
     lobby_code = Column(String(6), nullable=False)
+    lobby_status = Column(EnumStatus, nullable=False)
     p1_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
     p2_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
 
