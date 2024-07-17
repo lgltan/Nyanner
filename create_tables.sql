@@ -50,7 +50,8 @@ CREATE TABLE lobby(
     p1_id BIGINT UNSIGNED NOT NULL,
     FOREIGN KEY (p1_id) REFERENCES users(user_id),
     p2_id BIGINT UNSIGNED,
-    FOREIGN KEY (p2_id) REFERENCES users(user_id)
+    FOREIGN KEY (p2_id) REFERENCES users(user_id),
+    lobby_status ENUM ('Waiting','Ongoing','Archived')
 );
 
 CREATE TABLE moves(
