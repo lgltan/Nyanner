@@ -62,7 +62,7 @@ async def join_lobby(
     if not lobby:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Invalid access code."})
 
-    lobby.lobby_code = lobby_code.encode('ascii')
+    lobby.lobby_code = access_code.encode('ascii')
     lobby.p2_id = current_user.user_id
     lobby.lobby_status = EnumStatus['ongoing']
 
@@ -99,7 +99,7 @@ async def get_lobby(
     ):
 
     user_id = current_user.user_id
-    lobby = db.query(Lobby).filter(Lobby.p1_id == user_id or Lobby.p2_id == user_id).first()
+    lobby = db.query(Lobby).filter(Lobby.p1_id == user_id).first()
     
     print(lobby)
     
