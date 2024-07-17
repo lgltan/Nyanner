@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, HttpUrl
 from enum import Enum
 from datetime import date
 
-class lobby_status(str, Enum):
+class EnumStatus(str, Enum):
     waiting = 'Waiting'
     ongoing = 'Ongoing'
     archived = 'Archived'
@@ -57,14 +57,9 @@ class UserData(BaseModel):
     # password: bytes
 
 class CreateLobbyRequest(BaseModel):
-    lobby_name: str
     p1_id: int
-    lobby_status: Enum = 'Waiting'
-    
-class JoinLobbyRequest(BaseModel):
-    lobby_id: int
-    player_id: int
-    lobby_status: Enum = 'Ongoing'
+    lobby_code: str
+    lobby_status: EnumStatus = 'Waiting'
 
 class AdminLogSchema(BaseModel):
     admin_log_id: int

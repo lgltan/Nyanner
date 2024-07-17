@@ -4,13 +4,12 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
-    const [lobbyID, setLobbyID] = useState('');
+    const [lobbyCode, setLobbyCode] = useState('');
     const navigate = useNavigate();
 
     const createLobby = async () => {
         try {
-            const response = await axios.post('YOUR_API_ENDPOINT_FOR_CREATE_LOBBY');
-            setLobbyID(response.data.lobbyId); // Adjust based on your API response
+            const response = await axios.post('/lobby');
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
@@ -19,7 +18,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const joinLobby = async () => {
         try {
-            const response = await axios.post('YOUR_API_ENDPOINT_FOR_JOIN_LOBBY', { id: lobbyID });
+            const response = await axios.post('/lobby/join', { access_code: lobbyCode });
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
@@ -45,8 +44,8 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
                             className="input"
                             type={type}
                             name={name}
-                            value={lobbyID}
-                            onChange={(e) => setLobbyID(e.target.value)}
+                            value={lobbyCode}
+                            onChange={(e) => setLobbyCode(e.target.value)}
                             {...props}
                             required
                         />

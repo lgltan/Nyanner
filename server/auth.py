@@ -4,7 +4,7 @@ from datetime import timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from starlette import status
-from server.models import AdminLog, User, Photo
+from server.models import AdminLog, User, Photo, Session as UserSession
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
 from server.utils import validate_image, validate_phone_number, validate_name, validate_user_data, authenticate_user, create_access_token, get_current_active_user, get_current_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
@@ -110,10 +110,21 @@ async def login_for_access_token(
 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
     
-    # Log the successful login attempt
-    admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")
-    db.add(admin_log)
-    db.commit()
+    user_session = db.query(UserSession).filter(UserSession.user_id == user.user_id).first()
+    if user_session and user_session.ban_bool:
+        ban_end_time = user_session.ban_timestamp + timedelta(minutes=user_session.ban_time)
+        if datetime.now() < ban_end_time:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User is banned",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        else:
+            user_session.ban_bool = False
+            # Log the successful login attempt
+            admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")
+            db.add(admin_log)
+            db.commit()
 
     access_token_expires = None
     if request.rememberMe:
