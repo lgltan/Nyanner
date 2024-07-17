@@ -9,6 +9,11 @@ from dotenv import load_dotenv
 from server.schemas import TokenData
 import string
 import random
+import os
+from datetime import timedelta, datetime
+from fastapi.security import OAuth2PasswordBearer
+import re
+import base64
 
 load_dotenv()
 
