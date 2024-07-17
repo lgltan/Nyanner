@@ -209,3 +209,11 @@ async def get_photo_from_db(image_id: int, db: db_dependency):
     photo.content = base64.b64encode(photo.content)
     return photo
     # return StreamingResponse(BytesIO(photo.content), media_type="image/jpeg")
+
+async def add_photo(file: UploadFile, db: db_dependency):
+    photo_content = file.file.read()
+    photo = Photo(filename=file.filename, content=photo_content)
+    db.add(photo)
+    db.commit()
+    db.refresh(photo)
+    return photo.id

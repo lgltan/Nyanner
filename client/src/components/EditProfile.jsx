@@ -16,14 +16,15 @@ const Home = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const auth = fetchToken();
-  
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     username: "",
-    password: "",
+    confirm_password: "",
     phoneNumber: "",
+    birthday: "",
     profilePhoto: null,
   });
   const [errors, setErrors] = useState({});
@@ -31,9 +32,39 @@ const Home = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleConfirm = (password) => {
-    console.log('Password entered:', password);
-    // Perform your confirmation logic here
+  const handleConfirm = async (password) => {
+    console.log("Password entered:", password);
+
+    // Handle form submission
+    const data = new FormData();
+    data.append("first_name", formData.firstName);
+    data.append("last_name", formData.lastName);
+    data.append("phone_number", formData.phoneNumber);
+    data.append("birthday", formData.birthday);
+    data.append("confirm_password", password);
+    if (typeof formData.profilePhoto === 'object') {
+      data.append("file", formData.profilePhoto);
+      console.log("file passed");
+    }
+
+    console.log("Data:", data);
+
+    try {
+      const response = await api.put("/auth/edit/me", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${auth}`,
+        },
+      });
+      setErrors({});
+      console.log("Response:", response);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      const newErrors = error.response.data.detail;
+      console.log("Errors:", newErrors);
+      setErrors(newErrors);
+    }
   };
 
   useEffect(() => {
@@ -41,14 +72,16 @@ const Home = () => {
       try {
         const userData = await getUserData(auth);
         // const userPhoto = await getUserPhoto(auth);
+        console.log("user data", userData);
         setProfilePhoto(userData.photo_content);
         setFormData({
-            firstName: userData.first_name,
-            lastName: userData.last_name,
-            email: userData.email,
-            username: userData.username,
-            phoneNumber: userData.phone_number,
-            // profilePhoto: `data:image/jpeg;base64,${userData.photo_content}`,
+          firstName: userData.first_name,
+          lastName: userData.last_name,
+          email: userData.email,
+          username: userData.username,
+          phoneNumber: userData.phone_number,
+          birthday: userData.birthday,
+          profilePhoto: `data:image/jpeg;base64,${userData.photo.content}`,
         });
       } catch (error) {
         console.error("Error fetching user data or photo:", error);
@@ -80,40 +113,18 @@ const Home = () => {
     }));
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsModalOpen(true);
+    console.log("File:", formData.profilePhoto);
+    console.log(typeof formData.profilePhoto);
+    if (typeof formData.profilePhoto === 'object')
+    {
+      console.log("it should pass profile photo");
+    }
+
 
     // console.log('before post', formData)
-
-    // Handle form submission
-    // const data = new FormData();
-    // data.append('first_name', formData.firstName);
-    // data.append('last_name', formData.lastName);
-    // data.append('phone_number', formData.phoneNumber);
-    // if (formData.profilePhoto) {
-    //   data.append('file', formData.profilePhoto);
-    // }
-
-    // console.log('Data:', data);
-
-    // try {
-    //   const response = await api.put('/auth/edit/me?username='+formData.username, data, {
-    //     headers: {
-    //       'Content-Type': 'multipart/form-data',
-    //       'Authorization': `Bearer ${auth}`,
-    //     },
-    //   });
-    //   setErrors({});
-    //   // console.log('Response:', response.data);
-    //   window.location.reload();
-
-    // } catch (error) {
-    //   console.log(error)
-    //   const newErrors = error.response.data.detail
-    //   console.log('Errors:', newErrors)
-    //   setErrors(newErrors)
-    // }
   };
 
   return (
@@ -165,6 +176,15 @@ const Home = () => {
                 />
 
                 <FormInput
+                  label="Birthday"
+                  type="date"
+                  name="birthday"
+                  value={formData.birthday}
+                  onChange={handleChange}
+                  error={errors.birthday}
+                />
+
+                <FormInput
                   label="Username"
                   type="text"
                   name="username"
@@ -182,6 +202,7 @@ const Home = () => {
                   size="5"
                   onChange={handleProfilePhotoChange}
                   error={errors.profilePhoto}
+                  value={formData.profilePhoto}
                 />
               </div>
             </div>

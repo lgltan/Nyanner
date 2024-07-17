@@ -1,14 +1,15 @@
 # https://www.youtube.com/watch?v=0A_GCXBCNUQ
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from starlette import status
 from server.models import AdminLog, User, Photo, Session as UserSession
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
-from server.utils import validate_image, validate_phone_number, validate_name, validate_user_data, authenticate_user, create_access_token, get_current_active_user, get_current_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
+from server.utils import add_photo, validate_image, validate_phone_number, validate_name, validate_user_data, validate_birthday, authenticate_user, create_access_token, get_current_active_user, get_current_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import base64
+import logging
 
 load_dotenv()
 
@@ -159,59 +160,74 @@ async def get_photo(db: db_dependency, photo_id: int):
 @router.put('/edit/me', status_code=status.HTTP_200_OK)
 async def edit_user(
     db: db_dependency,
-    username: str,
     first_name: Optional[str] = Form(None),
     last_name: Optional[str] = Form(None),
     phone_number: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    current_user: User = Depends(get_current_active_user),
+    birthday: Optional[datetime] = Form(None),
+    confirm_password: str = Form(None),
+    current_user: User = Depends(get_current_user),
 ):
-    # Ensure the user can only edit their own profile
-    if current_user['user'].username != username:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to edit this user")
-
-    user = db.query(User).filter(User.username == username).first()
+    username = current_user['user'].username
+    if not username:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No username provided")
+    
+    user = authenticate_user(username, confirm_password, db)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-    if first_name:
-        if not validate_name(first_name):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid first name')
-        user.first_name = first_name.encode('ascii')
-    if last_name:
-        if not validate_name(last_name):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid last name')
-        user.last_name = last_name.encode('ascii')
-    if phone_number:
-        if not validate_phone_number(phone_number):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid phone number')
-        user.phone_number = phone_number.encode('ascii')
-
-    # Handle photo upload
-    if file:
-        FILE_SIZE_LIMIT = 5 * 1024 * 1024  # 5MB
-        if file.size > FILE_SIZE_LIMIT:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File size too large')
-        if not file.content_type.startswith('image/'):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid file type')
-        if not validate_image(file):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid image file')
-
-        photo_content = file.file.read()
-        photo = Photo(filename=file.filename, content=photo_content)
-        db.add(photo)
+        admin_log = AdminLog(admin_description=f"Failed UPDATE attempt for username: {username}")
+        db.add(admin_log)
         db.commit()
-        db.refresh(photo)
-        user.photo_id = photo.id
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'general': 'Invalid password'})
 
-    db.commit()
-    db.refresh(user)
+    isChanged = False
 
-    admin_log = AdminLog(admin_description=f"Successfully edited profile for username: {user.username}")
-    db.add(admin_log)
-    db.commit()
+    if first_name and not str(first_name) == str(user.first_name):
+        if not validate_name(first_name):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'firstName': 'Invalid first name'})
+        user.first_name = first_name
+        isChanged = True
+    
+    if last_name and not str(last_name) == str(user.last_name):
+        if not validate_name(last_name):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'lastName': 'Invalid last name'})
+        user.last_name = last_name
+        isChanged = True
+
+    if phone_number and not str(phone_number) == str(user.phone_number):
+        if not validate_phone_number(phone_number):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'phoneNumber': 'Invalid phone number'})
+        user.phone_number = phone_number
+        isChanged = True
+
+    if birthday and not birthday.strftime("%m/%d/%Y") == user.birthday.strftime("%m/%d/%Y"):
+        if not validate_birthday(birthday):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'birthday': 'Invalid birthday'})
+        user.birthday = birthday
+        isChanged = True
+
+    if file != None:
+        old_photo = await get_photo_from_db(user.photo_id, db)
+        if file.filename != old_photo.filename:
+            if not validate_image(file):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'profilePhoto': 'Invalid image file'})
+            
+            user.photo_id = await add_photo(file, db)
+            isChanged = True
+
+    if isChanged:
+        db.commit()
+        db.refresh(user)
+
+        admin_log = AdminLog(admin_description=f"Successfully edited profile for username: {user.username}")
+        db.add(admin_log)
+        db.commit()
+    else:
+        admin_log = AdminLog(admin_description=f"No changes for {user.username}")
+        db.add(admin_log)
+        db.commit()
     
     return {"message": "User details updated successfully"}
+
 
 @router.get('/logout', status_code=status.HTTP_200_OK)
 async def logout(db: db_dependency, current_user: dict = Depends(get_current_user)):

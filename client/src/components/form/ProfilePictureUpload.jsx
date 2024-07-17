@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './ProfilePictureUpload.css';
 import api from '../../services/api';
 
-const ProfilePictureUpload = ({ label, name, accept, size, onChange, error: externalError }) => {
-  const [preview, setPreview] = useState(null);
+const ProfilePictureUpload = ({ label, name, accept, size, onChange, error: externalError, value: value=null }) => {
+  const [preview, setPreview] = useState(value);
   const [error, setError] = useState(externalError);
   const [file, setFile] = useState(null);
 
