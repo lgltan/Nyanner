@@ -1,16 +1,13 @@
 # https://www.youtube.com/watch?v=0A_GCXBCNUQ
 
-from datetime import datetime, timedelta
-from typing import Annotated, Optional
+from datetime import timedelta
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session
 from starlette import status
-from server.database import SessionLocal
 from server.models import AdminLog, User, Photo, Session as UserSession
-from passlib.context import CryptContext
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
-from server.utils import validate_image, validate_phone_number, validate_name, validate_user_data, authenticate_user, create_access_token, get_current_active_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
+from server.utils import validate_image, validate_phone_number, validate_name, validate_user_data, authenticate_user, create_access_token, get_current_active_user, get_current_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import base64
 
 load_dotenv()
@@ -217,9 +214,13 @@ async def edit_user(
     return {"message": "User details updated successfully"}
 
 @router.get('/logout', status_code=status.HTTP_200_OK)
-async def logout(db: db_dependency, current_user: dict = Depends(get_current_active_user)):
-    admin_log = AdminLog(admin_description=f"Successfully logged out for username: {current_user.username}")
-    db.add(admin_log)
-    db.commit()
+async def logout(db: db_dependency, current_user: dict = Depends(get_current_user)):
+    username = current_user['user'].username
+    try:
+        admin_log = AdminLog(admin_description=f"Successfully logged out for username: {username}")
+        db.add(admin_log)
+        db.commit()
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to log out {username}")
     
-    return {"message": "User logged out successfully"}
+    # return {"message": "User logged out successfully"}
