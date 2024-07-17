@@ -44,7 +44,7 @@ async def create_lobby(
 
     new_lobby = Lobby(
         lobby_code=create_lobby_request.lobby_code.encode('ascii'),
-        p1_id=create_lobby_request.p1_id.encode('ascii'),
+        p1_id=create_lobby_request.p1_id,
         status=EnumStatus['waiting']
     )
     
