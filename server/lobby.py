@@ -90,6 +90,7 @@ async def create_bots(
     
     db.add(new_lobby)
     db.commit()
+    return
     
 @router.get('/info', status_code=status.HTTP_201_CREATED)
 async def get_lobby(
@@ -98,7 +99,7 @@ async def get_lobby(
     ):
 
     user_id = current_user.user_id
-    lobby = db.query(Lobby).filter(Lobby.lobby_status == EnumStatus['ongoing'] or Lobby.lobby_status == EnumStatus['waiting']).filter(Lobby.p1_id == user_id or Lobby.p2_id == user_id).first()
+    lobby = db.query(Lobby).filter(Lobby.p1_id == user_id or Lobby.p2_id == user_id).first()
     
     print(lobby)
     

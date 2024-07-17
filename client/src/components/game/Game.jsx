@@ -37,9 +37,9 @@ function Game() {
   return (
     <div className="game">
       <div className="game-left-col">
-        Nyanner
-        P1: {lobbyInfo?.p1_id}
-        P2: {lobbyInfo?.p2_id}
+        Nyanner <br />
+        P1: {lobbyInfo?.p1_id} <br />
+        P2: {lobbyInfo?.p2_id} <br />
         {/* insert player usernames */}
       </div>
       <div className="chessboard-container">
