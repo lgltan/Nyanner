@@ -28,15 +28,27 @@ export const removeToken = ()=>{
 export const useLogout = () => {
   const navigate = useNavigate();
 
-  const logout = () => {
+  const logout = async () => {
     try {
-      api.post('/auth/logout', {
-        headers: {
-          Authorization: `Bearer ${fetchToken()}`,
-        },
-      });
-      removeToken();
-      navigate('/login');
+      const token = fetchToken();
+      if(token) {
+        console.log('Logging out with token:', token);
+        const response = await api.get('/auth/logout', {
+          headers: {
+            Content_Type: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.status === 200) {
+          // await removeToken();
+          console.log('remove token')
+          navigate('/login');
+        }
+        else {
+          alert('Error logging out');
+          console.error('Error logging out:', response);
+        }
+      }
     } catch (error) {
       alert('Error logging out');
       console.error('Error logging out:', error);
@@ -49,12 +61,12 @@ export const useLogout = () => {
 export function ProtectedRoute({ isAdminRoute = false, children }) {
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
-    const auth = fetchToken();
+    const token = fetchToken();
     const location = useLocation();
   
     useEffect(() => {
       const checkAuthorization = async () => {
-        if (!auth) {
+        if (!token) {
           setLoading(false);
           return;
         }
@@ -62,7 +74,7 @@ export function ProtectedRoute({ isAdminRoute = false, children }) {
         try {
           const userResponse = await api.get('/auth/users/me', {
             headers: {
-              Authorization: `Bearer ${auth}`,
+              Authorization: `Bearer ${token}`,
             },
           });
   
@@ -82,13 +94,13 @@ export function ProtectedRoute({ isAdminRoute = false, children }) {
       };
   
       checkAuthorization();
-    }, [auth, isAdminRoute]);
+    }, [token, isAdminRoute]);
   
     if (loading) {
       return <Loading />;
     }
   
-    if (!auth) {
+    if (!token) {
       return <Navigate to='/login' state={{ from: location }} />;
     }
   

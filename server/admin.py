@@ -6,7 +6,7 @@ from starlette import status
 from server.database import SessionLocal
 from server.models import AdminLog, User, Photo
 from server.schemas import UserlistAdmin
-from server.auth import validate_image, validate_user_data, authenticate_user, create_access_token, get_current_active_user, db_dependency, bcrypt_context, TOKEN_EXPIRATION
+from server.auth import db_dependency, TOKEN_EXPIRATION
 
 router = APIRouter(
     prefix='/admin',
@@ -21,4 +21,4 @@ async def get_all_users(db: db_dependency):
 @router.get('/logs', response_model=List[dict])
 async def get_all_logs(db: db_dependency):
     logs = db.query(AdminLog).all()
-    return [{"log_id": log.admin_log_id, "description": log.description, "timestamp": log.timestamp} for log in logs]
+    return [{"admin_log_id": log.admin_log_id, "admin_description": log.admin_description, "admin_timestamp": log.admin_timestamp} for log in logs]

@@ -34,7 +34,6 @@
   p {
     color: var(--night);
     font-size: 14px;
-    font-style: italic;
   }
   
   .modal_password {
