@@ -23,6 +23,8 @@ router = APIRouter(
 ##  ROUTES   ##
 ###############
 
+# NOTE: get_current_user checks if session token is valid built into it
+
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_lobby(
     db: db_dependency, 

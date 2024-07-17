@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './lobby.css';
-import axios from 'axios';
+import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
@@ -9,7 +9,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const createLobby = async () => {
         try {
-            const response = await axios.post('/lobby');
+            const response = await api.post('/lobby');
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
@@ -18,7 +18,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const joinLobby = async () => {
         try {
-            const response = await axios.post('/lobby/join', { access_code: lobbyCode });
+            const response = await api.post('/lobby/join', { access_code: lobbyCode });
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
@@ -27,7 +27,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const playBots = async () => {
         try {
-            const response = await axios.post('API_CALL_FOR_PLAYING_AGAINST_SUNFISH');
+            const response = await api.post('API_CALL_FOR_PLAYING_AGAINST_SUNFISH');
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
