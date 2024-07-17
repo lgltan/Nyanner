@@ -17,13 +17,11 @@ const AdminPage = () => {
   const fetchUserData = useCallback(async () => {
     try {
       const token = fetchToken();
-      console.log("Fetching user data...");
       const response = await api.get('/auth/users/me', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log("User data fetched:", response.data);
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -34,13 +32,11 @@ const AdminPage = () => {
   const fetchAllUsers = useCallback(async () => {
     try {
       const token = fetchToken();
-      console.log("Fetching all users...");
       const response = await api.get('/admin/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log("All users fetched:", response.data);
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching all users:', error);
@@ -60,6 +56,34 @@ const AdminPage = () => {
       console.error('Error fetching logs:', error);
     }
   }, []);
+
+  // const handleBanUser = async (userId, duration) => {
+  //   try {
+  //     const token = fetchToken();
+  //     await api.post(`/admin/ban/${userId}`, { duration }, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`
+  //       }
+  //     });
+  //     fetchAllUsers(); // Refresh user list
+  //   } catch (error) {
+  //     console.error('Error banning user:', error);
+  //   }
+  // };
+
+  // const handleUnbanUser = async (userId) => {
+  //   try {
+  //     const token = fetchToken();
+  //     await api.post(`/admin/unban/${userId}`, {}, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`
+  //       }
+  //     });
+  //     fetchAllUsers(); // Refresh user list
+  //   } catch (error) {
+  //     console.error('Error unbanning user:', error);
+  //   }
+  // };
 
   useEffect(() => {
     if (activeTab === 'profile') {
@@ -113,9 +137,13 @@ const AdminPage = () => {
                     <tr key={user.user_id}>
                       <td>{user.username}</td>
                       <td>{user.email}</td>
-                      <td>{user.status}</td>
+                      <td>{user.ban_bool ? 'Banned' : 'Active'}</td>
                       <td>
-                        <button>Ban</button>
+                        {/* {user.ban_bool ? (
+                          <button onClick={() => handleUnbanUser(user.user_id)}>Unban</button>
+                        ) : (
+                          <button onClick={() => handleBanUser(user.user_id, 30)}>Ban</button>
+                        )} */}
                       </td>
                     </tr>
                   ))}
@@ -145,11 +173,11 @@ const AdminPage = () => {
                 </thead>
                 <tbody>
                   {logs.map((log) => (
-                    <tr key={log.log_id}>
-                      <td>{log.log_id}</td>
-                      <td>{log.description}</td>
-                      <td>{log.timestamp}</td>
-                    </tr>
+                    <tr key={log.admin_log_id}>
+                      <td>{log.admin_log_id}</td>
+                      <td>{log.admin_description}</td>
+                      <td>{log.admin_timestamp}</td>
+                  </tr>
                   ))}
                 </tbody>
               </table>
