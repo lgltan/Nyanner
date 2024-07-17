@@ -56,7 +56,7 @@ const Login = () => {
         console.log('User Response:', userData);
         setToken(token);
         
-        if (userData.user_type === 0) {
+        if (userData.user_type === false) {
           // console.log('Going to Home')
           navigate('/home');
         } else {
