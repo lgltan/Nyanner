@@ -99,7 +99,7 @@ async def get_lobby(
     ):
 
     user_id = current_user.user_id
-    lobby = db.query(Lobby).filter(Lobby.p1_id == user_id).first()
+    lobby = db.query(Lobby).filter(Lobby.p1_id == user_id and Lobby.p2_id == user_id).first()
     
     print(lobby)
     
