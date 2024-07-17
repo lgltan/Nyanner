@@ -40,6 +40,7 @@ function Game() {
         Nyanner <br />
         P1: {lobbyInfo?.p1_id} <br />
         P2: {lobbyInfo?.p2_id} <br />
+        Lobby Code: {lobbyInfo?.lobby_code}
         {/* insert player usernames */}
       </div>
       <div className="chessboard-container">

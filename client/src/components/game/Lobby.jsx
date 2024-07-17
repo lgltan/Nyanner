@@ -26,7 +26,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
     const joinLobby = async () => {
         try {
             const token = fetchToken();
-            const response = await api.put('/lobby/join', { access_code: lobbyCode }, {
+            const response = await api.put(`/lobby/join/${lobbyCode}`, {}, {
                 headers: {
                     Content_Type: 'application/json',
                     Authorization: `Bearer ${token}`,

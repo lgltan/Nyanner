@@ -47,10 +47,10 @@ async def create_lobby(
     db.commit()
     return access_code
     
-@router.put('/join', status_code=status.HTTP_201_CREATED)
+@router.put('/join/{access_code}', status_code=status.HTTP_201_CREATED)
 async def join_lobby(
     db: db_dependency, 
-    access_code: str = Form(...), 
+    access_code: str, 
     current_user: User = Depends(get_current_user)
     ):
 
