@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './lobby.css';
 import api from '../../services/api';
+import { fetchToken } from '../../services/authProvider';
 import { useNavigate } from 'react-router-dom';
 
 const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
@@ -9,7 +10,15 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const createLobby = async () => {
         try {
-            const response = await api.post('/lobby');
+            const token = fetchToken();
+            console.log(token);
+            const response = await api.post('/lobby/', {
+                headers: {
+                    Content_Type: 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            console.log(response);
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
