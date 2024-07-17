@@ -1,5 +1,3 @@
-# https://www.youtube.com/watch?v=0A_GCXBCNUQ
-
 from datetime import timedelta
 from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
@@ -25,10 +23,9 @@ router = APIRouter(
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_lobby(db: db_dependency, 
-                        lobby_id: str = Form(...),
-                        p1_id: str = Form(...),
-    ):
+async def create_lobby(db: db_dependency):
+
+    user_id = get_current_active_user()
 
     create_lobby_request = CreateLobbyRequest(
         lobby_id="",
@@ -37,34 +34,38 @@ async def create_lobby(db: db_dependency,
     )
     
     if not create_lobby_request.lobby_id or not create_lobby_request.p1_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to create lobby."})
 
-#     new_lobby = Lobby(
-#         lobby_name=create_lobby_request.lobby_name.encode('ascii'),
-#         p1_id=create_lobby_request.p1_id.encode('ascii'),
-#     )
+    new_lobby = Lobby(
+        lobby_id=create_lobby_request.lobby_name.encode('ascii'),
+        p1_id=create_lobby_request.p1_id.encode('ascii'),
+    )
     
-#     db.add(new_lobby)
-#     db.commit()
+    db.add(new_lobby)
+    db.commit()
     
 @router.put('/join', status_code=status.HTTP_201_CREATED)
-async def join_lobby(db: db_dependency, 
-                        lobby_id: str = Form(...),
-                        player_id: str = Form(...),
-    ):
+async def join_lobby(db: db_dependency, lobby_id: str = Form(...)):
+
+    user_id = get_current_active_user()
 
     join_lobby_request = JoinLobbyRequest(
-        lobby_id="",
+        lobby_id=lobby_id,
         player_id="",
     )
     
     if not join_lobby_request.lobby_id or not join_lobby_request.player_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
 
-#     join_lobby = Lobby(
-#         lobby_id=join_lobby_request.lobby_id.encode('ascii'),
-#         player_id=join_lobby_request.player_id.encode('ascii'),
-#     )
+    join_lobby = Lobby(
+        lobby_id=join_lobby_request.lobby_id.encode('ascii'),
+        player_id=join_lobby_request.player_id.encode('ascii'),
+    )
     
-#     db.add(join_lobby)
-#     db.commit()
+    db.add(join_lobby)
+    db.commit()
+
+async def get_current_lobby(current_user):
+    # get current user and find user in list of lobbies
+    # return
+    pass
