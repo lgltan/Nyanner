@@ -59,10 +59,12 @@ class UserData(BaseModel):
 class CreateLobbyRequest(BaseModel):
     lobby_name: str
     p1_id: int
+    lobby_code: str
     lobby_status: Enum = 'Waiting'
     
 class JoinLobbyRequest(BaseModel):
     lobby_id: int
+    lobby_code: str
     player_id: int
     lobby_status: Enum = 'Ongoing'
 
