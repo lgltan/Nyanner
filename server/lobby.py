@@ -39,7 +39,7 @@ async def create_lobby(
         p1_id=user_id
     )
     
-    if not create_lobby_request.lobby_id or not create_lobby_request.p1_id:
+    if not create_lobby_request.lobby_code or not create_lobby_request.p1_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to create lobby."})
 
     new_lobby = Lobby(
