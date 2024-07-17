@@ -96,7 +96,7 @@ async def create_bots(
         lobby_code=create_lobby_request.lobby_code.encode('ascii'),
         p1_id=create_lobby_request.p1_id,
         p2_id=0,
-        lobby_status=EnumStatus['Ongoing']
+        lobby_status=EnumStatus['ongoing']
     )
     
     db.add(new_lobby)
@@ -113,5 +113,5 @@ async def get_lobby(
     
     if not lobby:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
-    
-    return lobby
+    else:
+        return lobby
