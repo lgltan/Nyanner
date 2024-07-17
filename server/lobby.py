@@ -110,5 +110,8 @@ async def get_lobby(
 
     user_id = current_user.user_id
     lobby = db.query(Lobby).filter(Lobby.lobby_status == "Ongoing" or Lobby.lobby_status == "Waiting").filter(Lobby.p1_id == user_id or Lobby.p2_id == user_id).first()
-    print(lobby)
+    
+    if not lobby:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
+    
     return lobby
