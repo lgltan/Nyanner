@@ -57,16 +57,9 @@ class UserData(BaseModel):
     # password: bytes
 
 class CreateLobbyRequest(BaseModel):
-    lobby_name: str
     p1_id: int
     lobby_code: str
     lobby_status: EnumStatus = 'Waiting'
-    
-class JoinLobbyRequest(BaseModel):
-    lobby_id: int
-    lobby_code: str
-    player_id: int
-    lobby_status: EnumStatus = 'Ongoing'
 
 class AdminLogSchema(BaseModel):
     admin_log_id: int
