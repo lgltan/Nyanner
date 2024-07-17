@@ -32,8 +32,8 @@ function Game() {
     <div className="game">
       <div className="game-left-col">
         Nyanner
-        P1: {lobbyInfo().p1_id}
-        P2: {lobbyInfo().p2_id}
+        P1: {lobbyInfo.p1_id}
+        P2: {lobbyInfo.p2_id}
         {/* insert player usernames */}
       </div>
       <div className="chessboard-container">
