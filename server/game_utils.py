@@ -30,13 +30,22 @@ TOKEN_EXPIRATION = os.getenv("REMEMBER_ME_EXPIRATION_DAYS")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 chars = string.ascii_letters + string.digits
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Could not validate credentials',
         headers={'WWW-Authenticate': 'Bearer'}
     )
-
+    print("attempting payload")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('username')
@@ -51,8 +60,34 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
     user = db.query(User).filter(User.username == token_data.username).first()
     if user is None:
         raise credentials_exception
+
     
-    return user
+    return { 'user': user }
+
+# async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail='Could not validate credentials',
+#         headers={'WWW-Authenticate': 'Bearer'}
+#     )
+
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         print(payload)
+#         username: str = payload.get('username')
+#         user_id: int = payload.get('id')
+#         user_type: int = payload.get('user_type')
+#         if username is None or user_id is None:
+#             raise credentials_exception
+#         token_data = TokenData(username=username, user_id=user_id, user_type=user_type)
+#     except JWTError:
+#         raise credentials_exception
+    
+#     user = db.query(User).filter(User.username == token_data.username).first()
+#     if user is None:
+#         raise credentials_exception
+    
+#     return user
 
 def generate_unique_id(length=6):
     return ''.join(random.choice(chars) for _ in range(length))

@@ -15,7 +15,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
             const response = await api.post('/lobby/', {
                 headers: {
                     Content_Type: 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    token: token,
                 },
             });
             console.log(response);
