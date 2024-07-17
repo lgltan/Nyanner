@@ -45,7 +45,7 @@ async def create_lobby(
     new_lobby = Lobby(
         lobby_code=create_lobby_request.lobby_code.encode('ascii'),
         p1_id=create_lobby_request.p1_id,
-        status=EnumStatus['waiting']
+        lobby_status=EnumStatus['waiting']
     )
     
     db.add(new_lobby)
@@ -69,7 +69,7 @@ async def join_lobby(
 
     lobby.lobby_code = lobby_code
     lobby.p2_id = current_user.user_id
-    lobby.status = EnumStatus['ongoing']
+    lobby.lobby_status = EnumStatus['ongoing']
 
     db.commit()
     db.refresh(lobby)
