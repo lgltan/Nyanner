@@ -6,7 +6,7 @@ from starlette import status
 from server.database import SessionLocal
 from server.models import Lobby
 from dotenv import load_dotenv
-from server.schemas import CreateLobbyRequest, EnumStatus
+from server.schemas import EnumStatus
 from server.utils import db_dependency
 import base64
 from server.models import AdminLog, User, Session as UserSession
