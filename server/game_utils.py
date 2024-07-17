@@ -16,12 +16,9 @@ import re
 import base64
 from server.utils import db_dependency, TOKEN_EXPIRATION
 
-load_dotenv()
+import logging
 
-# router = APIRouter(
-#     prefix='/auth',
-#     tags=['auth']
-# )
+load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -45,9 +42,10 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
         detail='Could not validate credentials',
         headers={'WWW-Authenticate': 'Bearer'}
     )
-    print("attempting payload")
+    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        logging.debug(f"Decoded token payload: {payload}")
         username: str = payload.get('username')
         user_id: int = payload.get('id')
         user_type: int = payload.get('user_type')
@@ -61,33 +59,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
     if user is None:
         raise credentials_exception
 
-    
-    return { 'user': user }
-
-# async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
-#     credentials_exception = HTTPException(
-#         status_code=status.HTTP_401_UNAUTHORIZED,
-#         detail='Could not validate credentials',
-#         headers={'WWW-Authenticate': 'Bearer'}
-#     )
-
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         print(payload)
-#         username: str = payload.get('username')
-#         user_id: int = payload.get('id')
-#         user_type: int = payload.get('user_type')
-#         if username is None or user_id is None:
-#             raise credentials_exception
-#         token_data = TokenData(username=username, user_id=user_id, user_type=user_type)
-#     except JWTError:
-#         raise credentials_exception
-    
-#     user = db.query(User).filter(User.username == token_data.username).first()
-#     if user is None:
-#         raise credentials_exception
-    
-#     return user
+    return user
 
 def generate_unique_id(length=6):
     return ''.join(random.choice(chars) for _ in range(length))

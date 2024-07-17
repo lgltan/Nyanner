@@ -11,14 +11,13 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
     const createLobby = async () => {
         try {
             const token = fetchToken();
-            console.log(token);
-            const response = await api.post('/lobby/', {
+            const response = await api.post('/lobby/', {}, {
                 headers: {
                     Content_Type: 'application/json',
-                    token: token,
+                    Authorization: `Bearer ${token}`,
                 },
             });
-            console.log(response);
+            console.log(response.data);
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
@@ -36,7 +35,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const playBots = async () => {
         try {
-            const response = await api.post('API_CALL_FOR_PLAYING_AGAINST_SUNFISH');
+            const response = await api.post('/lobby/bots');
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
