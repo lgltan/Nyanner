@@ -25,7 +25,7 @@ router = APIRouter(
 
 # NOTE: get_current_user checks if session token is valid built into it
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
+@router.post('/create', status_code=status.HTTP_201_CREATED)
 async def create_lobby(
     db: db_dependency, 
     current_user: User = Depends(get_current_user)
@@ -67,9 +67,48 @@ async def join_lobby(
     if not lobby:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Invalid access code."})
 
-    lobby.lobby_code = lobby_code
+    lobby.lobby_code = lobby_code.encode('ascii')
     lobby.p2_id = current_user.user_id
     lobby.lobby_status = EnumStatus['ongoing']
 
     db.commit()
     db.refresh(lobby)
+    
+@router.post('/create/bots', status_code=status.HTTP_201_CREATED)
+async def create_bots(
+    db: db_dependency, 
+    current_user: User = Depends(get_current_user)
+    ):
+
+    user_id = current_user.user_id
+    access_code = generate_unique_id()
+
+    create_lobby_request = CreateLobbyRequest(
+        lobby_code=access_code,
+        p1_id=user_id,
+        p2_id=0
+    )
+    
+    if not create_lobby_request.lobby_code or not create_lobby_request.p1_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to create lobby."})
+
+    new_lobby = Lobby(
+        lobby_code=create_lobby_request.lobby_code.encode('ascii'),
+        p1_id=create_lobby_request.p1_id,
+        p2_id=0,
+        lobby_status=EnumStatus['Ongoing']
+    )
+    
+    db.add(new_lobby)
+    db.commit()
+    
+@router.get('/info', status_code=status.HTTP_201_CREATED)
+async def get_lobby(
+    db: db_dependency, 
+    current_user: User = Depends(get_current_user)
+    ):
+
+    user_id = current_user.user_id
+    lobby = db.query(Lobby).filter(Lobby.lobby_status == "Ongoing").filter(Lobby.p1_id == user_id or Lobby.p2_id == user_id).first()
+    
+    return lobby

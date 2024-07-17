@@ -11,7 +11,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
     const createLobby = async () => {
         try {
             const token = fetchToken();
-            const response = await api.post('/lobby/', {}, {
+            const response = await api.post('/lobby/create', {}, {
                 headers: {
                     Content_Type: 'application/json',
                     Authorization: `Bearer ${token}`,
@@ -26,7 +26,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const joinLobby = async () => {
         try {
-            const response = await api.post('/lobby/join', { access_code: lobbyCode });
+            const response = await api.put('/lobby/join', { access_code: lobbyCode });
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
@@ -35,7 +35,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
 
     const playBots = async () => {
         try {
-            const response = await api.post('/lobby/bots');
+            const response = await api.post('/lobby/create/bots');
             navigate(`/game`); // Navigate to the game page with the lobby ID
         } catch (error) {
             console.error(error);
