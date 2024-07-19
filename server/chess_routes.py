@@ -17,3 +17,7 @@ router = APIRouter(
     tags=['game']
 )
 
+# @ETHAN get chessboard (inputs: lobby id, auth check) returns latest move from db query
+
+# @ETHAN post move (inputs: new chessboard string, auth check) returns true if move is valid, false if invalid
+# needs to do move validation, to be added after 

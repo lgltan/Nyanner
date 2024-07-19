@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Lobby from './game/Lobby.jsx';
+import Game from './game/Game.jsx';
 import { fetchToken } from '../services/authProvider.js';
 import { getUserData } from '../services/api.js';
 import NavBar from './misc/NavBar.jsx';
 import Loading from './misc/Loading.jsx';
+import api from '../services/api.js';
 
 const Home = () => {
     const [isLoading, setIsLoading] = useState(true);
+    const [isInGame, setIsInGame] = useState(false);
     const auth = fetchToken();
 
     useEffect(() => {
@@ -19,20 +22,54 @@ const Home = () => {
                 setIsLoading(false);
             }
         };
-
         fetchData();
     }, [auth]);
+
+    useEffect(() => {
+        const checkIngame = async () => {
+            try {
+              const token = fetchToken();
+              const response = await api.get('/lobby/ingame_check', {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              setIsInGame(response.data);
+            } catch (error) {
+              console.error(error);
+              setIsInGame(false);
+            }
+          };
+
+          checkIngame();
+          console.log("isInGame: " + isInGame);
+    }, []);
+
+    const updateInGameStatus = (bool_ingame) => {
+        setIsInGame(bool_ingame);
+    }
+
 
     if (isLoading) {
         return <Loading />;
     }
 
-    return (
-        <div>
-            <NavBar />
-            <h1>Home</h1>
-        </div>
-    );
+    if (isInGame) {
+        return (
+            <div>
+                <NavBar />
+                <Game />
+            </div>
+        );
+    }
+    else {
+        return (
+            <div>
+                <NavBar />
+                <Lobby inGameCheck={updateInGameStatus}/>
+            </div>
+        );
+    }  
 };
 
 export default Home;

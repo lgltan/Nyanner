@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import './lobby.css';
 import api from '../../services/api';
 import { fetchToken } from '../../services/authProvider';
-import { useNavigate } from 'react-router-dom';
 
-const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
+const Lobby = ({ label, type, name, value, onChange, error, inGameCheck, ...props }) => {
     const [lobbyCode, setLobbyCode] = useState('');
-    const navigate = useNavigate();
 
     const createLobby = async () => {
         try {
@@ -17,7 +15,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            navigate(`/game`); // Navigate to the game page with the lobby ID
+            inGameCheck(true);
         } catch (error) {
             console.error(error);
         }
@@ -32,7 +30,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            navigate(`/game`); // Navigate to the game page with the lobby ID
+            inGameCheck(true);
         } catch (error) {
             console.error(error);
         }
@@ -47,7 +45,7 @@ const Lobby = ({ label, type, name, value, onChange, error, ...props }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            navigate(`/game`); // Navigate to the game page with the lobby ID
+            inGameCheck(true);
         } catch (error) {
             console.error(error);
         }

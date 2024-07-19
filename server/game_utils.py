@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from starlette import status
 from server.database import SessionLocal
-from server.models import User
+from server.models import User, Lobby
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 from server.schemas import TokenData
