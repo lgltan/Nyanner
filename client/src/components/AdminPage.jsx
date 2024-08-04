@@ -57,33 +57,57 @@ const AdminPage = () => {
     }
   }, []);
 
-  // const handleBanUser = async (userId, duration) => {
-  //   try {
-  //     const token = fetchToken();
-  //     await api.post(`/admin/ban/${userId}`, { duration }, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     });
-  //     fetchAllUsers(); // Refresh user list
-  //   } catch (error) {
-  //     console.error('Error banning user:', error);
-  //   }
-  // };
+  const handleBanUser = async (userId, duration) => {
+    try {
+      const token = fetchToken();
+      await api.post(`/admin/ban`, { "user_id": userId, "ban_duration": duration }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUsers(users.map(user => 
+        user.user_id === userId ? { ...user, ban_bool: true } : user
+      ));
+    } catch (error) {
+      console.error('Error banning user:', error);
+    }
+  };
 
-  // const handleUnbanUser = async (userId) => {
-  //   try {
-  //     const token = fetchToken();
-  //     await api.post(`/admin/unban/${userId}`, {}, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     });
-  //     fetchAllUsers(); // Refresh user list
-  //   } catch (error) {
-  //     console.error('Error unbanning user:', error);
-  //   }
-  // };
+  const handleUnbanUser = async (userId) => {
+    try {
+      const token = fetchToken();
+      await api.post(`/admin/unban/`, {"user_id": userId,}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUsers(users.map(user => 
+        user.user_id === userId ? { ...user, ban_bool: false } : user
+      ));
+    } catch (error) {
+      console.error('Error unbanning user:', error);
+    }
+  };
+
+  const promptBanDuration = (userId) => {
+    console.log('User ID:', userId);
+
+    const daysStr = prompt('Enter the number of days for the ban:', '0');
+    const hoursStr = prompt('Enter the number of hours for the ban:', '0');
+    const minutesStr = prompt('Enter the number of minutes for the ban:', '0');
+  
+    let days = parseInt(daysStr, 10);
+    let hours = parseInt(hoursStr, 10);
+    let minutes = parseInt(minutesStr, 10);
+
+    const duration = (days * 24 * 60) + (hours * 60) + minutes;
+
+    if (duration > 0) {
+      handleBanUser(userId, duration);
+    } else {
+      alert('Ban duration must be greater than zero.');
+    }
+  };
 
   useEffect(() => {
     if (activeTab === 'profile') {
@@ -133,20 +157,20 @@ const AdminPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                {users.map((user) => (
                     <tr key={user.user_id}>
                       <td>{user.username}</td>
                       <td>{user.email}</td>
                       <td>{user.ban_bool ? 'Banned' : 'Active'}</td>
                       <td>
-                        {/* {user.ban_bool ? (
+                        {user.ban_bool ? (
                           <button onClick={() => handleUnbanUser(user.user_id)}>Unban</button>
                         ) : (
-                          <button onClick={() => handleBanUser(user.user_id, 30)}>Ban</button>
-                        )} */}
+                          <button onClick={() => promptBanDuration(user.user_id)}>Ban</button>
+                        )}
                       </td>
                     </tr>
-                  ))}
+                ))}
                 </tbody>
               </table>
             </div>
@@ -177,7 +201,7 @@ const AdminPage = () => {
                       <td>{log.admin_log_id}</td>
                       <td>{log.admin_description}</td>
                       <td>{log.admin_timestamp}</td>
-                  </tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>

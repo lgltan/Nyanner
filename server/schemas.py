@@ -40,6 +40,7 @@ class TokenData(BaseModel):
     user_type: int = None
 
 class UserlistAdmin(BaseModel):
+    user_id: int
     username: str
     email: str
 
@@ -60,3 +61,10 @@ class AdminLogSchema(BaseModel):
     admin_log_id: int
     admin_description: str
     admin_timestamp: datetime
+
+class BanRequest(BaseModel):
+    user_id: int
+    ban_duration: int
+
+class UnbanRequest(BaseModel):
+    user_id: int

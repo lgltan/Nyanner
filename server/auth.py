@@ -122,6 +122,8 @@ async def login_for_access_token(
             )
         else:
             user_session.ban_bool = False
+            user_session.ban_timestamp = None
+            user_session.ban_time = 0
             # Log the successful login attempt
             admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")
             db.add(admin_log)
