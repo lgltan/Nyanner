@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from 'react-router-dom';
 import ReCAPTCHA from "react-google-recaptcha";
@@ -23,7 +23,22 @@ const Login = () => {
     setShowPassword(prevState => !prevState);
   };
 
-  // const recaptcha = useRef(null);
+  const recaptcha = useRef(null);
+  const [captchaKey, setCaptchaKey] = useState('');
+  
+  useEffect(() => {
+    const fetchCaptchaKey = async () => {
+      try {
+        const response = await api.get('/auth/recaptcha');
+        console.log(response.data.site_key);
+        setCaptchaKey(response.data.site_key);
+      } catch (err) {
+        console.error('Failed to fetch CAPTCHA key:', err);
+        setError('Failed to load CAPTCHA. Please try again later.');
+      }
+    };
+    fetchCaptchaKey();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -33,94 +48,63 @@ const Login = () => {
     });
   };
 
+  // with recaptcha
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await api.post('/auth/token', {
-          "username": formData.username,
-          "user_password": formData.password,
-          "rememberMe": formData.rememberMe
-      });
-
-      // console.log('Response:', response.data);
-      const token = response.data.access_token;
-
+    if(!recaptcha.current.getValue()){
+      setError('Please Submit Captcha')
+    }
+    else {
       try {
-        const userResponse = await api.get('/auth/users/me', {
+        // Prepare request payload
+        const request = {
+          username: formData.username,
+          user_password: formData.password,
+          rememberMe: formData.rememberMe,
+          recaptchaToken: recaptcha.current.getValue()
+        };
+        // console.log(request);
+
+        // Send API request with application/json header
+        const response = await api.post('/auth/token', request, {
           headers: {
-            Authorization: `Bearer ${token}`
+            'Content-Type': 'application/json'
           }
         });
-
-        const userData = userResponse.data;
-        console.log('User Response:', userData);
-        setToken(token);
-        
-        if (userData.user_type === false) {
-          // console.log('Going to Home')
-          navigate('/home');
-        } else {
-          // console.log('Going to Admin')
-          navigate('/admin');
+  
+        // console.log('Response:', response.data);
+        const token = response.data.access_token;
+  
+        try {
+          const userResponse = await api.get('/auth/users/me', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+  
+          const userData = userResponse.data;
+          console.log('User Response:', userData);
+          setToken(token);
+          
+          if (userData.user_type === false) {
+            // console.log('Going to Home')
+            navigate('/home');
+          } else {
+            // console.log('Going to Admin')
+            navigate('/admin');
+          }
         }
-      }
-      catch (error) { 
-        console.log(error)
+        catch (error) { 
+          console.log(error)
+          setError('Invalid credentials');
+        }
+      } catch (error) {
+        // console.log(error)
         setError('Invalid credentials');
       }
-    } catch (error) {
-      // console.log(error)
-      setError('Invalid credentials');
     }
-  };
-
-  // with recaptcha
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if(!recaptcha.current.getValue()){
-  //     setError('Please Submit Captcha')
-  //   }
-  //   else {
-  //     try {
-  //       const response = await api.post('/auth/token', {
-  //           "username": formData.username,
-  //           "password": formData.password,
-  //           "rememberMe": formData.rememberMe
-  //       });
-  
-  //       // console.log('Response:', response.data);
-  //       const token = response.data.access_token;
-  
-  //       try {
-  //         const userResponse = await api.get('/auth/users/me', {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`
-  //           }
-  //         });
-  
-  //         const userData = userResponse.data;
-  //         console.log('User Response:', userData);
-  //         setToken(token);
-          
-  //         if (userData.user_type === 0) {
-  //           // console.log('Going to Home')
-  //           navigate('/home');
-  //         } else {
-  //           // console.log('Going to Admin')
-  //           navigate('/admin');
-  //         }
-  //       }
-  //       catch (error) { 
-  //         console.log(error)
-  //         setError('Invalid credentials');
-  //       }
-  //     } catch (error) {
-  //       // console.log(error)
-  //       setError('Invalid credentials');
-  //     }
-  //   }
       
-  // };
+  };
 
   return (
     <div className="container">
@@ -166,8 +150,8 @@ const Login = () => {
               </div>
             </div>
             {error && <p className="error-center">{error}</p>}
+            {captchaKey && <ReCAPTCHA className="mt-20" sitekey={captchaKey} ref={recaptcha}/>}
             <button className="primary-btn mt-20" type="submit">Log In</button>
-            {/* <ReCAPTCHA sitekey={process.env.CAPTCHA_SITE_KEY} ref={recaptcha}/> */}
           </form>
           <div className="signup">
             <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>

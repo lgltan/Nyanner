@@ -29,6 +29,7 @@ class LoginRequest(BaseModel):
     username: str
     user_password: str
     rememberMe: bool
+    recaptchaToken: str
 
 class Token(BaseModel):
     access_token: str

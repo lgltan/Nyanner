@@ -4,11 +4,12 @@ from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from starlette import status
-from server.models import AdminLog, User, Photo, Session as UserSession
+from server.models import AdminLog, User, Photo, Session as UserSession, IssuedToken
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
-from server.utils import add_photo, validate_image, validate_phone_number, validate_name, validate_user_data, validate_birthday, authenticate_user, create_access_token, get_current_active_user, get_current_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
+from server.utils import add_photo, get_captcha_secret_key, get_captcha_site_key, validate_image, validate_phone_number, validate_name, validate_user_data, validate_birthday, authenticate_user, create_access_token, get_current_active_user, get_current_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
 import base64
+import httpx
 import logging
 
 load_dotenv()
@@ -101,11 +102,31 @@ async def login_for_access_token(
     request: LoginRequest,
     db: db_dependency
 ) -> Token:
+    
+    # # Verify the Google reCAPTCHA token
+    async with httpx.AsyncClient() as client:
+        recaptcha_response = await client.post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            data={
+                'secret': get_captcha_secret_key(),
+                'response': request.recaptchaToken
+            }
+        )
+    
+    recaptcha_result = recaptcha_response.json()
+
+    if not recaptcha_result.get('success'):
+        # Log the failed login attempt
+        admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}. Invalid reCAPTCHA token.")
+        db.add(admin_log)
+        db.commit()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid reCAPTCHA token')
+
     user = authenticate_user(request.username, request.user_password, db)
     
     if not user:
         # Log the failed login attempt
-        admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}")
+        admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}. Invalid credentials.")
         db.add(admin_log)
         db.commit()
 
@@ -115,6 +136,10 @@ async def login_for_access_token(
     if user_session and user_session.ban_bool:
         ban_end_time = user_session.ban_timestamp + timedelta(minutes=user_session.ban_time)
         if datetime.now() < ban_end_time:
+            # Log the failed login attempt
+            admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}. Banned user.")
+            db.add(admin_log)
+            db.commit()
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User is banned",
@@ -124,15 +149,20 @@ async def login_for_access_token(
             user_session.ban_bool = False
             user_session.ban_timestamp = None
             user_session.ban_time = 0
-            # Log the successful login attempt
-            admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")
-            db.add(admin_log)
-            db.commit()
+    
+    # Log the successful login attempt
+    admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")
+    db.add(admin_log)
+    db.commit()
 
     access_token_expires = None
     if request.rememberMe:
         access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
-    access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
+    issued_at, access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
+
+    issued_token = IssuedToken(token_id=access_token, user_id=user.user_id, issued_at=issued_at)
+    db.add(issued_token)
+    db.commit()
 
     return Token(access_token=access_token, token_type='bearer')
     
@@ -234,11 +264,33 @@ async def edit_user(
 @router.get('/logout', status_code=status.HTTP_200_OK)
 async def logout(db: db_dependency, current_user: dict = Depends(get_current_user)):
     username = current_user['user'].username
+
     try:
+        # Invalidate token in database
+        issued_token = db.query(IssuedToken)\
+                        .filter(IssuedToken.user_id == current_user['user'].user_id)\
+                        .order_by(IssuedToken.issued_at.desc())\
+                        .first()
+        
+        issued_token.invalidated = True
+        db.commit()
+        db.refresh(issued_token)
+
+        # Log the successful logout
         admin_log = AdminLog(admin_description=f"Successfully logged out for username: {username}")
         db.add(admin_log)
         db.commit()
+    
     except:
+        # Log the failed logout
+        admin_log = AdminLog(admin_description=f"Failed logout for username: {username}")
+        db.add(admin_log)
+        db.commit()
+
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to log out {username}")
     
     # return {"message": "User logged out successfully"}
+
+@router.get('/recaptcha', status_code=status.HTTP_200_OK)
+async def recaptcha():
+    return {"site_key": get_captcha_site_key()}
