@@ -54,6 +54,11 @@
     white-space: nowrap;
 }
 
+.captcha {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .forgot-password a {
     text-decoration: none;
     color: var(--indigo-dye);

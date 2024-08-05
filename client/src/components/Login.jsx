@@ -150,7 +150,7 @@ const Login = () => {
               </div>
             </div>
             {error && <p className="error-center">{error}</p>}
-            {captchaKey && <ReCAPTCHA className="mt-20" sitekey={captchaKey} ref={recaptcha}/>}
+            {captchaKey && <ReCAPTCHA className="captcha mt-20" sitekey={captchaKey} ref={recaptcha}/>}
             <button className="primary-btn mt-20" type="submit">Log In</button>
           </form>
           <div className="signup">
