@@ -27,11 +27,11 @@ class User(Base):
     
     photo = relationship("Photo")
 
-class Session(Base):
-    __tablename__ = 'sessions'
-    session_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
-    user_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
-    user = relationship("User")
+class BannedUsers(Base):
+    __tablename__ = 'bannedusers'
+    bannedusers_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
+    key_to_user_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
+    key_to_user_id = relationship("User")
     ban_bool = Column(Boolean, default=False)
     ban_timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
     ban_time = Column(BigInteger, default=0)

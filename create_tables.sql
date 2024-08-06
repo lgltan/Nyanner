@@ -1,13 +1,13 @@
 -- DROP DATABASE nyanner_db;
 -- CREATE DATABASE nyanner_db;
 
-DROP TABLE moves;
-DROP TABLE lobby;
-DROP TABLE admin_logs;
-DROP TABLE sessions;
-DROP TABLE issued_tokens;
-DROP TABLE users;
-DROP TABLE photos;
+-- DROP TABLE moves;
+-- DROP TABLE lobby;
+-- DROP TABLE admin_logs;
+-- DROP TABLE banned_users;
+-- DROP TABLE issued_tokens;
+-- DROP TABLE users;
+-- DROP TABLE photos;
 
 CREATE TABLE photos (
     id INT NOT NULL AUTO_INCREMENT,
@@ -30,10 +30,10 @@ CREATE TABLE users(
 	user_password VARBINARY(256) NOT NULL
 );
 
-CREATE TABLE sessions(
-    session_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT UNSIGNED,
-	FOREIGN KEY (user_id) REFERENCES users(user_id),
+CREATE TABLE banned_users(
+    banned_users_id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT PRIMARY KEY,
+    key_to_user_id BIGINT UNSIGNED,
+	FOREIGN KEY (key_to_user_id) REFERENCES users(user_id),
     ban_bool BOOLEAN DEFAULT 0,
     ban_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ban_time BIGINT DEFAULT 0
