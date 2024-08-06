@@ -63,3 +63,14 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
 
 def generate_unique_id(length=6):
     return ''.join(random.choice(chars) for _ in range(length))
+
+
+async def get_new_move(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Could not validate credentials',
+        headers={'WWW-Authenticate': 'Bearer'}
+    )
+
+
+    return None

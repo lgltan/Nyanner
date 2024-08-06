@@ -37,7 +37,12 @@ async def create_lobby(
     waiting_game = db.query(Lobby).filter(Lobby.lobby_status == "Waiting").filter(Lobby.p1_id == user_id).first()
     if waiting_game:
         # @ETHAN delete all games with p1_id == user_id
-        pass
+        # nested = db.begin_nested() # can delete
+        # try:
+        db.delete(waiting_game)
+        db.commit()
+        # except:
+        #     nested.rollback()
     
     ongoing_game = db.query(Lobby).filter(Lobby.lobby_status == "Ongoing").filter(or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id)).first()
     if ongoing_game:
