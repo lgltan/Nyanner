@@ -29,7 +29,7 @@ class User(Base):
 
 class BannedUsers(Base):
     __tablename__ = 'banned_users'
-    bannedusers_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
+    banned_users_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
     key_to_user_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
     user = relationship("User")
     ban_bool = Column(Boolean, default=False)
