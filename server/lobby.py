@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from server.schemas import EnumStatus
 from server.utils import db_dependency
 import base64
-from server.models import AdminLog, User, Session as UserSession
+from server.models import AdminLog, User, BannedUsers 
 from server.game_utils import get_current_user, generate_unique_id
 
 load_dotenv()

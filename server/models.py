@@ -28,10 +28,10 @@ class User(Base):
     photo = relationship("Photo")
 
 class BannedUsers(Base):
-    __tablename__ = 'bannedusers'
+    __tablename__ = 'banned_users'
     bannedusers_id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
     key_to_user_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
-    key_to_user_id = relationship("User")
+    user = relationship("User")
     ban_bool = Column(Boolean, default=False)
     ban_timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
     ban_time = Column(BigInteger, default=0)

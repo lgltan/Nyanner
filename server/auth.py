@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from starlette import status
-from server.models import AdminLog, User, Photo, Session as UserSession, IssuedToken
+from server.models import AdminLog, User, Photo, BannedUsers, IssuedToken
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
 from server.utils import add_photo, get_captcha_secret_key, get_captcha_site_key, validate_image, validate_phone_number, validate_name, validate_user_data, validate_birthday, authenticate_user, create_access_token, get_current_active_user, get_current_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
@@ -132,9 +132,9 @@ async def login_for_access_token(
 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
     
-    user_session = db.query(UserSession).filter(UserSession.user_id == user.user_id).first()
-    if user_session and user_session.ban_bool:
-        ban_end_time = user_session.ban_timestamp + timedelta(minutes=user_session.ban_time)
+    banned_user = db.query(BannedUsers).filter(BannedUsers.key_to_user_id == user.user_id).first()
+    if banned_user and banned_user.ban_bool:
+        ban_end_time = banned_user.ban_timestamp + timedelta(minutes=banned_user.ban_time)
         if datetime.now() < ban_end_time:
             # Log the failed login attempt
             admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}. Banned user.")
@@ -146,9 +146,9 @@ async def login_for_access_token(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         else:
-            user_session.ban_bool = False
-            user_session.ban_timestamp = None
-            user_session.ban_time = 0
+            banned_user.ban_bool = False
+            banned_user.ban_timestamp = None
+            banned_user.ban_time = 0
     
     # Log the successful login attempt
     admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")

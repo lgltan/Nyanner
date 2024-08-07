@@ -3,7 +3,7 @@ from typing import Annotated, Optional, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from server.database import SessionLocal
-from server.models import AdminLog, User, Session as UserSession
+from server.models import AdminLog, User, BannedUsers
 from server.schemas import UserlistAdmin, BanRequest, UnbanRequest
 from server.auth import db_dependency
 from starlette import status
@@ -34,16 +34,16 @@ async def ban_user(ban_request: BanRequest, db: db_dependency):
         logging.error(f"User with ID {ban_request.user_id} not found.")
         raise HTTPException(status_code=404, detail="User not found")
 
-    user_session = db.query(UserSession).filter(UserSession.user_id == user.user_id).first()
-    if not user_session:
+    banned_user = db.query(BannedUsers).filter(BannedUsers.key_to_user_id == user.user_id).first()
+    if not banned_user:
         logging.info("Creating new session")
-        user_session = UserSession(user_id=user.user_id, ban_bool=True, ban_time=ban_request.ban_duration)
-        db.add(user_session)
+        banned_user = BannedUsers(key_to_user_id=user.user_id, ban_bool=True, ban_time=ban_request.ban_duration)
+        db.add(banned_user)
     else:
-        logging.info("Session exists, updating")
-        user_session.ban_bool = True
-        user_session.ban_timestamp = datetime.now()
-        user_session.ban_time = ban_request.ban_duration
+        logging.info("Banned Session exists, updating")
+        banned_user.ban_bool = True
+        banned_user.ban_timestamp = datetime.now()
+        banned_user.ban_time = ban_request.ban_duration
 
     db.commit()
 
@@ -64,11 +64,11 @@ async def unban_user(unban_request: UnbanRequest, db: db_dependency):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user_session = db.query(UserSession).filter(UserSession.user_id == user.user_id).first()
-    if user_session:
-        user_session.ban_bool = False
-        user_session.ban_timestamp = None
-        user_session.ban_time = 0
+    banned_user = db.query(BannedUsers).filter(BannedUsers.key_to_user_id == user.user_id).first()
+    if banned_user:
+        banned_user.ban_bool = False
+        banned_user.ban_timestamp = None
+        banned_user.ban_time = 0
         db.commit()
 
     new_log = AdminLog(
