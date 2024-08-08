@@ -109,6 +109,33 @@ const AdminPage = () => {
     }
   };
 
+  const copyAndDownloadLogs = async () => {
+    try {
+      const token = fetchToken();
+      
+      // Copy and download the log file
+      const response = await api.get('/logs/copy_and_download_log', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        responseType: 'blob' // Important for file download
+      });
+  
+      // Create a link element and simulate a click to trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'app_copy.log'); // Set the file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error copying or downloading logs:', error);
+    }
+  };
+  
+  
+
   useEffect(() => {
     if (activeTab === 'profile') {
       fetchUserData();
@@ -178,38 +205,39 @@ const AdminPage = () => {
             </div>
           </div>
         );
-      case 'logs':
-        return (
-          <div>
-            <h2>Logs</h2>
-            <input
-              type="text"
-              placeholder="Search logs..."
-              value={searchLog}
-              onChange={(e) => setSearchLog(e.target.value)}
-            />
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Log ID</th>
-                    <th>Message</th>
-                    <th>Timestamp</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {logs.map((log) => (
-                    <tr key={log.admin_log_id}>
-                      <td>{log.admin_log_id}</td>
-                      <td>{log.admin_description}</td>
-                      <td>{log.admin_timestamp}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        case 'logs':
+  return (
+    <div>
+      <h2>Logs</h2>
+      <input
+        type="text"
+        placeholder="Search logs..."
+        value={searchLog}
+        onChange={(e) => setSearchLog(e.target.value)}
+      />
+      <button onClick={copyAndDownloadLogs}>Download Logs</button> {/* Add this line */}
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Log ID</th>
+              <th>Message</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {logs.map((log) => (
+              <tr key={log.admin_log_id}>
+                <td>{log.admin_log_id}</td>
+                <td>{log.admin_description}</td>
+                <td>{log.admin_timestamp}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
       default:
         return <div>Select a tab</div>;
     }

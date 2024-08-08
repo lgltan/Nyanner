@@ -3,6 +3,7 @@ from logging.handlers import RotatingFileHandler
 import os
 import shutil
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import FileResponse
 from server.models import AdminLog
 from datetime import datetime
 from server.utils import db_dependency
@@ -22,7 +23,6 @@ def ensure_log_file_writable(log_file):
 ensure_log_file_writable(log_file)
 
 # Create a file handler that logs messages to a file
-log_file = "app.log"
 file_handler = RotatingFileHandler(log_file, maxBytes=2000, backupCount=5)
 file_handler.setLevel(logging.INFO)
 
@@ -64,21 +64,18 @@ router = APIRouter(
     tags=['logs']
 )
 
-# Endpoint to request a copy of the log file
-@router.post("/request_log_copy")
-async def request_log_copy():
+@router.get("/copy_and_download_log", response_class=FileResponse)
+async def copy_and_download_log():
     try:
-        src_file = "app.log"
-        dst_file = "app_copy.log"
-        shutil.copy(src_file, dst_file)
-        return {"message": "Log file copied successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred while copying the log file: {str(e)}")
+        copied_log_file = "app_copy.log"
+        # Copy the log file
+        shutil.copy(log_file, copied_log_file)
 
-# Example usage of logging
-@router.get("/")
-async def root():
-    make_log_writable(log_file)  # Ensure the log file is writable before logging
-    logger.info("Root endpoint accessed")
-    make_log_read_only(log_file)  # Make the log file read-only after logging
-    return {"message": "Hello, World!"}
+        # Check if the copied log file exists
+        if not os.path.exists(copied_log_file):
+            raise HTTPException(status_code=404, detail="Copied log file not found")
+
+        # Return the copied log file for download
+        return FileResponse(copied_log_file, media_type='application/octet-stream', filename='app_copy.log')
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"An error occurred while copying or downloading the log file: {str(e)}")
