@@ -139,6 +139,44 @@ const AdminPage = () => {
     }
   };
   
+  const searchUsers = async () => {
+    try {
+      const token = fetchToken();
+      const response = await api.get('/admin/users', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const filteredUsers = response.data.filter(user =>
+        user.username.includes(searchUser) ||
+        user.email.includes(searchUser) ||
+        (user.ban_bool ? 'Banned' : 'Active').includes(searchUser)
+      );
+      setUsers(filteredUsers);
+    } catch (error) {
+      console.error('Error searching users:', error);
+    }
+  };
+  
+  const searchLogs = async () => {
+    try {
+      const token = fetchToken();
+      const response = await api.get('/admin/logs', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const filteredLogs = response.data.filter(log =>
+        log.admin_log_id.toString().includes(searchLog) ||
+        log.admin_description.includes(searchLog) ||
+        log.admin_timestamp.includes(searchLog)
+      );
+      setLogs(filteredLogs);
+    } catch (error) {
+      console.error('Error searching logs:', error);
+    }
+  };
+  
   
 
   useEffect(() => {
@@ -164,20 +202,21 @@ const AdminPage = () => {
             <p>First Name: {userData.first_name}</p>
             <p>Last Name: {userData.last_name}</p>
             <p>Phone Number: {userData.phone_number}</p>
-            <p>Bio: This is the admin bio.</p>
           </div>
         );
       case 'userlist':
         return (
           <div>
             <h2>User List</h2>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchUser}
-              onChange={(e) => setSearchUser(e.target.value)}
-            />
-            <button>Filter</button>
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchUser}
+                onChange={(e) => setSearchUser(e.target.value)}
+              />
+              <button onClick={searchUsers}>Filter</button>
+            </div>
             <div className="table-container">
               <table>
                 <thead>
@@ -189,64 +228,71 @@ const AdminPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                {users.map((user) => (
+                  {users.map((user) => (
                     <tr key={user.user_id}>
                       <td>{user.username}</td>
                       <td>{user.email}</td>
                       <td>{user.ban_bool ? 'Banned' : 'Active'}</td>
                       <td>
-                      {user.user_type ? (
-                        <span>Admin</span>
-                      ) : user.ban_bool ? (
-                        <button onClick={() => handleUnbanUser(user.user_id)}>Unban</button>
-                      ) : (
-                        <button onClick={() => promptBanDuration(user.user_id)}>Ban</button>
-                      )}
+                        {user.user_type ? (
+                          <span>Admin</span>
+                        ) : user.ban_bool ? (
+                          <button onClick={() => handleUnbanUser(user.user_id)}>Unban</button>
+                        ) : (
+                          <button onClick={() => promptBanDuration(user.user_id)}>Ban</button>
+                        )}
                       </td>
                     </tr>
-                ))}
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
         );
-        case 'logs':
-  return (
-    <div>
-      <h2>Logs</h2>
-      <input
-        type="text"
-        placeholder="Search logs..."
-        value={searchLog}
-        onChange={(e) => setSearchLog(e.target.value)}
-      />
-      <button onClick={copyAndDownloadLogs}>Download Logs</button> {/* Add this line */}
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Log ID</th>
-              <th>Message</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => (
-              <tr key={log.admin_log_id}>
-                <td>{log.admin_log_id}</td>
-                <td>{log.admin_description}</td>
-                <td>{log.admin_timestamp}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+      case 'logs':
+        return (
+          <div>
+            <h2>Logs</h2>
+            <div className="logs-header">
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Search logs..."
+                  value={searchLog}
+                  onChange={(e) => setSearchLog(e.target.value)}
+                />
+                <button onClick={searchLogs}>Filter</button>
+              </div>
+              <button className="download-logs-button" onClick={copyAndDownloadLogs}>Download Logs</button>
+            </div>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Log ID</th>
+                    <th>Message</th>
+                    <th>Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log) => (
+                    <tr key={log.admin_log_id}>
+                      <td>{log.admin_log_id}</td>
+                      <td>{log.admin_description}</td>
+                      <td>{log.admin_timestamp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
       default:
         return <div>Select a tab</div>;
     }
   };
+  
+  
 
   return (
     <div className="admin-container">
