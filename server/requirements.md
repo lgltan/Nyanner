@@ -1,5 +1,5 @@
 # Initial Installation
-```pip install fastapi python-dotenv sqlalchemy pymysql "python-jose[cryptography]" "passlib[bcrypt]" python-multipart```
+```pip install fastapi python-dotenv sqlalchemy pymysql "python-jose[cryptography]" "passlib[bcrypt]" python-multipart chess```
 
 # .env
 ```
