@@ -94,6 +94,9 @@ async def val_move(
 
         db.add(move)
         db.commit()
+
+        if board.is_checkmate():
+            return 'c'
         
         return True
     else:

@@ -64,7 +64,7 @@ const ChessGame = ({playerColor}) => {
     };
 
     useEffect(() => {
-        const intervalId = setInterval(updateBoard, 1000); // Fetch every 1 seconds
+        const intervalId = setInterval(updateBoard, 3000); // Fetch every 1 seconds
     
         return () => {
           clearInterval(intervalId); // Clear interval on cleanup
@@ -86,8 +86,9 @@ const ChessGame = ({playerColor}) => {
         }
 
          // exit if the game is over
-        if (game.isGameOver() || game.isDraw()) {
-            alert("Checkmate.")
+        let chess = new Chess(gamePosition)
+        if (chess.isGameOver()) {
+            alert("Checkmate.");
             return false;
         }
 
@@ -103,10 +104,16 @@ const ChessGame = ({playerColor}) => {
                     Authorization: `Bearer ${token}`,
                 }
             });
-            console.log(response);
+            console.log(response.data);
+
+            if (response.data == 'c'){
+                alert("Checkmate.");
+            }
+
         } catch (error) {
             console.error(error);
         }
+        
 
         return true;  
     };
