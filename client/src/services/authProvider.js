@@ -15,7 +15,7 @@ export const setToken = (token)=>{
 }
 
 export const fetchToken = ()=>{
-    return localStorage.getItem('token')
+    return localStorage.getItem('token');
 }
 
 export const removeToken = ()=>{
@@ -32,7 +32,7 @@ export const useLogout = () => {
     try {
       const token = fetchToken();
       if(token) {
-        console.log('Logging out with token:', token);
+        // console.log('Logging out with token:', token);
         const response = await api.get('/auth/logout', {
           headers: {
             Content_Type: 'application/json',
@@ -40,18 +40,16 @@ export const useLogout = () => {
           },
         });
         if (response.status === 200) {
-          // await removeToken();
+          await removeToken();
           console.log('remove token')
           navigate('/login');
         }
         else {
-          alert('Error logging out');
-          console.error('Error logging out:', response);
+          // console.error('Error logging out:', response);
         }
       }
     } catch (error) {
-      alert('Error logging out');
-      console.error('Error logging out:', error);
+      // console.error('Error logging out:', error);
     }
   };
 
@@ -87,7 +85,7 @@ export function ProtectedRoute({ isAdminRoute = false, children }) {
             setIsAuthorized(true);
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          // console.error('Error fetching user data:', error);
         } finally {
           setLoading(false);
         }

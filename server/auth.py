@@ -61,12 +61,13 @@ async def create_user(db: db_dependency,
     # Handle photo upload
     photo_id = None
     if file:
-        photo_content = file.file.read()
-        photo = Photo(filename=file.filename, content=photo_content)
-        db.add(photo)
-        db.commit()
-        db.refresh(photo)
-        photo_id = photo.id
+        # photo_content = file.file.read()
+        # photo = Photo(filename=file.filename, content=photo_content)
+        # db.add(photo)
+        # db.commit()
+        # db.refresh(photo)
+        # photo_id = photo.id
+        photo_id = await add_photo(file, db)
     
     new_user = User(
         user_type=0,
@@ -82,6 +83,13 @@ async def create_user(db: db_dependency,
     
     db.add(new_user)
     db.commit()
+    db.refresh(new_user)
+    user_id = new_user.user_id
+
+    if user_id:
+        admin_log = AdminLog(admin_description=f"Successfully registerd user: {new_user.username}")
+        db.add(admin_log)
+        db.commit()
 
 @router.post('/uploadfile', status_code=status.HTTP_202_ACCEPTED)
 async def upload_file(file: UploadFile = File(...)):
@@ -99,7 +107,7 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid image file.')
     
 
-@router.post("/token", response_model=Token)
+@router.post("/login", response_model=Token)
 async def login_for_access_token(
     request: LoginRequest,
     db: db_dependency
@@ -163,6 +171,7 @@ async def login_for_access_token(
     access_token_expires = None
     if request.rememberMe:
         access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
+        # access_token_expires = timedelta(minutes=int(TOKEN_EXPIRATION))
     issued_at, access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
 
     issued_token = IssuedToken(token_id=access_token, user_id=user.user_id, issued_at=issued_at)

@@ -21,7 +21,13 @@ const NavBar = ({ signup }) => {
         const userData = await getUserData(auth);
         setProfilePhoto(userData.photo.content);
       } catch (error) {
-        console.error("Error fetching user data or photo:", error);
+        if (error.response.data.detail === 'Expired token.') {
+          logout();
+        }
+        else {
+          // console.error('Error fetching user data:');
+        }
+        navigate('/');
       } finally {
         setIsLoading(false);
       }

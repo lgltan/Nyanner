@@ -13,13 +13,10 @@ from server.schemas import CreateUserRequest, TokenData
 import os
 import re
 import base64
+import string
+import random
 
 load_dotenv()
-
-# router = APIRouter(
-#     prefix='/auth',
-#     tags=['auth']
-# )
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -174,7 +171,7 @@ def authenticate_user(username: str, password: str, db):
 def create_access_token(username: str, user_id: int, user_type: int, expires_delta: Union[timedelta, None]):
     encode = {'username': username, 'id': user_id, 'user_type': user_type}
     issued_at = datetime.now()
-    expires = issued_at + timedelta(minutes=180)    # Default expiration time is 3 hours
+    expires = issued_at + timedelta(days=1)    # Default expiration time is 1 day
     if expires_delta:
         expires = issued_at + expires_delta
     encode.update({'exp': expires})
@@ -183,7 +180,7 @@ def create_access_token(username: str, user_id: int, user_type: int, expires_del
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Could not validate credentials',
+        detail='Invalid token.',
         headers={'WWW-Authenticate': 'Bearer'}
     )
 
@@ -192,9 +189,24 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
         username: str = payload.get('username')
         user_id: int = payload.get('id')
         user_type: int = payload.get('user_type')
-        if username is None or user_id is None:
+        expiration: int = payload.get('exp')
+
+        if username is None or user_id is None or expiration is None:
             raise credentials_exception
+        
+        expiration = datetime.fromtimestamp(expiration)
+        expiration = expiration - timedelta(hours=8)
+
+        if expiration < datetime.now():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Expired token.',
+                headers={'WWW-Authenticate': 'Bearer'}
+            )
+
+
         token_data = TokenData(username=username, user_id=user_id, user_type=user_type)
+    
     except JWTError:
         raise credentials_exception
     
@@ -224,9 +236,32 @@ async def get_photo_from_db(image_id: int, db: db_dependency):
     return photo
     # return StreamingResponse(BytesIO(photo.content), media_type="image/jpeg")
 
+def rename_photo(filename: str, random_length=32):
+    # Get the file extension
+    file_extension = os.path.splitext(filename)[1]
+    
+    # Generate a random string
+    letters_and_digits = string.ascii_letters + string.digits
+    random_string = ''.join(random.choice(letters_and_digits) for _ in range(random_length))
+    
+    # Get the current timestamp in a specific format
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    
+    # Combine random string and timestamp
+    combined_string = f"{random_string}_{timestamp}"
+    
+    # Cipher the combined string using a basic alphanumeric substitution
+    # This cipher simply shifts characters, ensuring all characters are alphanumeric
+    ciphered_string = ''.join(letters_and_digits[(letters_and_digits.index(char) + 3) % len(letters_and_digits)] 
+                              if char in letters_and_digits else char for char in combined_string)
+    
+    # Return the ciphered filename with the original extension
+    return f"{ciphered_string}{file_extension}"
+
 async def add_photo(file: UploadFile, db: db_dependency):
     photo_content = file.file.read()
-    photo = Photo(filename=file.filename, content=photo_content)
+    new_filename = rename_photo(file.filename)
+    photo = Photo(filename=new_filename, content=photo_content)
     db.add(photo)
     db.commit()
     db.refresh(photo)

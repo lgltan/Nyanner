@@ -30,10 +30,8 @@ const Login = () => {
     const fetchCaptchaKey = async () => {
       try {
         const response = await api.get('/auth/recaptcha');
-        console.log(response.data.site_key);
         setCaptchaKey(response.data.site_key);
       } catch (err) {
-        console.error('Failed to fetch CAPTCHA key:', err);
         setError('Failed to load CAPTCHA. Please try again later.');
       }
     };
@@ -66,7 +64,7 @@ const Login = () => {
         // console.log(request);
 
         // Send API request with application/json header
-        const response = await api.post('/auth/token', request, {
+        const response = await api.post('/auth/login', request, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -83,23 +81,19 @@ const Login = () => {
           });
   
           const userData = userResponse.data;
-          console.log('User Response:', userData);
+          // console.log('User Response:', userData);
           setToken(token);
           
           if (userData.user_type === false) {
-            // console.log('Going to Home')
             navigate('/home');
           } else {
-            // console.log('Going to Admin')
             navigate('/admin');
           }
         }
         catch (error) { 
-          console.log(error)
           setError('Invalid credentials');
         }
       } catch (error) {
-        // console.log(error)
         setError('Invalid credentials');
       }
     }

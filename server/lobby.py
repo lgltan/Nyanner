@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from starlette import status
 from server.database import SessionLocal
-from server.models import Lobby
+from server.models import Lobby, Move
 from dotenv import load_dotenv
 from server.schemas import EnumStatus, BotDifficulty
 from server.utils import db_dependency
@@ -36,14 +36,8 @@ async def create_lobby(
     
     waiting_game = db.query(Lobby).filter(Lobby.lobby_status == "Waiting").filter(Lobby.p1_id == user_id).first()
     if waiting_game:
-        # @ETHAN delete all games with p1_id == user_id
-        # nested = db.begin_nested() # can delete
-        # try:
         db.delete(waiting_game)
         db.commit()
-        # except:
-        #     nested.rollback()
-    
     ongoing_game = db.query(Lobby).filter(Lobby.lobby_status == "Ongoing").filter(or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id)).first()
     if ongoing_game:
         return # should redirect player to the game they are currently in automatically
@@ -59,7 +53,7 @@ async def create_lobby(
         lobby_status=EnumStatus['waiting'],
         bot_diff=0
     )
-    
+
     db.add(new_lobby)
     db.commit()
     return access_code
@@ -89,7 +83,15 @@ async def join_lobby(
 
         db.commit()
         db.refresh(lobby)
-    
+
+        zero_move = Move(
+        lobby_id=lobby.lobby_id,
+        board= 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        )
+
+        db.add(zero_move)
+        db.commit()
+
 @router.post('/create/bots', status_code=status.HTTP_201_CREATED)
 async def create_bots(
     request: BotDifficulty,
