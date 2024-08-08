@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
 from server.utils import debug_mode
 
-from server import auth, lobby, log_utils, models, admin
+from server import auth, lobby, log_utils, models, admin, chess_routes
 from server.database import SessionLocal, engine
 from server.utils import get_current_user
 
@@ -29,6 +29,7 @@ app.include_router(auth.router)
 app.include_router(lobby.router)
 app.include_router(admin.router)
 app.include_router(log_utils.router)
+app.include_router(chess_routes.router)
 
 
 @app.exception_handler(HTTPException)

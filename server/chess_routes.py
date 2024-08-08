@@ -6,7 +6,7 @@ from starlette import status
 from server.database import SessionLocal
 # from server.models import Lobby
 from dotenv import load_dotenv
-from server.utils import db_dependency, handle_error
+from server.utils import db_dependency
 from server.game_utils import get_current_user, get_new_move
 from server.game.game import get_uci, check_castling, get_index, check_enpassant, get_movelist, sunfish_to_FEN, get_best_move
 from server.models import User, Lobby, Move
@@ -34,42 +34,36 @@ def get_db():
 
 @router.get('/get_prev_board', status_code=status.HTTP_200_OK)
 def get_prev_board_API(db: db_dependency, current_user: User = Depends(get_current_user)):
-    try:
-        user_id = current_user.user_id
+    user_id = current_user.user_id
 
-        # # get the user's current lobby id
-        lobby = db.query(Lobby).filter(
-            (and_(Lobby.lobby_status == "Ongoing", or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id) ) )).first()
-        if not lobby:
-            raise ValueError("Failed to find lobby.")
-        
-        # using current lobby id, query from moves table
-        move = db.query(Move).filter(Move.lobby_id == lobby.lobby_id).order_by(Move.moves_id.desc()).first()
-        if move is None:
-            raise ValueError("Failed to find lobby.")
+    # # get the user's current lobby id
+    lobby = db.query(Lobby).filter(and_(Lobby.lobby_status == "Ongoing", or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id))).first()
+    if not lobby:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
+    
+    # # using current lobby id, query from moves table
+    move = db.query(Move).filter(Move.lobby_id == lobby.lobby_id).order_by(Move.moves_id.desc()).first()
+    if move == None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
 
-        return move.board
-    except Exception as exc:
-        handle_error(exc, message="Failed to get previous board")
+    return move.board
+
 
 def get_prev_board(db: db_dependency, current_user: User = Depends(get_current_user)):
-    try:
-        user_id = current_user.user_id
-        
-        # get the user's current lobby id
-        lobby = db.query(Lobby).filter(
-            (and_(Lobby.lobby_status == "Ongoing", or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id) ) )).first()
-        if not lobby:
-            raise ValueError("Failed to find lobby.")
-        
-        # using current lobby id, query from moves table
-        move = db.query(Move).filter(Move.lobby_id == lobby.lobby_id).order_by(Move.moves_id.desc()).first()
-        if move == None:
-            raise ValueError("Failed to find lobby.")
+    user_id = current_user.user_id
+    
+    # # get the user's current lobby id
+    lobby = db.query(Lobby).filter(and_(Lobby.lobby_status == "Ongoing", or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id))).first()
+    if not lobby:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
 
-        return lobby, move.board
-    except Exception as exc:
-            handle_error(exc, message="Failed to get previous board")
+    print(lobby.lobby_id)
+    # # using current lobby id, query from moves table
+    move = db.query(Move).filter(Move.lobby_id == lobby.lobby_id).order_by(Move.moves_id.desc()).first()
+    if move == None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
+
+    return lobby, move.board
 
 
 # gets called and passes requested move board
@@ -79,28 +73,31 @@ async def val_move(
     db: db_dependency, 
     current_user: User = Depends(get_current_user),
     ):
-    try:
-        lobby, board_fen = get_prev_board(db, current_user)
-        board = chess.Board(fen=board_fen)
 
-        if not board.is_valid():
-            return False
+    print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
+
+    lobby, board_fen = get_prev_board(db, current_user)
+    board = chess.Board(fen=board_fen)
+
+    if not board.is_valid():
+        return False
+    
+    # checks if move is valid
+    move = chess.Move.from_uci(request.uci)
+    if move in board.legal_moves:
         
-        # checks if move is valid
-        move = chess.Move.from_uci(request.uci)
-        if move in board.legal_moves:
-            board.push(move)
-            move = Move(
-            lobby_id=lobby.lobby_id,
-            board= board.fen(),
-            )
-            db.add(move)
-            db.commit()
-            return True
-        else:
-            return False
-    except Exception as exc:
-        handle_error(exc, message="Failed to validate move")
+        board.push(move)
+        move = Move(
+        lobby_id=lobby.lobby_id,
+        board= board.fen(),
+        )
+
+        db.add(move)
+        db.commit()
+        
+        return True
+    else:
+        return False
 
 @router.get('/bot_move', status_code=status.HTTP_201_CREATED)
 async def bot_move(
@@ -108,31 +105,32 @@ async def bot_move(
     current_user: User = Depends(get_current_user)
     ):
 
-    try:
-
-        lobby, board_fen = get_prev_board(db, current_user)
-        # run get best move function
-        move_uci = get_best_move(board_fen, lobby.bot_diff)
-        board = chess.Board(fen=move_uci)
-        if not board.is_valid():
-            print('error')
-            return False
-
-        # checks if move is valid
-        move = chess.Move.from_uci(move_uci)
-        print(move_uci)
+    # game = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(or_(Lobby.p1_id == current_user.user_id, Lobby.p2_id == current_user.user_id)).first()
     
-        if move in board.legal_moves:
-            move = Move(
-            lobby_id=lobby.lobby_id,
-            board= board_fen,
-            )
+    lobby, board_fen = get_prev_board(db, current_user)
 
-            db.add(move)
-            db.commit()
-            
-            return True
-        else:
-            return False
-    except Exception as exc:
-        handle_error(exc, message="Failed to perform bot move")
+    # run get best move function
+    move_uci = get_best_move(board_fen, lobby.bot_diff)
+
+    board = chess.Board(fen=move_uci)
+    if not board.is_valid():
+        print('error')
+        return False
+
+    # checks if move is valid
+    move = chess.Move.from_uci(move_uci)
+    print(move_uci)
+ 
+    if move in board.legal_moves:
+        move = Move(
+        lobby_id=lobby.lobby_id,
+        board= board_fen,
+        )
+
+        db.add(move)
+        db.commit()
+        
+        return True
+    else:
+        print('WALAHI IM COOKED')
+        return False

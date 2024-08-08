@@ -73,14 +73,6 @@ const ChessGame = ({playerColor}) => {
     
 
     const onDrop = async (sourceSquare, targetSquare, piece) => {
-        // const move = game.move({
-        //     from: sourceSquare,
-        //     to: targetSquare,
-        //     promotion: piece[1].toLowerCase() ?? "q",
-        // });
-        // // illegal move
-        // if (move === null) return false;
-
         // Update the FEN and game state
         try {
             const token = fetchToken();
@@ -107,7 +99,7 @@ const ChessGame = ({playerColor}) => {
             };
             const response = api.post('/game/val_move', request, {
                 headers: {
-                    'Content_Type': 'application/json',
+                    Content_Type: 'application/json',
                     Authorization: `Bearer ${token}`,
                 }
             });
