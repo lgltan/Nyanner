@@ -61,12 +61,13 @@ async def create_user(db: db_dependency,
     # Handle photo upload
     photo_id = None
     if file:
-        photo_content = file.file.read()
-        photo = Photo(filename=file.filename, content=photo_content)
-        db.add(photo)
-        db.commit()
-        db.refresh(photo)
-        photo_id = photo.id
+        # photo_content = file.file.read()
+        # photo = Photo(filename=file.filename, content=photo_content)
+        # db.add(photo)
+        # db.commit()
+        # db.refresh(photo)
+        # photo_id = photo.id
+        photo_id = await add_photo(file, db)
     
     new_user = User(
         user_type=0,
