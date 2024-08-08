@@ -17,6 +17,13 @@ import base64
 
 load_dotenv()
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 router = APIRouter(
     prefix='/game',
     tags=['game']
@@ -26,24 +33,16 @@ router = APIRouter(
 # which game the current user is playing
 def get_prev_board(db: db_dependency, current_user: User = Depends(get_current_user)):
     user_id = current_user.user_id
-
     # # get the user's current lobby id
-    lobby = db.query(Lobby).filter(Lobby.lobby_status == "Ongoing", Lobby.p1_id == user_id).first()
+    lobby = db.query(Lobby).filter(or_(Lobby.lobby_status == "Ongoing", Lobby.p1_id == user_id)).first()
     if not lobby:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
 
     # # using current lobby id, query from moves table
-    move = db.query(Move).filter(Move.lobby_id == lobby.value).first()
-    # if not move:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
+    move = db.query(Move).filter(Move.lobby_id == lobby.lobby_id).first()
+    if not move:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
 
-    return move.board
-
-# use sunfish, 2 string inputs; board states, get previous board state, given new board state, check difference with sunfish
-# post board to db if valid
-# return boolean true or false
-# post move (inputs: new chessboard string, auth check) returns true if move is valid, false if invalid
-# needs to do move validation, to be added after 
 
 # gets called and passes requested move board
 @router.post('/val_move', status_code=status.HTTP_200_OK)
@@ -61,25 +60,6 @@ async def validate_move(
 
 
     return True
-
-
-@router.post('/instantiate_moves', status_code=status.HTTP_200_OK)
-async def instantiate_moves(
-    request: SendMove,
-    db: db_dependency, 
-    current_user: User = Depends(get_current_user),
-    ):
-    
-    previous_board = get_prev_board(db_dependency, current_user)
-
-
-    print(current_user.first_name)
-    print(request.fen)
-
-
-    return True
-
-
 
 #      lobby.p2_id = current_user.user_id
 #       lobby.lobby_status = EnumStatus['ongoing']
