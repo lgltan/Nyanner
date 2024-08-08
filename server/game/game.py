@@ -1,15 +1,15 @@
 # game functions
 import numpy as np
-from sunfish import initial, Searcher, Position, MATE_LOWER, MATE_UPPER
+from server.game.sunfish import initial, Searcher, Position, MATE_LOWER, MATE_UPPER
 import chess
 import math
 
 # For internal testing only
-# class Moves:
-#     def __init__(self, moves_id, lobby_id, board):
-#         self.moves_id = moves_id # probably move number
-#         self.lobby_id = lobby_id # foreign key
-#         self.board = board
+class Moves:
+    def __init__(self, moves_id, lobby_id, board):
+        self.moves_id = moves_id # probably move number
+        self.lobby_id = lobby_id # foreign key
+        self.board = board
 
 BOARD_COLS = 8
 BOARD_ROWS = 8
