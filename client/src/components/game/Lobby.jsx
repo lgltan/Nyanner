@@ -40,11 +40,12 @@ const Lobby = ({ label, type, name, value, onChange, error, inGameCheck, ...prop
     const playBots = async () => {
         try {
             const token = fetchToken();
-            const response = await api.post('/lobby/create/bots', diffLvl, {
+            const request = {"diffLvl": diffLvl};
+            const response = await api.post('/lobby/create/bots', request, {
                 headers: {
                     Content_Type: 'application/json',
                     Authorization: `Bearer ${token}`,
-                },
+                }
             });
             inGameCheck(true);
         } catch (error) {
