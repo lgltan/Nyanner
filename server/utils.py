@@ -175,7 +175,7 @@ def create_access_token(username: str, user_id: int, user_type: int, expires_del
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Could not validate credentials',
+        detail='Invalid token.',
         headers={'WWW-Authenticate': 'Bearer'}
     )
 
@@ -184,9 +184,24 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
         username: str = payload.get('username')
         user_id: int = payload.get('id')
         user_type: int = payload.get('user_type')
-        if username is None or user_id is None:
+        expiration: int = payload.get('exp')
+
+        if username is None or user_id is None or expiration is None:
             raise credentials_exception
+        
+        expiration = datetime.fromtimestamp(expiration)
+        expiration = expiration - timedelta(hours=8)
+
+        if expiration < datetime.now():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Expired token.',
+                headers={'WWW-Authenticate': 'Bearer'}
+            )
+
+
         token_data = TokenData(username=username, user_id=user_id, user_type=user_type)
+    
     except JWTError:
         raise credentials_exception
     

@@ -24,8 +24,13 @@ const AdminPage = () => {
       });
       setUserData(response.data);
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      navigate('/login');
+      if (error.response.data.detail === 'Expired token.') {
+        logout();
+      }
+      else {
+        // console.error('Error fetching user data:', error);
+      }
+      navigate('/');
     }
   }, [navigate]);
 

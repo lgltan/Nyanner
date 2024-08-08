@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Lobby from "./game/Lobby.jsx";
 import { fetchToken } from "../services/authProvider.js";
-import { getUserData, getUserPhoto } from "../services/api.js";
+import { getUserData } from '../services/api.js';
 import NavBar from "./misc/NavBar.jsx";
 import { useNavigate } from "react-router-dom";
 import FormInput from "./form/FormInput.jsx";
@@ -33,8 +33,6 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleConfirm = async (password) => {
-    console.log("Password entered:", password);
-
     // Handle form submission
     const data = new FormData();
     data.append("first_name", formData.firstName);
@@ -44,10 +42,7 @@ const Home = () => {
     data.append("confirm_password", password);
     if (typeof formData.profilePhoto === 'object') {
       data.append("file", formData.profilePhoto);
-      console.log("file passed");
     }
-
-    console.log("Data:", data);
 
     try {
       const response = await api.put("/auth/edit/me", data, {
@@ -57,12 +52,9 @@ const Home = () => {
         },
       });
       setErrors({});
-      console.log("Response:", response);
       window.location.reload();
     } catch (error) {
-      console.log(error);
       const newErrors = error.response.data.detail;
-      console.log("Errors:", newErrors);
       setErrors(newErrors);
     }
   };
@@ -72,7 +64,6 @@ const Home = () => {
       try {
         const userData = await getUserData(auth);
         // const userPhoto = await getUserPhoto(auth);
-        console.log("user data", userData);
         setProfilePhoto(userData.photo_content);
         setFormData({
           firstName: userData.first_name,
@@ -84,7 +75,7 @@ const Home = () => {
           profilePhoto: `data:image/jpeg;base64,${userData.photo.content}`,
         });
       } catch (error) {
-        console.error("Error fetching user data or photo:", error);
+        // console.error("Error fetching user data or photo:", error);
       } finally {
         setIsLoading(false);
       }
@@ -106,7 +97,6 @@ const Home = () => {
   };
 
   const handleProfilePhotoChange = (file, error) => {
-    // console.log('File:', file);
     setFormData((prevData) => ({
       ...prevData,
       profilePhoto: file,
@@ -116,15 +106,6 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsModalOpen(true);
-    console.log("File:", formData.profilePhoto);
-    console.log(typeof formData.profilePhoto);
-    if (typeof formData.profilePhoto === 'object')
-    {
-      console.log("it should pass profile photo");
-    }
-
-
-    // console.log('before post', formData)
   };
 
   return (

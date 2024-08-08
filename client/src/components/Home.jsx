@@ -17,7 +17,7 @@ const Home = () => {
             try {
                 await getUserData(auth);
             } catch (error) {
-                console.error("Error fetching user data:", error);
+                // console.error("Error fetching user data:", error);
             } finally {
                 setIsLoading(false);
             }

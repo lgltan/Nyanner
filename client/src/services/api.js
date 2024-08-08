@@ -16,7 +16,12 @@ export const getUserData = async (token) => {
     // console.log("User data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    // console.error("Error fetching user data:", error);
+    if (error.response.data.detail === "Expired token.") {
+      // Logout if token is expired
+      if (localStorage.getItem('token'))
+        localStorage.removeItem('token');
+    }
     throw error; // Rethrow the error for further handling if needed
   }
 };
@@ -29,7 +34,7 @@ export const getUserPhoto = async (token) => {
     // console.log("Photo:", response.data);
     return { user: userData, photo: response.data };
   } catch (error) {
-    console.error("Error fetching user photo:", error);
+    // console.error("Error fetching user photo:", error);
     throw error;
   }
 };
