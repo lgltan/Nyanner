@@ -9,6 +9,7 @@ const FormInput = ({
   onChange,
   error,
   disabled=false,
+  isRequired=false,
   ...props
 }) => {
  
@@ -52,7 +53,7 @@ const FormInput = ({
         {...onBlur}
         {...props}
         disabled={disabled}
-        required
+        required={isRequired}
       />
       <label className="input-label" htmlFor={name}>{label}</label>
       {error && <p className="error">{error}</p>}
