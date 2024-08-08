@@ -1,9 +1,12 @@
 :root {
   --indigo-dye: #244166ff;
   --indigo-dye-darker: rgb(31, 56, 88);
+  --indigo-dye-darker-2: rgb(19, 34, 53);
   --porcelain-blue: #405A86;
+  --porcelain-blue-lighter: #6383a8;
   --night: #0a0a0aff;
   --off-white: #F7F7F7;
+  --grayish: #999;
 }
 
 body {

@@ -12,7 +12,7 @@
 }
 
 .upload-label {
-    color: #999;
+  color: var(--grayish);
     display: flex;
     align-items: center;
 }
