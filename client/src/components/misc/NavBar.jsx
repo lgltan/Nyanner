@@ -41,15 +41,12 @@ const NavBar = ({ signup }) => {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <Link to="/" className="site-name">
+        <Link to="/home" className="site-name">
           Nyanner
         </Link>
       </div>
       
       <div className="navbar-right">
-        <button className="primary-btn mr-10" onClick={() => navigate("/game")}>
-          Play Game
-        </button>
         <div className="profile-container">
           <img
             src={`data:image/jpeg;base64,${profilePhoto}`}

@@ -11,7 +11,7 @@ const Unauthorized = () => {
             style={{width: "50%", margin: " 160px auto", textAlign: "center"}}
         >
             <img src={unauthImg} alt="unauthorized" style={{margin: "auto"}}/>
-            <h2 style={{margin: "-10px 0 30px 0"}}>Unauthorized</h2>
+            <h2 style={{margin: "-10px 0 30px 0"}}>Oops... Something went wrong.</h2>
             <button className='primary-btn' onClick={() => navigate('/login')}>Log In</button>
         </div>
     );

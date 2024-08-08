@@ -8,8 +8,6 @@ import Signup from './components/Signup.jsx';
 import Home from './components/Home.jsx';
 import AdminPage from './components/AdminPage.jsx';
 import EditProfile from './components/EditProfile.jsx';
-import Lobby from './components/game/Lobby.jsx';
-import Game from './components/game/Game.jsx';
 import Unauthorized from './components/misc/Unauthorized.jsx';
 
 import { fetchToken } from './services/authProvider.js';
@@ -41,7 +39,7 @@ const App = () => {
                 <EditProfile />
               </ProtectedRoute>
                   } />
-          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/oops" element={<Unauthorized />} />
         </Routes>
       </div>
     </Router>
