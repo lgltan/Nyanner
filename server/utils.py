@@ -15,6 +15,8 @@ import re
 import base64
 import string
 import random
+import traceback
+import logging
 
 load_dotenv()
 
@@ -42,10 +44,20 @@ def get_captcha_site_key():
 def get_captcha_secret_key():
     return CAPTCHA_SECRET_KEY
 
+# FOR DEBUG MODE --
 def debug_mode():
-    return os.getenv("DEBUG_MODE", "off").lower() == "on"
+    debug_mode_value = os.getenv("DEBUG_MODE", "off").lower()
+    return debug_mode_value == "on"
 
-
+def handle_error(exc: Exception, message: str = 'An unexpected error occurred.', status_code: int = status.HTTP_400_BAD_REQUEST, redirect_url: str = "/brokenpage"):
+    if debug_mode():
+        logging.error(traceback.format_exc())
+        status_code = status.HTTP_401_UNAUTHORIZED
+        raise HTTPException(status_code=status_code, detail=str(exc))
+    else:
+        logging.error(message)
+        raise HTTPException(status_code=status.HTTP_307_TEMPORARY_REDIRECT, detail=redirect_url)
+# FOR DEBUG MODE --
 
 def validate_password(password: str):
     password_length = len(password)
