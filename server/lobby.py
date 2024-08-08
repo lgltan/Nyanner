@@ -56,7 +56,8 @@ async def create_lobby(
     new_lobby = Lobby(
         lobby_code=access_code.encode('ascii'),
         p1_id=user_id,
-        lobby_status=EnumStatus['waiting']
+        lobby_status=EnumStatus['waiting'],
+        bot_diff=0
     )
     
     db.add(new_lobby)
