@@ -25,6 +25,7 @@ const Login = () => {
 
   const recaptcha = useRef(null);
   const [captchaKey, setCaptchaKey] = useState('');
+  const hasFetchedCaptchaKey = useRef(false);
   
   useEffect(() => {
     const fetchCaptchaKey = async () => {
@@ -35,7 +36,11 @@ const Login = () => {
         setError('Failed to load CAPTCHA. Please try again later.');
       }
     };
-    fetchCaptchaKey();
+
+    if (!hasFetchedCaptchaKey.current) {
+      fetchCaptchaKey();
+      hasFetchedCaptchaKey.current = true;
+    }
   }, []);
 
   const handleChange = (e) => {
