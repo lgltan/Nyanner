@@ -297,12 +297,14 @@ def sunfish_to_FEN(board:str):
 #     table_moves = [zero_move, first_move, second_move, third_move, fourth_move, fifth_move]
 
 #     # FEN Format: board_state, color, castling, enpassant, halfmove, fullmove
-#     board_state = ''
-#     color = ''
-#     castling = ''
-#     enpassant = '-'
-#     halfmove = 0
-#     fullmove = 1
+#     
+#     rnbqkbnr/ppp1pppp/8/3p4/6P1/8/PPPPPP1P/RNBQKBNR w KQkq - 0 2
+#     board_state = '' rnbqkbnr/ppp1pppp/8/3p4/6P1/8/PPPPPP1P/RNBQKBNR
+#     color = '' w
+#     castling = '' KQkq
+#     enpassant = '-' - ds
+#     halfmove = 0 0 
+#     fullmove = 1 2
 #     parsed_FEN = ''
 
 #     board_state = sunfish_to_FEN(third_move.board) 
