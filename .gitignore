@@ -136,3 +136,6 @@ server/__pycache__
 game/__pycache__
 
 .vscode
+/server/game/__pycache__
+/server/game/__pycache__
+/server/__pycache__
