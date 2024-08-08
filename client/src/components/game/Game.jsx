@@ -18,7 +18,6 @@ function Game() {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log(response.data);
       setLobbyInfo(response.data);
     } catch (error) {
       console.error(error);
@@ -26,29 +25,19 @@ function Game() {
   };
   
   useEffect(() => {
-    const intervalId = setInterval(getLobby, 5000); // Fetch every 5 seconds
+    const intervalId = setInterval(getLobby, 1000); // Fetch every 5 seconds
 
     return () => {
       clearInterval(intervalId); // Clear interval on cleanup
     };
   }, []);
 
-  useEffect(() => {
-    if (lobbyInfo?.p2_id != null) {
-      setIsWaiting(false);
-      console.log("P2 Found.");
-    }
-    else {
-      console.log("Waiting for P2.");
-    }
-  }, [lobbyInfo]);
-
   return (
     <div className="game">
       <div className="game-left-col">
         Nyanner <br />
-        P1: {lobbyInfo?.p1_id} <br />
-        P2: {lobbyInfo?.p2_id} <br />
+        P1: {lobbyInfo?.p1_name ? lobbyInfo.p1_name : "Waiting"} <br />
+        P2: {lobbyInfo?.p2_name ? lobbyInfo.p2_name : "Waiting"} <br />
         Lobby Code: {lobbyInfo?.lobby_code}
       </div>
       <div className="chessboard-container">

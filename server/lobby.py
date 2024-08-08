@@ -122,6 +122,14 @@ async def get_lobby(
     
     lobby = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id)).first()
     
+    p1_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p1_id
+    p2_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p2_id
+    
+    if p1_id:
+        lobby.p1_name = db.query(User).filter(User.user_id == p1_id).first().username
+    if p2_id:
+        lobby.p2_name = db.query(User).filter(User.user_id == p2_id).first().username
+    
     if not lobby:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
     else:
