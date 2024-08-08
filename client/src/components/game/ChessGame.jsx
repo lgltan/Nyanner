@@ -65,23 +65,23 @@ const ChessGame = ({playerColor}) => {
             return false;
         }
 
-        // try {
-        //     console.log('hi');
-        //     const token = fetchToken();
-        //     const request = {
-        //         'fen': game.fen()
-        //     };
-        //     console.log(request.fen);
-        //     const response = api.post('/game/val_move', request, {
-        //         headers: {
-        //             Content_Type: 'application/json',
-        //             Authorization: `Bearer ${token}`,
-        //         }
-        //     });
-        //     console.log(response);
-        // } catch (error) {
-        //     console.error(error);
-        // }
+        try {
+            console.log('hi');
+            const token = fetchToken();
+            const request = {
+                'fen': game.fen(),
+                'uci': '' + sourceSquare + targetSquare
+            };
+            const response = api.post('/game/val_move', request, {
+                headers: {
+                    'Content_Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            console.log(response);
+        } catch (error) {
+            console.error(error);
+        }
 
         return true;  
     };

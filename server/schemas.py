@@ -73,6 +73,8 @@ class UnbanRequest(BaseModel):
 
 class SendMove(BaseModel):
     fen: str
+    uci: str 
     
 class BotDifficulty(BaseModel):
     diffLvl: int
+    
