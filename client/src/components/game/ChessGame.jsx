@@ -2,7 +2,7 @@
 // p2 is either the player or the bot
 // receive player color - compare player id with currently logged in to player 1 or player 2 in game state
 // insert game logic which sends the board state representation as a string as soon as the piece is dropped, wait for response from server to see if it is a valid move
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import api from '../../services/api';
@@ -24,6 +24,7 @@ import bP from './pieces/bP.png';
 
 const ChessGame = ({playerColor}) => {
     const game = useMemo(() => new Chess(), []);
+    const [isBot, setIsBot] = useState();
     const [gamePosition, setGamePosition] = useState(game.fen());
 
     const pieces = ["wP","wN","wB","wR","wQ","wK","bP","bN","bB","bR","bQ","bK"];
@@ -45,6 +46,22 @@ const ChessGame = ({playerColor}) => {
             );
         });
         return pieceComponents;
+    }, []);
+
+    useEffect(() => {
+        const updateBoard = async () => {
+            try {
+                const token = fetchToken();
+                const response = await api.get('/game/get_prev_board', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+              });
+              setGamePosition(response.data);
+            } catch (error) {  
+            }
+          };
+          updateBoard();
     }, []);
 
     const onDrop = async (sourceSquare, targetSquare, piece) => {

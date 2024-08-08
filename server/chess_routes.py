@@ -8,7 +8,7 @@ from server.database import SessionLocal
 from dotenv import load_dotenv
 from server.utils import db_dependency
 from server.game_utils import get_current_user, get_new_move
-from server.game.game import get_uci, check_castling, get_index, check_enpassant, get_movelist, sunfish_to_FEN
+from server.game.game import get_uci, check_castling, get_index, check_enpassant, get_movelist, sunfish_to_FEN, get_best_move
 from server.models import User, Lobby, Move
 from sqlalchemy import or_, and_
 from server.schemas import SendMove
@@ -75,3 +75,16 @@ async def val_move(
     print(move in board.legal_moves)
 
     return True
+
+@router.get('/bot_move', status_code=status.HTTP_201_CREATED)
+async def bot_move(
+    db: db_dependency, 
+    current_user: User = Depends(get_current_user)
+    ):
+
+    game = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(or_(Lobby.p1_id == current_user.user_id, Lobby.p2_id == current_user.user_id)).first()
+    
+    # get latest move from game
+    fen = "TO DO"
+    # run get best move function
+    get_best_move(fen, game.bot_diff)

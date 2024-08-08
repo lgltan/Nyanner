@@ -2,6 +2,7 @@
 import numpy as np
 from server.game.sunfish import initial, Searcher, Position, MATE_LOWER, MATE_UPPER
 import chess
+import chess.engine
 import math
 
 # For internal testing only
@@ -333,3 +334,79 @@ def sunfish_to_FEN(board:str):
 #     return 0
 
 # main()
+
+def evaluate_board(board):
+    # Simple evaluation function
+    if board.is_checkmate():
+        return float('-inf') if board.turn else float('inf')
+    if board.is_stalemate():
+        return 0
+    
+    # Material value of pieces
+    material_value = {
+        chess.PAWN: 1,
+        chess.KNIGHT: 3,
+        chess.BISHOP: 3,
+        chess.ROOK: 5,
+        chess.QUEEN: 9,
+        chess.KING: 0,
+    }
+
+    # Calculate total material value
+    total_value = 0
+    for piece in chess.PIECE_TYPES:
+        total_value += len(board.pieces(piece, chess.WHITE)) * material_value[piece]
+        total_value -= len(board.pieces(piece, chess.BLACK)) * material_value[piece]
+
+    return total_value
+
+def minimax(board, depth, alpha, beta, maximizing_player):
+    if depth == 0 or board.is_game_over():
+        return evaluate_board(board)
+
+    if maximizing_player:
+        max_eval = float('-inf')
+        for move in board.legal_moves:
+            board.push(move)
+            eval = minimax(board, depth - 1, alpha, beta, False)
+            board.pop()
+            max_eval = max(max_eval, eval)
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break
+        return max_eval
+    else:
+        min_eval = float('inf')
+        for move in board.legal_moves:
+            board.push(move)
+            eval = minimax(board, depth - 1, alpha, beta, True)
+            board.pop()
+            min_eval = min(min_eval, eval)
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break
+        return min_eval
+
+def find_best_move(board, depth):
+    best_move = None
+    best_value = float('-inf')
+
+    for move in board.legal_moves:
+        board.push(move)
+        move_value = minimax(board, depth - 1, float('-inf'), float('inf'), False)
+        board.pop()
+
+        if move_value > best_value:
+            best_value = move_value
+            best_move = move
+
+    return best_move
+
+def get_best_move(fen, depth=3):
+    board = chess.Board(fen)
+    best_move = find_best_move(board, depth)
+    return best_move.uci() if best_move else None
+
+# current_fen = 'rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'  # Example starting position
+# best_move = get_best_move(current_fen)
+# print("Best move in UCI format:", best_move)
