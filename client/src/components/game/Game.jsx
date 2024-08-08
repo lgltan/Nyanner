@@ -25,7 +25,6 @@ function Game() {
     }
   };
   
-
   useEffect(() => {
     const intervalId = setInterval(getLobby, 5000); // Fetch every 5 seconds
 

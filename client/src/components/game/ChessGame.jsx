@@ -47,11 +47,7 @@ const ChessGame = () => {
         return pieceComponents;
     }, []);
 
-    const onPieceDrop = ({ sourceSquare, targetSquare, piece }) => {
-     
-        console.log('xxxxxx');
-        console.log(piece);
-
+    const onDrop = (sourceSquare, targetSquare, piece) => {
         const move = game.move({
             from: sourceSquare,
             to: targetSquare,
@@ -67,7 +63,7 @@ const ChessGame = () => {
         setGame(new Chess(game.fen())); // Set the game state correctly
 
          // exit if the game is over
-        if (game.game_over() || game.in_draw()) return false;
+        // if (game.game_over() || game.in_draw()) return false;
 
         return true;  
     };
@@ -75,7 +71,7 @@ const ChessGame = () => {
     return <Chessboard 
     id="chessboard"
     position={fen} 
-    onPieceDrop={onPieceDrop} 
+    onPieceDrop={onDrop} 
     boardOrientation={"black"} 
     customPieces={customPieces}
     customDarkSquareStyle={{backgroundColor: '#405A86'}} 
