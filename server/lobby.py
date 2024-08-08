@@ -7,7 +7,7 @@ from starlette import status
 from server.database import SessionLocal
 from server.models import Lobby
 from dotenv import load_dotenv
-from server.schemas import EnumStatus
+from server.schemas import EnumStatus, BotDifficulty
 from server.utils import db_dependency
 import base64
 from server.models import AdminLog, User, BannedUsers 
@@ -91,8 +91,9 @@ async def join_lobby(
     
 @router.post('/create/bots', status_code=status.HTTP_201_CREATED)
 async def create_bots(
+    request: BotDifficulty,
     db: db_dependency, 
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
     ):
 
     user_id = current_user.user_id
@@ -105,7 +106,8 @@ async def create_bots(
         lobby_code=access_code.encode('ascii'),
         p1_id=user_id,
         p2_id=0,
-        lobby_status=EnumStatus['ongoing']
+        lobby_status=EnumStatus['ongoing'],
+        bot_diff=request.diffLvl
     )
     
     db.add(new_lobby)

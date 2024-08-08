@@ -4,7 +4,7 @@
 // insert game logic which sends the board state representation as a string as soon as the piece is dropped, wait for response from server to see if it is a valid move
 import React, { useState, useMemo } from 'react';
 import { Chessboard } from 'react-chessboard';
-import { Chess } from 'chess.js';
+import { Chess, Engine } from 'chess.js';
 import api from '../../services/api';
 import { fetchToken } from '../../services/authProvider';
 
@@ -22,9 +22,11 @@ import bB from './pieces/bB.png';
 import bN from './pieces/bN.png';
 import bP from './pieces/bP.png';
 
-const ChessGame = () => {
-    const [fen, setFen] = useState('start');
-    const [game, setGame] = useState(new Chess());
+const ChessGame = ({playerColor, diffLvl}) => {
+    const [gamePosition, setGamePosition] = useState(game.fen());
+    const [stockfishLevel, setStockfishLevel] = useState(diffLvl);
+    const game = useMemo(() => new Chess(), []);
+    const engine = useMemo(() => new Engine(), []);
 
     const pieces = ["wP","wN","wB","wR","wQ","wK","bP","bN","bB","bR","bQ","bK"];
     const pieceImgs = [wP,wN,wB,wR,wQ,wK,bP,bN,bB,bR,bQ,bK]
@@ -53,24 +55,24 @@ const ChessGame = () => {
             to: targetSquare,
             promotion: piece[1].toLowerCase() ?? "q",
         });
-        setGame(game.fen());
-
         // illegal move
         if (move === null) return false;
 
         // Update the FEN and game state
-        setFen(game.fen());
-        setGame(new Chess(game.fen())); // Set the game state correctly
+        setGamePosition(game.fen());
 
          // exit if the game is over
-        // if (game.game_over() || game.in_draw()) return false;
+        if (game.isGameOver || game.isDraw) {
+            alert("Checkmate.")
+            return false;
+        }
 
         return true;  
     };
 
     return <Chessboard 
     id="chessboard"
-    position={fen} 
+    position={gamePosition} 
     onPieceDrop={onDrop} 
     boardOrientation={"black"} 
     customPieces={customPieces}
