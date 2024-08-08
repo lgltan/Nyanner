@@ -1,0 +1,36 @@
+.lobby-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    overflow: hidden;
+    width: 30%;
+    margin: 20vh auto;
+    background: #fffdfd;
+    padding: 50px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.create-lobby {
+    margin-top: 20px;
+}
+
+.join-lobby, .play-bots {
+    display: flex;
+    align-items: start;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.play-bots {
+    margin-top: 0px;
+}
+
+.join-lobby .form-input, .play-bots .form-input {
+    width: 60%;
+}
+
+.join-lobby button, .play-bots button {
+    width: 30%;
+}

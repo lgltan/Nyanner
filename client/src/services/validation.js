@@ -40,3 +40,15 @@ export const validatePassword = (password, newErrors) => {
 
     return newErrors;
 };
+
+export const validateLobbyCode = (lobbyCode) => {
+    if (lobbyCode === '') {
+        return false;
+    }
+    const regex = /^[a-zA-Z0-9]{6}$/;
+    return regex.test(lobbyCode);
+}
+
+export const validateBotDifficulty = (diffLvl) => {
+    return diffLvl >= 1 && diffLvl <= 10;
+}

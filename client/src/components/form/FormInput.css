@@ -1,6 +1,7 @@
 .form-input {
     position: relative;
     margin-bottom: 20px;
+    align-items: center;
 }
 
 .input {
