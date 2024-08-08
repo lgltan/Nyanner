@@ -16,3 +16,6 @@ In ```./server``` run the following command in the terminal:
 In ```./client``` run the following command in the terminal:
 ```npm install```
 ```npm start```
+
+# HTTPS
+cert password: ```cssecdev```
