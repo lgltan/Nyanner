@@ -41,7 +41,6 @@ export const useLogout = () => {
         });
         if (response.status === 200) {
           await removeToken();
-          console.log('remove token')
           navigate('/login');
         }
         else {
