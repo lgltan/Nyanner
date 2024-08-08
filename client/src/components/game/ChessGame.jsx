@@ -22,7 +22,7 @@ import bB from './pieces/bB.png';
 import bN from './pieces/bN.png';
 import bP from './pieces/bP.png';
 
-const ChessGame = ({playerColor}) => {
+const ChessGame = ({playerColor, isRobot}) => {
     const game = useMemo(() => new Chess(), []);
     const [isBot, setIsBot] = useState();
     const [gamePosition, setGamePosition] = useState();
@@ -65,7 +65,6 @@ const ChessGame = ({playerColor}) => {
 
     useEffect(() => {
         const intervalId = setInterval(updateBoard, 3000); // Fetch every 1 seconds
-    
         return () => {
           clearInterval(intervalId); // Clear interval on cleanup
         };
@@ -110,6 +109,17 @@ const ChessGame = ({playerColor}) => {
             console.error(error);
         }
         
+        if (isBot) {
+            try {
+                const token = fetchToken();
+                const response = await api.get('/game/bot_move', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+              });
+            } catch (error) {  
+            }
+        }
 
         return true;  
     };

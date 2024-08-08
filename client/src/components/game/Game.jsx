@@ -11,6 +11,7 @@ const Game = ({inGameCheck}) => {
   const [lobbyInfo, setLobbyInfo] = useState(null);
   const [isWaiting, setIsWaiting] = useState(true);
   const [playerColor, setPlayerColor] = useState("white");
+  const [isBot, setIsBot] = useState(false);
 
   useEffect(() => {
     const updatePlayerColor = async () => {
@@ -38,6 +39,9 @@ const Game = ({inGameCheck}) => {
         }
       });
       setLobbyInfo(response.data);
+      if (lobbyInfo?.p1_id == lobbyInfo?.p2_id) {
+        setIsBot(true);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -78,7 +82,7 @@ const Game = ({inGameCheck}) => {
         <button className="leave-game secondary-btn mt-20" onClick={leaveGame}>Leave</button>
       </div>
       <div className="chessboard-container">
-        <ChessGame playerColor={playerColor}/>
+        <ChessGame playerColor={playerColor} isRobot={isBot}/>
       </div>
     </div>
   );
