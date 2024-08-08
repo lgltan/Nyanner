@@ -40,6 +40,7 @@ const App = () => {
               </ProtectedRoute>
                   } />
           <Route path="/oops" element={<Unauthorized />} />
+          <Route path="/settings" element={<Unauthorized />} />
         </Routes>
       </div>
     </Router>

@@ -87,7 +87,7 @@ const Lobby = ({
 
   return (
     <div className="lobby-container">
-      <button className="create-lobby primary-btn mt-10" onClick={createLobby}>
+      <button className="create-lobby primary-btn" onClick={createLobby}>
         Create Lobby
       </button>
       <hr />
