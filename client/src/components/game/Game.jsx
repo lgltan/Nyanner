@@ -10,6 +10,23 @@ const Game = ({inGameCheck}) => {
   const Navigate = useNavigate();
   const [lobbyInfo, setLobbyInfo] = useState(null);
   const [isWaiting, setIsWaiting] = useState(true);
+  const [playerColor, setPlayerColor] = useState("white");
+
+  useEffect(() => {
+    const updatePlayerColor = async () => {
+        try {
+            const token = fetchToken();
+            const response = await api.get('/lobby/current_player', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+          });
+          setPlayerColor(response.data);
+        } catch (error) {  
+        }
+      };
+      updatePlayerColor();
+}, []);
 
   const getLobby = async () => {
     try {
@@ -39,7 +56,6 @@ const Game = ({inGameCheck}) => {
         console.error(error);
       }
     }
-
   };
 
   const leaveGame = async () => {
@@ -75,7 +91,7 @@ const Game = ({inGameCheck}) => {
         <button onClick={leaveGame}>Leave</button>
       </div>
       <div className="chessboard-container">
-        <ChessGame />
+        <ChessGame playerColor={playerColor}/>
       </div>
     </div>
   );

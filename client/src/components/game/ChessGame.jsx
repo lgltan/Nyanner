@@ -22,7 +22,7 @@ import bB from './pieces/bB.png';
 import bN from './pieces/bN.png';
 import bP from './pieces/bP.png';
 
-const ChessGame = ({playerColor, diffLvl}) => {
+const ChessGame = ({playerColor}) => {
     const game = useMemo(() => new Chess(), []);
     const [gamePosition, setGamePosition] = useState(game.fen());
 
@@ -91,7 +91,7 @@ const ChessGame = ({playerColor, diffLvl}) => {
     id="chessboard"
     position={gamePosition} 
     onPieceDrop={onDrop} 
-    boardOrientation={"black"} 
+    boardOrientation={playerColor} 
     customPieces={customPieces}
     customDarkSquareStyle={{backgroundColor: '#405A86'}} 
     customLightSquareStyle={{backgroundColor: '#F7F7F7'}} 

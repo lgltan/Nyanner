@@ -141,6 +141,25 @@ async def get_lobby(
     else:
         return lobby
     
+@router.get('/current_player', status_code=status.HTTP_201_CREATED)
+async def get_lobby(
+    db: db_dependency, 
+    current_user: User = Depends(get_current_user)
+    ):
+
+    user_id = current_user.user_id
+    lobby = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id)).first()
+    
+    if lobby:
+        p1_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p1_id
+        p2_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p2_id
+    if p1_id:
+        if user_id == p1_id:
+            return "white"
+    if p2_id:
+        if user_id == p2_id:
+            return "black"    
+    
 @router.get('/ingame_check', status_code=status.HTTP_201_CREATED)
 async def get_ingame_check(
     db: db_dependency, 
