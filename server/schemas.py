@@ -44,6 +44,7 @@ class UserlistAdmin(BaseModel):
     user_id: int
     username: str
     email: str
+    user_type: bool
 
 class UserData(BaseModel):
     user_id: int

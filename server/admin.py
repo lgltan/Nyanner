@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Annotated, Optional, List
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from server.database import SessionLocal
 from server.models import AdminLog, User, BannedUsers
 from server.schemas import UserlistAdmin, BanRequest, UnbanRequest
-from server.auth import db_dependency
+from server.utils import db_dependency
+from server.log_utils import log_message
 from starlette import status
-import logging
+
+log_file = "app.log"
 
 router = APIRouter(
     prefix='/admin',
@@ -24,42 +25,37 @@ async def get_all_logs(db: db_dependency):
     logs = db.query(AdminLog).all()
     return [{"admin_log_id": log.admin_log_id, "admin_description": log.admin_description, "admin_timestamp": log.admin_timestamp} for log in logs]
 
-
 @router.post('/ban', status_code=status.HTTP_202_ACCEPTED)
 async def ban_user(ban_request: BanRequest, db: db_dependency):
-    logging.info(f"Received ban request: {ban_request}")
-
+    
     user = db.query(User).filter(User.user_id == ban_request.user_id).first()
     if not user:
-        logging.error(f"User with ID {ban_request.user_id} not found.")
         raise HTTPException(status_code=404, detail="User not found")
 
+    # If user is admin don't ban
+    if user.user_type:
+        raise HTTPException(status_code=403, detail="Cannot ban an admin user")
+
+    # Writing to the banned user table
     banned_user = db.query(BannedUsers).filter(BannedUsers.key_to_user_id == user.user_id).first()
     if not banned_user:
-        logging.info("Creating new session")
         banned_user = BannedUsers(key_to_user_id=user.user_id, ban_bool=True, ban_time=ban_request.ban_duration)
         db.add(banned_user)
     else:
-        logging.info("Banned Session exists, updating")
         banned_user.ban_bool = True
         banned_user.ban_timestamp = datetime.now()
         banned_user.ban_time = ban_request.ban_duration
 
     db.commit()
-
-    new_log = AdminLog(
-        admin_description=f"User {user.username} has been banned for {ban_request.ban_duration} minutes.",
-        admin_timestamp=datetime.now()
-    )
-    db.add(new_log)
-    db.commit()
-
-    logging.info(f"User {user.username} banned successfully.")
+    # make_log_writable(log_file)
+    log_message(db, f"User {user.username} has been banned for {ban_request.ban_duration} minutes.")
+    # make_log_read_only(log_file)
+   
     return {"message": "User banned successfully"}
-
 
 @router.post('/unban', status_code=204)
 async def unban_user(unban_request: UnbanRequest, db: db_dependency):
+    
     user = db.query(User).filter(User.user_id == unban_request.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -71,11 +67,8 @@ async def unban_user(unban_request: UnbanRequest, db: db_dependency):
         banned_user.ban_time = 0
         db.commit()
 
-    new_log = AdminLog(
-        admin_description=f"User {user.username} has been unbanned.",
-        admin_timestamp=datetime.now()
-    )
-    db.add(new_log)
-    db.commit()
-
+    # make_log_writable(log_file)
+    log_message(db, f"User {user.username} has been unbanned.")
+    # make_log_read_only(log_file)
+   
     return {"message": "User unbanned successfully"}

@@ -8,11 +8,13 @@ from server.models import AdminLog, User, Photo, BannedUsers, IssuedToken
 from dotenv import load_dotenv
 from server.schemas import CreateUserRequest, LoginRequest, Token, UserData, PhotoData
 from server.utils import add_photo, get_captcha_secret_key, get_captcha_site_key, validate_image, validate_phone_number, validate_name, validate_user_data, validate_birthday, authenticate_user, create_access_token, get_current_active_user, get_current_user, get_photo_from_db, db_dependency, bcrypt_context, TOKEN_EXPIRATION
+from server.log_utils import make_log_read_only, make_log_writable, log_message
 import base64
 import httpx
 import logging
 
 load_dotenv()
+log_file = "app.log"
 
 router = APIRouter(
     prefix='/auth',
@@ -117,8 +119,10 @@ async def login_for_access_token(
 
     if not recaptcha_result.get('success'):
         # Log the failed login attempt
-        admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}. Invalid reCAPTCHA token.")
-        db.add(admin_log)
+        # make_log_writable(log_file)
+        log_message(db, f"Failed login attempt for username: {request.username}. Invalid reCAPTCHA token.")
+        # make_log_read_only(log_file)
+
         db.commit()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid reCAPTCHA token')
 
@@ -126,8 +130,8 @@ async def login_for_access_token(
     
     if not user:
         # Log the failed login attempt
-        admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}. Invalid credentials.")
-        db.add(admin_log)
+        log_message(db, f"Failed login attempt for username: {request.username}. Invalid credentials.")
+
         db.commit()
 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Credentials')
@@ -137,8 +141,9 @@ async def login_for_access_token(
         ban_end_time = banned_user.ban_timestamp + timedelta(minutes=banned_user.ban_time)
         if datetime.now() < ban_end_time:
             # Log the failed login attempt
-            admin_log = AdminLog(admin_description=f"Failed login attempt for username: {request.username}. Banned user.")
-            db.add(admin_log)
+            ban_duration = ban_end_time - datetime.now()
+            log_message(db, f"Failed login attempt for username: {request.username}. User is banned for {ban_duration}.")
+
             db.commit()
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -151,8 +156,8 @@ async def login_for_access_token(
             banned_user.ban_time = 0
     
     # Log the successful login attempt
-    admin_log = AdminLog(admin_description=f"Successful login for username: {request.username}")
-    db.add(admin_log)
+    log_message(db, f"Successful login for username: {request.username}")
+
     db.commit()
 
     access_token_expires = None
@@ -277,14 +282,14 @@ async def logout(db: db_dependency, current_user: dict = Depends(get_current_use
         db.refresh(issued_token)
 
         # Log the successful logout
-        admin_log = AdminLog(admin_description=f"Successfully logged out for username: {username}")
-        db.add(admin_log)
+        log_message(db, f"Successfully logged out for username: {username}")
+
         db.commit()
     
     except:
         # Log the failed logout
-        admin_log = AdminLog(admin_description=f"Failed logout for username: {username}")
-        db.add(admin_log)
+        log_message(db, f"Failed logout for username: {username}")
+
         db.commit()
 
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to log out {username}")

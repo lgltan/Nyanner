@@ -163,11 +163,13 @@ const AdminPage = () => {
                       <td>{user.email}</td>
                       <td>{user.ban_bool ? 'Banned' : 'Active'}</td>
                       <td>
-                        {user.ban_bool ? (
-                          <button onClick={() => handleUnbanUser(user.user_id)}>Unban</button>
-                        ) : (
-                          <button onClick={() => promptBanDuration(user.user_id)}>Ban</button>
-                        )}
+                      {user.user_type ? (
+                        <span>Admin</span>
+                      ) : user.ban_bool ? (
+                        <button onClick={() => handleUnbanUser(user.user_id)}>Unban</button>
+                      ) : (
+                        <button onClick={() => promptBanDuration(user.user_id)}>Ban</button>
+                      )}
                       </td>
                     </tr>
                 ))}
