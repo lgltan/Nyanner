@@ -119,6 +119,17 @@ async def create_bots(
 
         db.add(new_lobby)
         db.commit()
+
+        lobby = db.query(Lobby).filter(Lobby.lobby_code == access_code).first()
+
+        zero_move = Move(
+            lobby_id=lobby.lobby_id,
+            board='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        )
+
+        db.add(zero_move)
+        db.commit()
+
     except Exception as exc:
         handle_error(exc, message="Failed to create lobby with bots")
 

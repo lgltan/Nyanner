@@ -74,8 +74,6 @@ async def val_move(
     current_user: User = Depends(get_current_user),
     ):
 
-    print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
-
     lobby, board_fen = get_prev_board(db, current_user)
     board = chess.Board(fen=board_fen)
 
@@ -110,9 +108,9 @@ async def bot_move(
     # run get best move function
     move_uci = get_best_move(board_fen, lobby.bot_diff)
 
-    board = chess.Board(fen=move_uci)
+    move = chess.Move.from_uci(move_uci)
+    board = chess.Board(fen=move)
     if not board.is_valid():
-        print('error')
         return False
 
     # checks if move is valid
