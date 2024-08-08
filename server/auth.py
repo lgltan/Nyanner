@@ -170,8 +170,8 @@ async def login_for_access_token(
 
     access_token_expires = None
     if request.rememberMe:
-        # access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
-        access_token_expires = timedelta(minutes=int(TOKEN_EXPIRATION))
+        access_token_expires = timedelta(days=int(TOKEN_EXPIRATION))
+        # access_token_expires = timedelta(minutes=int(TOKEN_EXPIRATION))
     issued_at, access_token = create_access_token(user.username, user.user_id, user.user_type, access_token_expires)
 
     issued_token = IssuedToken(token_id=access_token, user_id=user.user_id, issued_at=issued_at)

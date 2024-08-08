@@ -171,7 +171,7 @@ def authenticate_user(username: str, password: str, db):
 def create_access_token(username: str, user_id: int, user_type: int, expires_delta: Union[timedelta, None]):
     encode = {'username': username, 'id': user_id, 'user_type': user_type}
     issued_at = datetime.now()
-    expires = issued_at + timedelta(minutes=180)    # Default expiration time is 3 hours
+    expires = issued_at + timedelta(days=1)    # Default expiration time is 1 day
     if expires_delta:
         expires = issued_at + expires_delta
     encode.update({'exp': expires})
