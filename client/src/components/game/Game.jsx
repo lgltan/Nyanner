@@ -3,6 +3,7 @@ import ChessGame from './ChessGame';
 import './game.css';
 import api from '../../services/api';
 import { fetchToken } from '../../services/authProvider';
+import { Chessboard } from 'react-chessboard';
 
 function Game() {
   const [lobbyInfo, setLobbyInfo] = useState(null);
@@ -13,6 +14,7 @@ function Game() {
       const token = fetchToken();
       const response = await api.get('/lobby/info', {
         headers: {
+          Content_Type: 'application/json',
           Authorization: `Bearer ${token}`
         }
       });
@@ -22,6 +24,7 @@ function Game() {
       console.error(error);
     }
   };
+  
 
   useEffect(() => {
     const intervalId = setInterval(getLobby, 5000); // Fetch every 5 seconds

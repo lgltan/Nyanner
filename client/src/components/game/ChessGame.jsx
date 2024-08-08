@@ -5,6 +5,8 @@
 import React, { useState, useMemo } from 'react';
 import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
+import api from '../../services/api';
+import { fetchToken } from '../../services/authProvider';
 
 import wK from './pieces/wK.png';
 import wQ from './pieces/wQ.png';
@@ -36,7 +38,8 @@ const ChessGame = () => {
                         width: squareWidth,
                         height: squareWidth,
                         backgroundImage: `url(${pieceImgs[i]})`,
-                        backgroundSize: "100%"
+                        backgroundSize: "100%",
+                        backgroundRepeat: "no-repeat"
                     }}
                 />
             );
@@ -44,38 +47,35 @@ const ChessGame = () => {
         return pieceComponents;
     }, []);
 
-    const onDrop = ({ sourceSquare, targetSquare }) => {
-        // Determine if the move involves a pawn promotion
-        const isPawnPromotion = /p/.test(sourceSquare[0]);
-    
-        // Attempt to make the move
-        let moveResult = null;
-        if (isPawnPromotion) {
-            const promotion = window.prompt("Promote to what piece? (e.g., q for queen, r for rook, b for bishop, n for knight):") || 'q'; // Default to queen if no input
-            moveResult = game.move({
-                from: sourceSquare,
-                to: targetSquare,
-                promotion: promotion,
-            });
-        } else {
-            moveResult = game.move({ from: sourceSquare, to: targetSquare });
-        }
-    
-        // Check if the move was successful
-        if (!moveResult) {
-            alert("Invalid move");
-        } else {
-            setFen(game.fen());
-            if (game.game_over()) {
-                alert(`Game over! ${game.status()}`);
-            }
-        }
+    const onPieceDrop = ({ sourceSquare, targetSquare, piece }) => {
+     
+        console.log('xxxxxx');
+        console.log(piece);
+
+        const move = game.move({
+            from: sourceSquare,
+            to: targetSquare,
+            promotion: piece[1].toLowerCase() ?? "q",
+        });
+        setGame(game.fen());
+
+        // illegal move
+        if (move === null) return false;
+
+        // Update the FEN and game state
+        setFen(game.fen());
+        setGame(new Chess(game.fen())); // Set the game state correctly
+
+         // exit if the game is over
+        if (game.game_over() || game.in_draw()) return false;
+
+        return true;  
     };
 
     return <Chessboard 
     id="chessboard"
     position={fen} 
-    onDrop={onDrop} 
+    onPieceDrop={onPieceDrop} 
     boardOrientation={"black"} 
     customPieces={customPieces}
     customDarkSquareStyle={{backgroundColor: '#405A86'}} 
