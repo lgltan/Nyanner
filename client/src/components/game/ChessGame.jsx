@@ -4,7 +4,7 @@
 // insert game logic which sends the board state representation as a string as soon as the piece is dropped, wait for response from server to see if it is a valid move
 import React, { useState, useMemo } from 'react';
 import { Chessboard } from 'react-chessboard';
-import { Chess, Engine } from 'chess.js';
+import { Chess } from 'chess.js';
 import api from '../../services/api';
 import { fetchToken } from '../../services/authProvider';
 
@@ -23,10 +23,8 @@ import bN from './pieces/bN.png';
 import bP from './pieces/bP.png';
 
 const ChessGame = ({playerColor, diffLvl}) => {
-    const [gamePosition, setGamePosition] = useState(game.fen());
-    const [stockfishLevel, setStockfishLevel] = useState(diffLvl);
     const game = useMemo(() => new Chess(), []);
-    const engine = useMemo(() => new Engine(), []);
+    const [gamePosition, setGamePosition] = useState(game.fen());
 
     const pieces = ["wP","wN","wB","wR","wQ","wK","bP","bN","bB","bR","bQ","bK"];
     const pieceImgs = [wP,wN,wB,wR,wQ,wK,bP,bN,bB,bR,bQ,bK]
@@ -67,23 +65,23 @@ const ChessGame = ({playerColor, diffLvl}) => {
             return false;
         }
 
-        try {
-            console.log('hi');
-            const token = fetchToken();
-            const request = {
-                'fen': game.fen()
-            };
-            console.log(request.fen);
-            const response = api.post('/game/val_move', request, {
-                headers: {
-                    Content_Type: 'application/json',
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            console.log(response);
-        } catch (error) {
-            console.error(error);
-        }
+        // try {
+        //     console.log('hi');
+        //     const token = fetchToken();
+        //     const request = {
+        //         'fen': game.fen()
+        //     };
+        //     console.log(request.fen);
+        //     const response = api.post('/game/val_move', request, {
+        //         headers: {
+        //             Content_Type: 'application/json',
+        //             Authorization: `Bearer ${token}`,
+        //         }
+        //     });
+        //     console.log(response);
+        // } catch (error) {
+        //     console.error(error);
+        // }
 
         return true;  
     };
