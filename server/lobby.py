@@ -112,7 +112,7 @@ async def create_bots(
         new_lobby = Lobby(
             lobby_code=access_code.encode('ascii'),
             p1_id=user_id,
-            p2_id=0,
+            p2_id=user_id,
             lobby_status=EnumStatus['ongoing'],
             bot_diff=request.diffLvl
         )

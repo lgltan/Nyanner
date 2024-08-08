@@ -106,10 +106,6 @@ const ChessGame = ({playerColor}) => {
             });
             console.log(response.data);
 
-            if (response.data == 'c'){
-                alert("Checkmate.");
-            }
-
         } catch (error) {
             console.error(error);
         }
