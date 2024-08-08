@@ -11,6 +11,7 @@ import EditProfile from './components/EditProfile.jsx';
 import Unauthorized from './components/misc/Unauthorized.jsx';
 
 import { fetchToken } from './services/authProvider.js';
+import BrokenPage from './components/misc/BrokenPage.jsx';
 
 const App = () => {
   const isLoggedIn = !!fetchToken();
@@ -40,6 +41,8 @@ const App = () => {
               </ProtectedRoute>
                   } />
           <Route path="/oops" element={<Unauthorized />} />
+          <Route path="/settings" element={<Unauthorized />} />
+          <Route path="/oops2" element={<BrokenPage />} />
         </Routes>
       </div>
     </Router>

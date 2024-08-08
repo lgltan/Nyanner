@@ -25,7 +25,7 @@ import bP from './pieces/bP.png';
 const ChessGame = ({playerColor}) => {
     const game = useMemo(() => new Chess(), []);
     const [isBot, setIsBot] = useState();
-    const [gamePosition, setGamePosition] = useState(game.fen());
+    const [gamePosition, setGamePosition] = useState();
 
     const pieces = ["wP","wN","wB","wR","wQ","wK","bP","bN","bB","bR","bQ","bK"];
     const pieceImgs = [wP,wN,wB,wR,wQ,wK,bP,bN,bB,bR,bQ,bK]
@@ -48,33 +48,50 @@ const ChessGame = ({playerColor}) => {
         return pieceComponents;
     }, []);
 
-    useEffect(() => {
-        const updateBoard = async () => {
-            try {
-                const token = fetchToken();
-                const response = await api.get('/game/get_prev_board', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-              });
-              setGamePosition(response.data);
-            } catch (error) {  
+    const updateBoard = async () => {
+        console.log('ho')
+        try {
+            const token = fetchToken();
+            const response = await api.get('/game/get_prev_board', {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-          };
-          updateBoard();
-    }, []);
+          });
+          setGamePosition(response.data);
+          game.fen(gamePosition);
+        } catch (error) {  
+        }
+    };
+
+    useEffect(() => {
+        const intervalId = setInterval(updateBoard, 1000); // Fetch every 1 seconds
+    
+        return () => {
+          clearInterval(intervalId); // Clear interval on cleanup
+        };
+      }, []);
+    
 
     const onDrop = async (sourceSquare, targetSquare, piece) => {
-        const move = game.move({
-            from: sourceSquare,
-            to: targetSquare,
-            promotion: piece[1].toLowerCase() ?? "q",
-        });
-        // illegal move
-        if (move === null) return false;
+        // const move = game.move({
+        //     from: sourceSquare,
+        //     to: targetSquare,
+        //     promotion: piece[1].toLowerCase() ?? "q",
+        // });
+        // // illegal move
+        // if (move === null) return false;
 
         // Update the FEN and game state
-        setGamePosition(game.fen());
+        try {
+            const token = fetchToken();
+            const response = await api.get('/game/get_prev_board', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+          });
+          setGamePosition(response.data);
+        } catch (error) {  
+        }
 
          // exit if the game is over
         if (game.isGameOver() || game.isDraw()) {
@@ -83,7 +100,6 @@ const ChessGame = ({playerColor}) => {
         }
 
         try {
-            console.log('hi');
             const token = fetchToken();
             const request = {
                 'fen': game.fen(),

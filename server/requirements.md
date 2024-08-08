@@ -8,6 +8,7 @@
 DB_URL = "mysql+pymysql://{db_username}:{db_password}@localhost:3306/{db_name}"
 SECRET_KEY = "WHY_IS_IT_9AM"
 ALGORITHM = "HS256"
+DEBUG_MODE=true
 ```
 
 # Running the server

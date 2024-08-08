@@ -69,11 +69,13 @@ const Game = ({inGameCheck}) => {
   return (
     <div className="game">
       <div className="game-left-col">
-        Nyanner <br />
-        P1: {lobbyInfo?.p1_name ? lobbyInfo.p1_name : "Waiting"} <br />
-        P2: {lobbyInfo?.p2_name ? lobbyInfo.p2_name : "Waiting"} <br />
-        Lobby Code: {lobbyInfo?.lobby_code}<br />
-        <button onClick={leaveGame}>Leave</button>
+        <div className='game-info'>
+          <h3> Lobby Code: <span className='lobbyInfo'>{lobbyInfo?.lobby_code}</span><br /> </h3>
+          <h4 className='P1'> P1: <span className='lobbyInfo'>{lobbyInfo?.p1_name ? lobbyInfo.p1_name : "Waiting"}</span> </h4> 
+          <h4 className='P2'> P2: <span className='lobbyInfo'>{lobbyInfo?.p2_name ? lobbyInfo.p2_name : "Waiting"}</span> </h4>
+        </div>
+        
+        <button className="leave-game secondary-btn mt-20" onClick={leaveGame}>Leave</button>
       </div>
       <div className="chessboard-container">
         <ChessGame playerColor={playerColor}/>
