@@ -105,7 +105,7 @@ export function ProtectedRoute({ isAdminRoute = false, children }) {
     }
   
     if (!isAuthorized) {
-      return <Navigate to='/unauthorized' />;
+      return <Navigate to='/oops' />;
     }
   
     return children;
