@@ -48,7 +48,7 @@ def get_prev_board(db: db_dependency, current_user: User = Depends(get_current_u
     if move == None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
 
-    return move.board
+    return lobby.lobby_id, move.board
 
 
 # gets called and passes requested move board
@@ -58,23 +58,30 @@ async def val_move(
     db: db_dependency, 
     current_user: User = Depends(get_current_user),
     ):
+    lobby_id, board_str = get_prev_board(db, current_user)
     
+    print(board_str)
 
-    print(current_user.first_name)
-    print(request.fen)
-    previous_board = get_prev_board(db, current_user)
-    
-    board = chess.Board(fen=previous_board)
+    board = chess.Board(fen=board_str)
     if not board.is_valid():
         print('error')
 
     # checks if move is valid
     move = chess.Move.from_uci(request.uci)
-    print('WALDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
-    print(board.legal_moves)
-    print(move in board.legal_moves)
+ 
+    if move in board.legal_moves:
+        move = Move(
+        lobby_id=lobby_id,
+        board= board_str,
+        )
 
-    return True
+        db.add(move)
+        db.commit()
+        
+        return True
+    else:
+        print('WALAHI IM COOKED')
+        return False
 
 @router.get('/bot_move', status_code=status.HTTP_201_CREATED)
 async def bot_move(
