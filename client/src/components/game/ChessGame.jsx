@@ -74,7 +74,16 @@ const ChessGame = ({playerColor}) => {
         if (move === null) return false;
 
         // Update the FEN and game state
-        setGamePosition(game.fen());
+        try {
+            const token = fetchToken();
+            const response = await api.get('/game/get_prev_board', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+          });
+          setGamePosition(response.data);
+        } catch (error) {  
+        }
 
          // exit if the game is over
         if (game.isGameOver() || game.isDraw()) {
@@ -83,7 +92,6 @@ const ChessGame = ({playerColor}) => {
         }
 
         try {
-            console.log('hi');
             const token = fetchToken();
             const request = {
                 'fen': game.fen(),
