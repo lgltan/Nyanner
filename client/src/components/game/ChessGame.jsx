@@ -22,9 +22,9 @@ import bB from './pieces/bB.png';
 import bN from './pieces/bN.png';
 import bP from './pieces/bP.png';
 
-const ChessGame = () => {
-    const [fen, setFen] = useState('start');
-    const [game, setGame] = useState(new Chess());
+const ChessGame = ({playerColor, diffLvl}) => {
+    const game = useMemo(() => new Chess(), []);
+    const [gamePosition, setGamePosition] = useState(game.fen());
 
     const pieces = ["wP","wN","wB","wR","wQ","wK","bP","bN","bB","bR","bQ","bK"];
     const pieceImgs = [wP,wN,wB,wR,wQ,wK,bP,bN,bB,bR,bQ,bK]
@@ -47,30 +47,49 @@ const ChessGame = () => {
         return pieceComponents;
     }, []);
 
-    const onDrop = (sourceSquare, targetSquare, piece) => {
+    const onDrop = async (sourceSquare, targetSquare, piece) => {
         const move = game.move({
             from: sourceSquare,
             to: targetSquare,
             promotion: piece[1].toLowerCase() ?? "q",
         });
-        setGame(game.fen());
-
         // illegal move
         if (move === null) return false;
 
         // Update the FEN and game state
-        setFen(game.fen());
-        setGame(new Chess(game.fen())); // Set the game state correctly
+        setGamePosition(game.fen());
 
          // exit if the game is over
-        // if (game.game_over() || game.in_draw()) return false;
+        if (game.isGameOver() || game.isDraw()) {
+            alert("Checkmate.")
+            return false;
+        }
+
+        // try {
+        //     console.log('hi');
+        //     const token = fetchToken();
+        //     const request = {
+        //         'fen': game.fen()
+        //     };
+        //     console.log(request.fen);
+        //     const response = api.post('/game/val_move', request, {
+        //         headers: {
+        //             Content_Type: 'application/json',
+        //             Authorization: `Bearer ${token}`,
+        //         }
+        //     });
+        //     console.log(response);
+        // } catch (error) {
+        //     console.error(error);
+        // }
 
         return true;  
     };
 
+
     return <Chessboard 
     id="chessboard"
-    position={fen} 
+    position={gamePosition} 
     onPieceDrop={onDrop} 
     boardOrientation={"black"} 
     customPieces={customPieces}

@@ -62,3 +62,24 @@ async def validate_move(
 
     return True
 
+
+@router.post('/instantiate_moves', status_code=status.HTTP_200_OK)
+async def instantiate_moves(
+    request: SendMove,
+    db: db_dependency, 
+    current_user: User = Depends(get_current_user),
+    ):
+    
+    previous_board = get_prev_board(db_dependency, current_user)
+
+
+    print(current_user.first_name)
+    print(request.fen)
+
+
+    return True
+
+
+
+#      lobby.p2_id = current_user.user_id
+#       lobby.lobby_status = EnumStatus['ongoing']

@@ -29,10 +29,10 @@ const Home = () => {
         const checkIngame = async () => {
             try {
                 console.log("Updating ingame status: " + isInGame);
-              const token = fetchToken();
-              const response = await api.get('/lobby/ingame_check', {
+                const token = fetchToken();
+                const response = await api.get('/lobby/ingame_check', {
                 headers: {
-                  Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`
                 }
               });
               setIsInGame(response.data);
@@ -42,8 +42,7 @@ const Home = () => {
           };
 
           checkIngame();
-          console.log("isInGame: " + isInGame);
-    }, []);
+    }, [isInGame]);
 
     const updateInGameStatus = (bool_ingame) => {
         console.log("Updating ingame status");
@@ -59,7 +58,7 @@ const Home = () => {
         return (
             <div>
                 <NavBar />
-                <Game />
+                <Game inGameCheck={updateInGameStatus}/>
             </div>
         );
     }

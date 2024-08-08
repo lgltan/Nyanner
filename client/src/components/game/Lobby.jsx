@@ -5,6 +5,7 @@ import { fetchToken } from '../../services/authProvider';
 
 const Lobby = ({ label, type, name, value, onChange, error, inGameCheck, ...props }) => {
     const [lobbyCode, setLobbyCode] = useState('');
+    const [diffLvl, setDiffLvl] = useState(0);
 
     const createLobby = async () => {
         try {
@@ -39,11 +40,12 @@ const Lobby = ({ label, type, name, value, onChange, error, inGameCheck, ...prop
     const playBots = async () => {
         try {
             const token = fetchToken();
-            const response = await api.post('/lobby/create/bots', {}, {
+            const request = {"diffLvl": diffLvl};
+            const response = await api.post('/lobby/create/bots', request, {
                 headers: {
                     Content_Type: 'application/json',
                     Authorization: `Bearer ${token}`,
-                },
+                }
             });
             inGameCheck(true);
         } catch (error) {
@@ -71,6 +73,13 @@ const Lobby = ({ label, type, name, value, onChange, error, inGameCheck, ...prop
                     <button onClick={joinLobby}>Join Lobby</button>
                     <hr />
                     <button onClick={playBots}>Play Bots</button>
+                    <input
+                            className="input"
+                            type="number"
+                            value={diffLvl}
+                            onChange={(e) => setDiffLvl(e.target.value)}
+                            required
+                        />
         </div >
     );
 };

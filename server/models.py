@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, LargeBinary, Boolean, DATE, DATETIME, BLOB, SmallInteger, Enum
+from sqlalchemy import create_engine, Column, Integer, String, BigInteger, ForeignKey, TIMESTAMP, LargeBinary, Boolean, DATE, DATETIME, Enum
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -50,6 +50,7 @@ class Lobby(Base):
     lobby_status = Column("lobby_status", Enum("Waiting", "Ongoing", "Archive"), nullable=False)
     p1_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
     p2_id = Column(BIGINT(unsigned=True), ForeignKey('users.user_id'))
+    bot_diff = Column(BIGINT(unsigned=True), nullable=True)
 
 class Move(Base):
     __tablename__ = 'moves'

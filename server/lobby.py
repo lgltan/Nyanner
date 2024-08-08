@@ -7,7 +7,7 @@ from starlette import status
 from server.database import SessionLocal
 from server.models import Lobby
 from dotenv import load_dotenv
-from server.schemas import EnumStatus
+from server.schemas import EnumStatus, BotDifficulty
 from server.utils import db_dependency
 import base64
 from server.models import AdminLog, User, BannedUsers 
@@ -56,7 +56,8 @@ async def create_lobby(
     new_lobby = Lobby(
         lobby_code=access_code.encode('ascii'),
         p1_id=user_id,
-        lobby_status=EnumStatus['waiting']
+        lobby_status=EnumStatus['waiting'],
+        bot_diff=0
     )
     
     db.add(new_lobby)
@@ -91,8 +92,9 @@ async def join_lobby(
     
 @router.post('/create/bots', status_code=status.HTTP_201_CREATED)
 async def create_bots(
+    request: BotDifficulty,
     db: db_dependency, 
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
     ):
 
     user_id = current_user.user_id
@@ -105,7 +107,8 @@ async def create_bots(
         lobby_code=access_code.encode('ascii'),
         p1_id=user_id,
         p2_id=0,
-        lobby_status=EnumStatus['ongoing']
+        lobby_status=EnumStatus['ongoing'],
+        bot_diff=request.diffLvl
     )
     
     db.add(new_lobby)
@@ -122,8 +125,11 @@ async def get_lobby(
     
     lobby = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id)).first()
     
-    p1_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p1_id
-    p2_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p2_id
+    if lobby:
+        p1_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p1_id
+        p2_id = db.query(Lobby).filter(Lobby.lobby_code == lobby.lobby_code).first().p2_id
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
     
     if p1_id:
         lobby.p1_name = db.query(User).filter(User.user_id == p1_id).first().username
@@ -141,9 +147,32 @@ async def get_ingame_check(
     current_user: User = Depends(get_current_user)
     ):
 
-    game = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(Lobby.p1_id == current_user.user_id).first()
+    game = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(or_(Lobby.p1_id == current_user.user_id, Lobby.p2_id == current_user.user_id)).first()
     
     if game:
+        return True
+    else:
+        return False
+    
+@router.put('/leave_game/{access_code}', status_code=status.HTTP_201_CREATED)
+async def leave_game(
+    db: db_dependency, 
+    access_code: str, 
+    current_user: User = Depends(get_current_user)
+    ):
+
+    lobby = db.query(Lobby).filter(Lobby.lobby_code == access_code).first()
+    
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Bad request."})
+
+    if not lobby:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Invalid access code."})
+    
+    if current_user.user_id == lobby.p1_id or current_user.user_id == lobby.p2_id:
+        lobby.lobby_status = EnumStatus['archived']
+        db.commit()
+        db.refresh(lobby)
         return True
     else:
         return False

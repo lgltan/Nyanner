@@ -42,6 +42,11 @@ def get_captcha_site_key():
 def get_captcha_secret_key():
     return CAPTCHA_SECRET_KEY
 
+def debug_mode():
+    return os.getenv("DEBUG_MODE", "off").lower() == "on"
+
+
+
 def validate_password(password: str):
     password_length = len(password)
     has_lowercase = re.search(r'[a-z]', password) is not None
