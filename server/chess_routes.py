@@ -11,6 +11,8 @@ from server.game_utils import get_current_user, get_new_move
 from server.game.game import get_uci, check_castling, get_index, check_enpassant, get_movelist, sunfish_to_FEN
 from server.models import User, Lobby, Move
 from sqlalchemy import or_
+from server.schemas import SendMove
+import chess
 import base64
 
 load_dotenv()
@@ -32,8 +34,8 @@ def get_prev_board(db: db_dependency, current_user: User = Depends(get_current_u
 
     # # using current lobby id, query from moves table
     move = db.query(Move).filter(Move.lobby_id == lobby.value).first()
-    if not move:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
+    # if not move:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
 
     return move.board
 
@@ -44,26 +46,19 @@ def get_prev_board(db: db_dependency, current_user: User = Depends(get_current_u
 # needs to do move validation, to be added after 
 
 # gets called and passes requested move board
-@router.get('/val_move', status_code=status.HTTP_200_OK)
+@router.post('/val_move', status_code=status.HTTP_200_OK)
 async def validate_move(
+    request: SendMove,
     db: db_dependency, 
     current_user: User = Depends(get_current_user),
-    
     ):
     
+    previous_board = get_prev_board(db_dependency, current_user)
+
+
     print(current_user.first_name)
+    print(request.fen)
 
-    # compare previous board with requested move board
 
-    # if true
-    new_move = Move(
-        
-    )
-    
-    # db.add(new_move)
-    # db.commit()
-    # return True
-
-    # if False
-    return False
+    return True
 

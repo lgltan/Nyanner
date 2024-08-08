@@ -70,3 +70,6 @@ class BanRequest(BaseModel):
 
 class UnbanRequest(BaseModel):
     user_id: int
+
+class SendMove(BaseModel):
+    fen: str
