@@ -22,7 +22,7 @@ const App = () => {
       <div>
         <Routes>
           <Route path="/" element={
-            isLoggedIn? <Navigate to="/home" /> : <Navigate to="/login" />
+            isLoggedIn ? <Navigate to="/home" /> : <Navigate to="/login" />
           } />
           <Route path="/login" element={<Login/>} />
           <Route path="/signup" element={<Signup/>} />
