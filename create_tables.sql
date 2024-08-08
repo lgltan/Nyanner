@@ -1,13 +1,13 @@
 -- DROP DATABASE nyanner_db;
 -- CREATE DATABASE nyanner_db;
 
--- DROP TABLE moves;
--- DROP TABLE lobby;
--- DROP TABLE admin_logs;
--- DROP TABLE banned_users;
--- DROP TABLE issued_tokens;
--- DROP TABLE users;
--- DROP TABLE photos;
+DROP TABLE moves;
+DROP TABLE lobby;
+DROP TABLE admin_logs;
+DROP TABLE banned_users;
+DROP TABLE issued_tokens;
+DROP TABLE users;
+DROP TABLE photos;
 
 CREATE TABLE photos (
     id INT NOT NULL AUTO_INCREMENT,
@@ -52,7 +52,8 @@ CREATE TABLE lobby(
     FOREIGN KEY (p1_id) REFERENCES users(user_id),
     p2_id BIGINT UNSIGNED,
     FOREIGN KEY (p2_id) REFERENCES users(user_id),
-    lobby_status ENUM ('Waiting','Ongoing','Archived')
+    lobby_status ENUM ('Waiting','Ongoing','Archived'),
+    bot_diff INT UNSIGNED
 );
 
 CREATE TABLE moves(

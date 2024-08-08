@@ -23,7 +23,7 @@ function Game() {
       console.error(error);
     }
 
-    if ((lobbyInfo.p1_id != null) && (lobbyInfo.p2_id != null)){
+    if ((lobbyInfo?.p1_id != null) && (lobbyInfo?.p2_id != null)){
       try {
         const token = fetchToken();
         const response = await api.get('/game/instantiate_moves', {

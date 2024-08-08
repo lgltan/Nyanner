@@ -60,7 +60,7 @@ const ChessGame = ({playerColor, diffLvl}) => {
         setGamePosition(game.fen());
 
          // exit if the game is over
-        if (game.isGameOver || game.isDraw) {
+        if (game.isGameOver() || game.isDraw()) {
             alert("Checkmate.")
             return false;
         }
