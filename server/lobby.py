@@ -147,7 +147,7 @@ async def get_ingame_check(
     current_user: User = Depends(get_current_user)
     ):
 
-    game = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(Lobby.p1_id == current_user.user_id).first()
+    game = db.query(Lobby).filter(or_(Lobby.lobby_status == "Waiting", Lobby.lobby_status == "Ongoing")).filter(or_(Lobby.p1_id == current_user.user_id, Lobby.p2_id == current_user.user_id)).first()
     
     if game:
         return True
