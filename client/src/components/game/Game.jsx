@@ -22,10 +22,26 @@ function Game() {
     } catch (error) {
       console.error(error);
     }
+
+    if ((lobbyInfo.p1_id != null) && (lobbyInfo.p2_id != null)){
+      try {
+        const token = fetchToken();
+        const response = await api.get('/game/instantiate_moves', {
+          headers: {
+            Content_Type: 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
   };
   
   useEffect(() => {
-    const intervalId = setInterval(getLobby, 1000); // Fetch every 5 seconds
+    const intervalId = setInterval(getLobby, 1000); // Fetch every 1 seconds
 
     return () => {
       clearInterval(intervalId); // Clear interval on cleanup

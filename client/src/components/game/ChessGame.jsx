@@ -49,7 +49,7 @@ const ChessGame = ({playerColor, diffLvl}) => {
         return pieceComponents;
     }, []);
 
-    const onDrop = (sourceSquare, targetSquare, piece) => {
+    const onDrop = async (sourceSquare, targetSquare, piece) => {
         const move = game.move({
             from: sourceSquare,
             to: targetSquare,
@@ -67,8 +67,27 @@ const ChessGame = ({playerColor, diffLvl}) => {
             return false;
         }
 
+        try {
+            console.log('hi');
+            const token = fetchToken();
+            const request = {
+                'fen': game.fen()
+            };
+            console.log(request.fen);
+            const response = api.post('/game/val_move', request, {
+                headers: {
+                    Content_Type: 'application/json',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            console.log(response);
+        } catch (error) {
+            console.error(error);
+        }
+
         return true;  
     };
+
 
     return <Chessboard 
     id="chessboard"
