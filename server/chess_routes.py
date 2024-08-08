@@ -31,6 +31,26 @@ def get_db():
 
 # get chessboard (inputs: current user, auth check) returns latest move from db query
 # which game the current user is playing
+
+@router.get('/get_prev_board', status_code=status.HTTP_200_OK)
+def get_prev_board_API(db: db_dependency, current_user: User = Depends(get_current_user)):
+    user_id = current_user.user_id
+    
+    # # get the user's current lobby id
+    lobby = db.query(Lobby).filter(
+        (and_(Lobby.lobby_status == "Ongoing", or_(Lobby.p1_id == user_id, Lobby.p2_id == user_id) ) )).first()
+    if not lobby:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
+
+    print(lobby.lobby_id)
+    # # using current lobby id, query from moves table
+    move = db.query(Move).filter(Move.lobby_id == lobby.lobby_id).first()
+    if move == None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
+
+    return move.board
+
+
 def get_prev_board(db: db_dependency, current_user: User = Depends(get_current_user)):
     user_id = current_user.user_id
     
