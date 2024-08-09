@@ -33,74 +33,73 @@ async def create_user(db: db_dependency,
                         confirm_password: str = Form(...),
                         file: Optional[UploadFile] = File(None)
     ):
-    try:
-        create_user_request = CreateUserRequest(
-            user_type=0,
-            username=username,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            phone_number=phone_number,
-            birthday=birthday,
-            user_password=user_password,
-            confirm_password=confirm_password
-        )
-        
-        if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.user_password or not create_user_request.confirm_password or not file:
-            raise ValueError("Please fill out all fields.")
-        
-        # Validate information
-        errors = validate_user_data(db, create_user_request, file)
-        
-        if len(errors) > 0:
-            raise ValueError(errors)
-        
-        # Handle photo upload
-        photo_id = None
-        if file:
-            photo_id = await add_photo(file, db)
-        
-        new_user = User(
-            user_type=0,
-            username=create_user_request.username.encode('ascii'),
-            first_name=create_user_request.first_name.encode('ascii'),
-            last_name=create_user_request.last_name.encode('ascii'),
-            email=create_user_request.email.encode('ascii'),
-            phone_number=create_user_request.phone_number.encode('ascii'),
-            birthday=create_user_request.birthday,
-            photo_id=photo_id,
-            user_password=bcrypt_context.hash(create_user_request.user_password).encode('ascii'),
-        )
-        
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        user_id = new_user.user_id
+    create_user_request = CreateUserRequest(
+        user_type=0,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        phone_number=phone_number,
+        birthday=birthday,
+        user_password=user_password,
+        confirm_password=confirm_password
+    )
+    
+    if not create_user_request.username or not create_user_request.first_name or not create_user_request.last_name or not create_user_request.email or not create_user_request.phone_number or not create_user_request.user_password or not create_user_request.confirm_password or not file:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Please fill out all fields."})
+    
+    # Validate information
+    errors = validate_user_data(db, create_user_request, file)
+    
+    if len(errors) > 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=errors)
+    
+    # Handle photo upload
+    photo_id = None
+    if file:
+        # photo_content = file.file.read()
+        # photo = Photo(filename=file.filename, content=photo_content)
+        # db.add(photo)
+        # db.commit()
+        # db.refresh(photo)
+        # photo_id = photo.id
+        photo_id = await add_photo(file, db)
+    
+    new_user = User(
+        user_type=0,
+        username=create_user_request.username.encode('ascii'),
+        first_name=create_user_request.first_name.encode('ascii'),
+        last_name=create_user_request.last_name.encode('ascii'),
+        email=create_user_request.email.encode('ascii'),
+        phone_number=create_user_request.phone_number.encode('ascii'),
+        birthday=create_user_request.birthday,
+        photo_id=photo_id,
+        user_password=bcrypt_context.hash(create_user_request.user_password).encode('ascii'),
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    user_id = new_user.user_id
 
-        if user_id:
-            admin_log = AdminLog(admin_description=f"Successfully registered user: {new_user.username}")
-            db.add(admin_log)
-            db.commit()
-    except Exception as exc:
-        handle_error(exc, message="Failed to create user", status_code=status.HTTP_400_BAD_REQUEST)
+    if user_id:
+        log_message(db, f"Successfully registerd user: {new_user.username}")
+        db.commit()
 
 @router.post('/uploadfile', status_code=status.HTTP_202_ACCEPTED)
 async def upload_file(file: UploadFile = File(...)):
-    try:
-        if not file:
-            raise ValueError("No file uploaded.")
-        
-        FILE_SIZE_LIMIT = 5 * 1024 * 1024   # 5MB
-        if file.size > FILE_SIZE_LIMIT:
-            raise ValueError("File size too large.")
-        
-        if not file.content_type.startswith('image/'):
-            raise ValueError("Invalid file type.")
-        
-        if not validate_image(file):
-            raise ValueError("Invalid image file.")
-    except Exception as exc:
-        handle_error(exc, message="File upload failed", status_code=status.HTTP_400_BAD_REQUEST)
+    if not file:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='No file uploaded.')
+    
+    FILE_SIZE_LIMIT = 5 * 1024 * 1024   # 5MB
+    if file.size > FILE_SIZE_LIMIT:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File size too large.')
+    
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid file type.')
+    
+    if not validate_image(file):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid image file.')
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
@@ -197,68 +196,61 @@ async def edit_user(
     confirm_password: str = Form(None),
     current_user: User = Depends(get_current_user),
 ):
-    try:
-        username = current_user['user'].username
-        if not username:
-            raise ValueError("No username provided")
-        
-        user = authenticate_user(username, confirm_password, db)
-        if not user:
-            admin_log = AdminLog(admin_description=f"Failed UPDATE attempt for username: {username}")
-            db.add(admin_log)
-            db.commit()
-            raise ValueError("Invalid password")
+    username = current_user['user'].username
+    if not username:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No username provided")
+    
+    user = authenticate_user(username, confirm_password, db)
+    if not user:
+        log_message(db, f"Failed UPDATE attempt for username: {username}")
+        db.commit()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'general': 'Invalid password'})
 
-        isChanged = False
+    isChanged = False
 
-        if first_name and not str(first_name) == str(user.first_name):
-            if not validate_name(first_name):
-                raise ValueError("Invalid first name")
-            user.first_name = first_name
-            isChanged = True
-        
-        if last_name and not str(last_name) == str(user.last_name):
-            if not validate_name(last_name):
-                raise ValueError("Invalid last name")
-            user.last_name = last_name
-            isChanged = True
+    if first_name and not str(first_name) == str(user.first_name):
+        if not validate_name(first_name):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'firstName': 'Invalid first name'})
+        user.first_name = first_name
+        isChanged = True
+    
+    if last_name and not str(last_name) == str(user.last_name):
+        if not validate_name(last_name):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'lastName': 'Invalid last name'})
+        user.last_name = last_name
+        isChanged = True
 
-        if phone_number and not str(phone_number) == str(user.phone_number):
-            if not validate_phone_number(phone_number):
-                raise ValueError("Invalid phone number")
-            user.phone_number = phone_number
-            isChanged = True
+    if phone_number and not str(phone_number) == str(user.phone_number):
+        if not validate_phone_number(phone_number):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'phoneNumber': 'Invalid phone number'})
+        user.phone_number = phone_number
+        isChanged = True
 
-        if birthday and not birthday.strftime("%m/%d/%Y") == user.birthday.strftime("%m/%d/%Y"):
-            if not validate_birthday(birthday):
-                raise ValueError("Invalid birthday")
-            user.birthday = birthday
-            isChanged = True
+    if birthday and not birthday.strftime("%m/%d/%Y") == user.birthday.strftime("%m/%d/%Y"):
+        if not validate_birthday(birthday):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'birthday': 'Invalid birthday'})
+        user.birthday = birthday
+        isChanged = True
 
-        if file != None:
-            old_photo = await get_photo_from_db(user.photo_id, db)
-            if file.filename != old_photo.filename:
-                if not validate_image(file):
-                    raise ValueError("Invalid image file")
-                
-                user.photo_id = await add_photo(file, db)
-                isChanged = True
+    if file != None:
+        old_photo = await get_photo_from_db(user.photo_id, db)
+        if file.filename != old_photo.filename:
+            if not validate_image(file):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'profilePhoto': 'Invalid image file'})
+            
+            user.photo_id = await add_photo(file, db)
 
-        if isChanged:
-            db.commit()
-            db.refresh(user)
+    if isChanged:
+        db.commit()
+        db.refresh(user)
 
-            admin_log = AdminLog(admin_description=f"Successfully edited profile for username: {user.username}")
-            db.add(admin_log)
-            db.commit()
-        else:
-            admin_log = AdminLog(admin_description=f"No changes for {user.username}")
-            db.add(admin_log)
-            db.commit()
-        
-        return {"message": "User details updated successfully"}
-    except Exception as exc:
-        handle_error(exc, message="Failed to edit user", status_code=status.HTTP_400_BAD_REQUEST)
+        log_message(db, f"Successfully edited profile for username: {user.username}")
+        db.commit()
+    else:
+        log_message(db, f"No changes for username: {user.username}")
+        db.commit()
+    
+    return {"message": "User details updated successfully"}
 
 @router.get('/logout', status_code=status.HTTP_200_OK)
 async def logout(db: db_dependency, current_user: dict = Depends(get_current_user)):

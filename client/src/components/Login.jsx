@@ -66,7 +66,6 @@ const Login = () => {
           rememberMe: formData.rememberMe,
           recaptchaToken: recaptcha.current.getValue()
         };
-        // console.log(request);
 
         // Send API request with application/json header
         const response = await api.post('/auth/login', request, {
@@ -75,7 +74,6 @@ const Login = () => {
           }
         });
   
-        // console.log('Response:', response.data);
         const token = response.data.access_token;
   
         try {

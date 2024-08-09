@@ -19,31 +19,30 @@ def ensure_log_file_writable(log_file):
         open(log_file, 'a').close()
     os.chmod(log_file, 0o666)  # Set the file to writable
 
-# Ensure the log file is writable at the start
+
 ensure_log_file_writable(log_file)
 
-# Create a file handler that logs messages to a file
+
 file_handler = RotatingFileHandler(log_file, maxBytes=2000, backupCount=5)
 file_handler.setLevel(logging.INFO)
 
-# Create a console handler that logs messages to the console
+
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
-# Create a logging format
+
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
 console_handler.setFormatter(formatter)
 
-# Add the handlers to the logger
+
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
-# Function to make the log file read-only
 def make_log_read_only(log_file):
     os.chmod(log_file, 0o444)  # Set the log file to read-only
 
-# Function to make the log file writable
+
 def make_log_writable(log_file):
     os.chmod(log_file, 0o666)  # Set the log file to writable
 

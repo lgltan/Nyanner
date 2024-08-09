@@ -57,7 +57,6 @@ def get_prev_board(db: db_dependency, current_user: User = Depends(get_current_u
     if not lobby:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"general": "Failed to find lobby."})
 
-    print(lobby.lobby_id)
     # # using current lobby id, query from moves table
     move = db.query(Move).filter(Move.lobby_id == lobby.lobby_id).order_by(Move.moves_id.desc()).first()
     if move == None:

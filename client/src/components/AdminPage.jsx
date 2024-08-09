@@ -95,7 +95,6 @@ const AdminPage = () => {
   };
 
   const promptBanDuration = (userId) => {
-    console.log('User ID:', userId);
 
     const daysStr = prompt('Enter the number of days for the ban:', '0');
     const hoursStr = prompt('Enter the number of hours for the ban:', '0');

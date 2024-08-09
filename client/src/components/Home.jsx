@@ -28,7 +28,6 @@ const Home = () => {
     useEffect(() => {
         const checkIngame = async () => {
             try {
-                console.log("Updating ingame status: " + isInGame);
                 const token = fetchToken();
                 const response = await api.get('/lobby/ingame_check', {
                 headers: {
@@ -45,7 +44,6 @@ const Home = () => {
     }, [isInGame]);
 
     const updateInGameStatus = (bool_ingame) => {
-        console.log("Updating ingame status");
         setIsInGame(bool_ingame);
     }
 

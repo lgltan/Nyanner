@@ -182,7 +182,7 @@ async def get_current_player(
     except Exception as exc:
         handle_error(exc, message="Failed to get current player")
 
-@router.get('/ingame_check', status_code=status.HTTP_201_CREATED)
+@router.get('/ingame_check', status_code=status.HTTP_201_CREATED) 
 async def get_ingame_check(
     db: db_dependency, 
     current_user: User = Depends(get_current_user)
